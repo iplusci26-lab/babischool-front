@@ -111,10 +111,11 @@ export default function StaffPage() {
           <option value="">Sélectionner un role</option>
 
           {roles.map((r: any) => (
-            <option key={r.id} value={r.id}>
-              {r.name}
-              
-            </option>
+            r.name !== "Enseignant" && (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            )
           ))}
         </select>
         

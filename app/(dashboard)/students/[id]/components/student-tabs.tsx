@@ -18,7 +18,7 @@ export default function StudentTabs({ student }: any) {
         <Tab label="Générale" value="overview" tab={tab} setTab={setTab} />
         <Tab label="Grades" value="grades" tab={tab} setTab={setTab} />
         <Tab label="Présence" value="attendance" tab={tab} setTab={setTab} />
-        <Tab label="Finance" value="finance" tab={tab} setTab={setTab} />
+        {/*<Tab label="Finance" value="finance" tab={tab} setTab={setTab}/>*/}
         <Tab label="Homework" value="homework" tab={tab} setTab={setTab} />
       </div>
 
@@ -39,9 +39,9 @@ export default function StudentTabs({ student }: any) {
           <StudentAttendance studentId={student.id} />
         )}
 
-        {tab === "finance" && (
+        {/*tab === "finance" && (
           <StudentFinance studentId={student.id} />
-        )}
+        )*/}
 
         {tab === "homework" && (
           <StudentHomework studentId={student.id} />

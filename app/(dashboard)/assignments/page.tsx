@@ -21,9 +21,10 @@ export default function AssignmentsPage() {
       api.get("/academics/class-subjects/"),
       api.get("/students/classrooms/"),
       api.get("/academics/subjects/"),
-      api.get("/auth/staff/?user_type=teacher"),
+      api.get("/academics/teachers/"),
     ]);
 
+    console.log("Assignments:", a.data);
     setAssignments(a.data.results || a.data);
     setClassrooms(c.data.results || c.data);
     setSubjects(s.data.results || s.data);

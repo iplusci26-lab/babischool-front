@@ -65,7 +65,7 @@ export default function Sidebar() {
       items: [
         { key: "teachers", label: "Professeurs", href: "/teachers/admin", icon: UserCog },
         { key: "subjects", label: "Matières", href: "/subjects", icon: BookOpen },
-        { key: "assignment", label: "Affectations", href: "/assignments", icon: Layers3 },
+        {/* key: "assignment", label: "Affectations", href: "/assignments", icon: Layers3 */},
         { key: "schedule", label: "Emploi du temps", href: "/schedule", icon: CalendarDays },
         { key: "evaluations", label: "Évaluations",href: "/assessments",icon: FileSpreadsheet,},
         { key: "grade", label: "Notes",href: "/grades",icon: PenSquare,},
