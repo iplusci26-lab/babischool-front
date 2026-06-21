@@ -30,7 +30,7 @@ export default function SettingsPage() {
       );
 
       setSettings(res.data);
-      console.log("settings--- ",res.data)
+      
 
     } catch (err) {
 
@@ -235,7 +235,6 @@ export default function SettingsPage() {
                       : settings.logo_url
                   }
                   alt="logo"
-                  fill="true"
                   className="object-cover w-50 h-50"
                 />
 
