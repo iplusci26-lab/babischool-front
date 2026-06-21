@@ -417,7 +417,7 @@ export default function SettingsPage() {
               </label>
 
               <textarea
-                label="Adresse"
+                
                 value={
                   settings.address
                 }
