@@ -32,7 +32,7 @@ export default function LoginPage() {
       
       localStorage.setItem("token", res.data.access);
      
-
+       console.log("donnée ",res.data);
       if (res.data.school_active.active == true) {
         router.push("/profile");
       } else {
