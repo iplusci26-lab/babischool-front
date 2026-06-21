@@ -99,7 +99,7 @@ export default function Sidebar() {
   
   const renderItem = (item: any) => {
     const isActive = pathname.startsWith(item.href);
-    const Icon = item.icon;
+    const Icon = item.icon!;
 
     return (
       <Link
@@ -155,10 +155,10 @@ export default function Sidebar() {
 
             <nav className="flex flex-col gap-1">
 
-              {group.items.filter(item => canAccess(item.key, user)).map((item) => {
+              {group.items.filter(item => item.key && canAccess(item.key, user)).map((item) => {
                 
                 const isActive = pathname.startsWith(
-                  item.href
+                  item.href ?? ""
                 );
 
                 const Icon = item.icon;
@@ -167,7 +167,7 @@ export default function Sidebar() {
 
                   <Link
                     key={item.href}
-                    href={item.href}
+                    href={item.href ?? ""}
                     className={`
                       flex items-center gap-3
                       px-4 py-2 rounded-xl
