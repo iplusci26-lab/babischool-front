@@ -17,8 +17,8 @@ export default function AssessmentsPage() {
     term: "",
     title: "",
     assessment_type: "test",
-    max_score: "",
-    weight: "",
+    max_score: 0,
+    weight: 0,
     date_assessment:"",
   });
 
@@ -74,8 +74,8 @@ export default function AssessmentsPage() {
       term: "",
       title: "",
       assessment_type: "test",
-      max_score: "",
-      weight: "",
+      max_score: 0,
+      weight: 0,
       date_assessment:""
     });
 
