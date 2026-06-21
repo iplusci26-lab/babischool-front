@@ -334,7 +334,7 @@ export default function SettingsPage() {
               label="Ville"
               value={settings.city}
 
-              onChange={(v)=>
+              onChange={(v: string)=>
                 setSettings({
                   ...settings,
                   city: v
@@ -347,7 +347,7 @@ export default function SettingsPage() {
               label="Sigle"
               value={settings.sigle}
 
-              onChange={(v)=>
+              onChange={(v: string)=>
                 setSettings({
                   ...settings,
                   city: v
