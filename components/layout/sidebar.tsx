@@ -161,7 +161,7 @@ export default function Sidebar() {
                   item.href ?? ""
                 );
 
-                const Icon = item.icon;
+                const Icon = item.icon as React.ElementType;
 
                 return (
 
