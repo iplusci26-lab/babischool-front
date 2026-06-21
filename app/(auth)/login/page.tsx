@@ -16,18 +16,23 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleLogin = async () => {
+    
+    
 
-    try {
-
+      try{
       setLoading(true);
-
+     
+      
+      
       const res = await api.post("/auth/login/", {
         phone,
         password,
       });
 
+      
       localStorage.setItem("token", res.data.access);
-      console.log(res.data.school_active);
+     
+
       if (res.data.school_active.active == true) {
         router.push("/profile");
       } else {
@@ -37,7 +42,7 @@ export default function LoginPage() {
 
     } catch (err: any) {
 
-      console.error(err.response?.data);
+     
 
       alert(
         err.response?.data?.detail ||
@@ -141,7 +146,7 @@ export default function LoginPage() {
               <button
                 onClick={handleLogin}
                 disabled={loading}
-                className="mt-4 h-12 w-full rounded-xl bg-[#6214BE] font-semibold text-white transition hover:scale-[1.02] hover:bg-[#4e10a0]"
+                className="mt-4 h-12 cursor-pointer w-full rounded-xl bg-[#6214BE] font-semibold text-white transition hover:scale-[1.02] hover:bg-[#4e10a0]"
               >
                 {loading ? "Connexion..." : "Se connecter"}
               </button>
@@ -153,7 +158,7 @@ export default function LoginPage() {
 
                 <Link
                   href="/register"
-                  className="ml-2 font-semibold text-[#6214BE] hover:underline"
+                  className="ml-2 cursor-pointer font-semibold text-[#6214BE] hover:underline"
                 >
                   Inscription
                 </Link>

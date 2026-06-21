@@ -29,7 +29,9 @@ import {
   MessageSquare,
   Briefcase,
   Settings,
-  RefreshCcw
+  RefreshCcw,
+  Bell,
+  Megaphone
 
 } from "lucide-react";
 
@@ -80,13 +82,21 @@ export default function Sidebar() {
         { key: "teacherAttendance",label: "Présence Prof", href: "/attendance/teachers", icon: Calendar },
         { key: "studentAttendance",label: "Présence Elève", href: "/attendance/students", icon: CalendarCheck },
         { key: "staffAttendance",label: "Présence Personnel", href: "/attendance/staff", icon: Users },
-        { key: "messages", label: "Message", href: "/messaging", icon: MessageCircle },
         { key: "settings",label: "Settings",href: "/settings",icon: Settings},
         
       ],
     },
-  ]
- 
+
+    {
+      section: "Communication",
+      items: [
+        { key: "announcements", label: "Annonces", href: "/annoucements", icon: Megaphone },
+        { key: "messages", label: "Message", href: "/messaging", icon: MessageCircle },
+      ],
+    },
+  ] 
+  
+  
   const renderItem = (item: any) => {
     const isActive = pathname.startsWith(item.href);
     const Icon = item.icon;
@@ -115,7 +125,7 @@ export default function Sidebar() {
       <div className="mb-8 flex items-center gap-3">
         {school?.logo ? (
           <img
-            src={`http://localhost:8000/${school.logo}`}
+            src={`${process.env.NEXT_PUBLIC_API_URL}${school.logo}`}
             className="w-10 h-10  rounded object-cover"  
           />
         ) : (

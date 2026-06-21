@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import ProtectedRoute from "@/components/auth/protected-route";
+import RecentActivity
+from "../notifications/components/RecentActivity";
 
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
@@ -39,7 +41,7 @@ export default function DashboardPage() {
       <h1 className="text-2xl font-bold">
         Dashboard
       </h1>
-
+      <RecentActivity />
       <div className="grid grid-cols-3 gap-4">
         <Card title="Students" value={data.students_count} />
         <Card title="Payments" value={data.total_payments} />

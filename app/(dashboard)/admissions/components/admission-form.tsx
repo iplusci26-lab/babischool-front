@@ -79,10 +79,11 @@ export default function AdmissionForm() {
         },
       };
 
-      await api.post("/students/admissions/", payload);
+      const res = await api.post("/students/admissions/", payload);
 
       alert("Student created successfully");
-
+      console.log("11111 ",res.data)
+      console.log("2222 ", res.data.results)
       // reset
       setForm({
         student_first_name: "",

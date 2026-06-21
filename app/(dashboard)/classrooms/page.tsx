@@ -16,6 +16,7 @@ export default function ClassroomsPage() {
   const fetchClasses = async () => {
     const res = await api.get("/students/classrooms/");
     setClasses(res.data);
+    
   };
 
   const createClass = async () => {
@@ -29,6 +30,7 @@ export default function ClassroomsPage() {
     fetchClasses();
     api.get("/students/classlevel/").then((res) => {
       setClassroomlevel(res.data);
+      console.log(res.data);
       });
   }, []);
 
@@ -73,7 +75,7 @@ export default function ClassroomsPage() {
             setForm({ ...form, classroom_level: e.target.value })
         }
         >
-        <option value="">Select cycle</option>
+        <option value="">Niveau</option>
 
         {classroomlevel.map((c: any) => (
             <option key={c.id} value={c.id}>

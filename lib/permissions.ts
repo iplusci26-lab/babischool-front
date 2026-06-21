@@ -4,7 +4,10 @@ export const menuPermissions: Record<
 > = {
 
   
-
+  announcements: [
+    "admin",
+    "Directeur",
+  ],
 
   dashboard: [
     "admin",
@@ -73,6 +76,7 @@ export const menuPermissions: Record<
     "Econome",
     "Educateur",
     "Censeur",
+    "Parent"
     
   ],
 
@@ -146,6 +150,11 @@ export function canAccess(menu: string, user: any) {
   if (user.is_superuser) {
     return true;
   }
+
+  /*if(user.user_type=="Parent"){
+
+    return true
+  }*/
 
   const allowed =
     menuPermissions[menu];

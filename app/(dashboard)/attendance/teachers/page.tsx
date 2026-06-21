@@ -10,7 +10,8 @@ export default function TodayAttendancePage() {
 
   const load = async () => {
     const res = await api.get("/attendance/teacher-attendance/today/");
-    setData(res.data);
+    setData(res.data.results || res.data);
+    console.log(res.data.results || res.data);
     setLoading(false);
   };
 

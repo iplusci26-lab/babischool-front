@@ -130,7 +130,7 @@ export default function StudentsTable() {
             <thead className="bg-gray-100 text-left">
               <tr>
                 <th className="p-3">Matricule</th>
-                <th className="p-3">Name</th>
+                <th className="p-3">Nom</th>
                 <th className="p-3">Class</th>
                 <th className="p-3">Parent</th>
               </tr>

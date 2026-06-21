@@ -148,7 +148,7 @@ export default function StaffAttendancePage() {
 
       <tr className="text-left text-sm text-gray-500">
 
-        <th className="p-4">Personnel</th>
+        <th className="p-4">Nom</th>
         <th className="p-4">Fonction</th>
         <th className="p-4">Statut</th>
         <th className="p-4">Actions</th>

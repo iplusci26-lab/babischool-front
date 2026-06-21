@@ -16,10 +16,10 @@ export default function StudentTabs({ student }: any) {
       {/* NAV */}
       <div className="flex gap-4 border-b pb-2">
         <Tab label="Générale" value="overview" tab={tab} setTab={setTab} />
-        <Tab label="Grades" value="grades" tab={tab} setTab={setTab} />
-        <Tab label="Présence" value="attendance" tab={tab} setTab={setTab} />
+        <Tab label="Moyennes" value="grades" tab={tab} setTab={setTab} />
+        <Tab label="Présences" value="attendance" tab={tab} setTab={setTab} />
         {/*<Tab label="Finance" value="finance" tab={tab} setTab={setTab}/>*/}
-        <Tab label="Homework" value="homework" tab={tab} setTab={setTab} />
+        <Tab label="Devoirs" value="homework" tab={tab} setTab={setTab} />
       </div>
 
       {/* CONTENT */}

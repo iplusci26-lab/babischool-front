@@ -216,7 +216,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-4 h-12 rounded-xl bg-[#6214BE] font-semibold text-white transition hover:scale-[1.02] hover:bg-[#4e10a0]"
+                className="mt-4 h-12 cursor-pointer rounded-xl bg-[#6214BE] font-semibold text-white transition hover:scale-[1.02] hover:bg-[#4e10a0]"
               >
                 {loading ? "Création..." : "Créer mon compte"}
               </button>
@@ -227,7 +227,7 @@ export default function RegisterPage() {
 
                 <Link
                   href="/login"
-                  className="ml-2 font-semibold text-[#6214BE] hover:underline"
+                  className="ml-2 cursor-pointer font-semibold text-[#6214BE] hover:underline"
                 >
                   Connexion
                 </Link>

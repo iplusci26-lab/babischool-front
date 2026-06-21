@@ -212,6 +212,7 @@ export default function SchedulePage() {
                   className="border p-2 mb-2 rounded text-sm"
                 >
                   <div>{s.start_time} - {s.end_time}</div>
+                  <div>{s.classroom_name}</div>
                   <div className="font-medium">{s.subject_name}</div>
                   <div className="text-gray-500">
                     {s.teacher_name}
