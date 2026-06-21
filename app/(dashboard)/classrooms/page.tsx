@@ -20,13 +20,29 @@ export default function ClassroomsPage() {
   };
 
   const createClass = async () => {
-
-    await api.post("/students/classrooms/",{form,
-      capacity: Number(form.capacity),
-      annual_tuition_fee: Number(form.capacity)
-  });
+    try {
   
-    fetchClasses();
+      const payload = {
+        name: form.name,
+        classroom_level: form.classroom_level,
+        capacity: Number(form.capacity),
+        annual_tuition_fee: Number(
+          form.annual_tuition_fee
+        ),
+      };
+  
+      await api.post(
+        "/students/classrooms/",
+        payload
+      );
+  
+      fetchClasses();
+  
+    } catch (error: any) {
+  
+      console.log(error.response?.data);
+  
+    }
   };
 
   useEffect(() => {
