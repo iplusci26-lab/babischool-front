@@ -292,7 +292,7 @@ export default function SettingsPage() {
               label="Nom école"
               value={settings.name}
 
-              onChange={(v)=>
+              onChange={(v: string)=>
                 setSettings({
                   ...settings,
                   name: v
@@ -306,7 +306,7 @@ export default function SettingsPage() {
               label="Email"
               value={settings.email}
 
-              onChange={(v)=>
+              onChange={(v: string)=>
                 setSettings({
                   ...settings,
                   email: v
@@ -320,7 +320,7 @@ export default function SettingsPage() {
               label="Téléphone"
               value={settings.phone}
 
-              onChange={(v)=>
+              onChange={(v: string)=>
                 setSettings({
                   ...settings,
                   phone: v
