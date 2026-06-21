@@ -21,7 +21,10 @@ export default function ClassroomsPage() {
 
   const createClass = async () => {
 
-    await api.post("/students/classrooms/",form);
+    await api.post("/students/classrooms/",{form,
+      capacity: Number(form.capacity),
+      annual_tuition_fee: Number(form.capacity)
+  });
   
     fetchClasses();
   };
@@ -54,7 +57,7 @@ export default function ClassroomsPage() {
         className="border p-2 w-full"
         value={form.capacity}
         onChange={(e) =>
-            setForm({ ...form, capacity: Number(e.target.value) })
+            setForm({ ...form, capacity: e.target.value })
         }
         />
 
@@ -64,7 +67,7 @@ export default function ClassroomsPage() {
         className="border p-2 w-full"
         value={form.annual_tuition_fee}
         onChange={(e) =>
-            setForm({ ...form, annual_tuition_fee: Number(e.target.value) })
+            setForm({ ...form, annual_tuition_fee: e.target.value })
         }
         />
 
