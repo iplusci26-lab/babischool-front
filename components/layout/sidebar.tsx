@@ -99,7 +99,7 @@ export default function Sidebar() {
   
   const renderItem = (item: any) => {
     const isActive = pathname.startsWith(item.href);
-    const Icon = item.icon!;
+    const Icon = item.icon as React.ElementType;
 
     return (
       <Link
