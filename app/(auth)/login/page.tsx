@@ -40,12 +40,18 @@ export default function LoginPage() {
       }
       //
 
-    } catch (err: any) {
+    } catch (err: unknown) {
 
-     
+      const error = err as {
+        response?: {
+          data?: {
+            detail?: string;
+          };
+        };
+      };
 
       alert(
-        err.response?.data?.detail ||
+        error.response?.data?.detail ||
         "Numéro ou mot de passe incorrect"
       );
 
@@ -154,7 +160,7 @@ export default function LoginPage() {
               {/* Register Link */}
               <p className="pt-4 text-center text-sm text-gray-500">
 
-                Vous n'avez pas encore de compte ?
+                Vous n avez pas encore de compte ?
 
                 <Link
                   href="/register"

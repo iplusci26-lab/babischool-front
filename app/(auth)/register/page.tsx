@@ -190,7 +190,7 @@ export default function RegisterPage() {
               <div className="rounded-xl border border-dashed border-gray-300 p-4">
 
                 <label className="mb-2 block text-sm font-medium text-gray-600">
-                  Logo de l'établissement
+                  Logo de l établissement
                 </label>
 
                 <input
