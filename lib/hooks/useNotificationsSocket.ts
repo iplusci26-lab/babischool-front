@@ -35,12 +35,7 @@ export function useNotificationsSocket({
         state.addNotification
     );
 
-  const wsBase =
-    process.env.NEXT_PUBLIC_API_URL
-      ?.replace(
-        "http",
-        "ws"
-      );
+  const wsBase = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
 

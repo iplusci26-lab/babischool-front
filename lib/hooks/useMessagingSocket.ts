@@ -36,11 +36,7 @@ useMessagingSocket() {
 
     const wsBase =
     process.env
-    .NEXT_PUBLIC_API_URL
-    ?.replace(
-      "http",
-      "ws"
-    );
+    .NEXT_PUBLIC_API_URL;
 
     socketRef.current =
     new WebSocket(
