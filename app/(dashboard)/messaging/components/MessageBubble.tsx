@@ -8,8 +8,12 @@ export default function MessageBubble({
 
 }: any) {
 
+  console.log(message.sender);
+  console.log(currentUser);
+  console.log("mine :", message.sender === currentUser);
+
   const mine =
-    message.sender_id ===
+    message.sender ===
     currentUser;
 
   return (

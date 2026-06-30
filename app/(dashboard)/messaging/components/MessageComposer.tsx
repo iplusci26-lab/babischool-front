@@ -94,7 +94,7 @@ export default function MessageComposer({
 
     } catch (error: any) {
 
-      alert(JSON.stringify(error.response?.data, null, 2));
+      console.log(error.response?.data, null, 2);
 
     } finally {
 

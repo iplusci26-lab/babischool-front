@@ -33,18 +33,30 @@ export default function ConversationPage() {
   const [loading, setLoading] =
     useState(true);
 
-    const addMessage =
-      (
-        message: any
-      ) => {
+    const addMessage = (message: any ) => {
 
-        setConversation(
-          (prev: any) => {
+        setConversation((prev: any) => {
 
             if (!prev) {
               return prev;
             }
+            
+            const exists = prev.messages.some(
+              (m: any) => m.id === message.id
+            );
+    
+            if (exists) {
+              console.log(
+                "Déjà ajouté par HTTP :",
+                message.id
+              );
+                return prev;
+            }
 
+            console.log(
+              "Ajout HTTP :",
+              message.id
+            );
             return {
 
               ...prev,
@@ -73,7 +85,9 @@ export default function ConversationPage() {
         setConversation(
           res.data
         );
+        
 
+      
       } catch (error) {
 
         console.error(error);
@@ -136,18 +150,34 @@ export default function ConversationPage() {
             event.data
           );
 
-        if (
-          data.conversation_id ===
-          params.id
-        ) {
+        if (data.conversation_id !== params.id){
+          return ;
+        } 
 
-          setConversation(
-            (prev: any) => {
+          setConversation((prev: any) => {
         
               if (!prev) {
                 return prev;
               }
-        
+              
+              const exists = prev.messages.some(
+                (m: any) => m.id === data.message.id
+              );
+              
+              if (exists) {
+
+                console.log(
+                  "Message déjà présent :",
+                  data.message.id
+                );
+                  return prev;
+              }
+
+              console.log(
+                "Ajout WS :",
+                data.message.id
+              );
+
               return {
         
                 ...prev,
@@ -156,12 +186,12 @@ export default function ConversationPage() {
         
                   ...prev.messages,
         
-                  data
+                  data.message
                 ]
               };
             }
           );
-        }
+        
       };
 
     return () => {
@@ -194,7 +224,7 @@ export default function ConversationPage() {
       </div>
     );
   }
-
+  
   return (
 
     <div className="h-[calc(100vh-80px)] flex flex-col">
