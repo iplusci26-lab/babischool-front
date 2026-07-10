@@ -174,7 +174,7 @@ export default function ProfilePage() {
               {profile.avatar ? (
 
                 <img
-                  src={`http://localhost:8000${
+                  src={`https://iplus-api.onrender.com${
                     profile.avatar instanceof File
                       ? URL.createObjectURL(profile.avatar)
                       : profile.avatar

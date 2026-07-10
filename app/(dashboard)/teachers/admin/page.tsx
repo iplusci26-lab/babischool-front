@@ -49,12 +49,14 @@ export default function TeachersPage() {
     }
 
     setLoading(true);
-    await api.post("/academics/teachers/", form);
+    const res = await api.post("/academics/teachers/", form);
     resetForm();
     loadTeachers();
     setLoading(false);
+    console.log("------- données ",res)
   };
 
+  
   // UPDATE
   const handleUpdate = async () => {
     setLoading(true);

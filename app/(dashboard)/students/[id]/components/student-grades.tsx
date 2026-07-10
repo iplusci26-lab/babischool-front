@@ -105,22 +105,7 @@ export default function StudentGrades({
   // GROUP BY SUBJECT
   // =========================
 
-  const groupedGrades = report?.grades?.reduce(
-    (acc:any, item:any) => {
-
-      if (!acc[item.subject]) {
-
-        acc[item.subject] = [];
-
-      }
-
-      acc[item.subject].push(item);
-
-      return acc;
-
-    },
-    {}
-  );
+  
 
   return (
 
@@ -212,7 +197,7 @@ export default function StudentGrades({
               </div>
 
               <div className="text-3xl font-bold mt-2">
-                {report.average}/20
+                {report.report_card.average}/20
               </div>
 
             </div>
@@ -226,7 +211,7 @@ export default function StudentGrades({
               </div>
 
               <div className="text-3xl font-bold mt-2">
-                #{report.rank}
+                #{report.report_card.rank}
               </div>
 
             </div>
@@ -241,7 +226,7 @@ export default function StudentGrades({
 
               <div className="text-3xl font-bold mt-2">
 
-                {report.average >= 10
+                {report.report_card.average >= 10
                   ? "Admis"
                   : "Insuffisant"}
 
@@ -255,12 +240,12 @@ export default function StudentGrades({
 
           <div className="space-y-6">
 
-            {Object.keys(groupedGrades || {}).map(
+            {report.subjects?.map((subject:any)=>(
 
-              (subject:any)=>(
+              
 
                 <div
-                  key={subject}
+                  key={subject.subject}
                   className="bg-white border rounded-2xl overflow-hidden"
                 >
 
@@ -271,8 +256,15 @@ export default function StudentGrades({
                     <div>
 
                       <div className="font-semibold text-lg">
-                        {subject}
+                        {subject.subject}
                       </div>
+                      <div className="text-sm text-gray-500">
+
+                          {subject.teacher}
+
+                      </div>
+
+                      
 
                     </div>
 
@@ -314,9 +306,7 @@ export default function StudentGrades({
 
                       <tbody>
 
-                        {groupedGrades[
-                          subject
-                        ].map((grade:any,index:number)=>(
+                        {subject.grades.map((grade:any,index:number)=>(
 
                           <tr
                             key={index}
@@ -324,7 +314,7 @@ export default function StudentGrades({
                           >
 
                             <td className="p-4">
-                              {grade.assessment}
+                              {grade.title}
                             </td>
 
                             <td className="p-4 font-semibold">
@@ -341,7 +331,7 @@ export default function StudentGrades({
 
                             <td className="p-4">
 
-                              {grade.coefficient}
+                              {subject.coefficient}
 
                             </td>
 
