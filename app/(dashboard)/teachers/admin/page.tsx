@@ -49,11 +49,12 @@ export default function TeachersPage() {
     }
 
     setLoading(true);
-    const res = await api.post("/academics/teachers/", form);
+    await api.post("/academics/teachers/", form);
+    console.log("------- données ")
     resetForm();
     loadTeachers();
     setLoading(false);
-    console.log("------- données ",res)
+    
   };
 
   
