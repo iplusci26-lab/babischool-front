@@ -43,13 +43,14 @@ export default function TeachersPage() {
 
   // CREATE
   const handleCreate = async () => {
-    console.log("------- CREATE ")
+    
     if (!form.first_name || !form.last_name || !form.phone || !form.password) {
       alert("Tous les champs sont obligatoires");
       return;
     }
 
     setLoading(true);
+    console.log("------- CREATE ",form)
     await api.post("/academics/teachers/", form);
     
     resetForm();
