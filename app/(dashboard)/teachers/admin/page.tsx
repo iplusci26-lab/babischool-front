@@ -50,9 +50,9 @@ export default function TeachersPage() {
     }
 
     setLoading(true);
-    console.log("------- CREATE ",form)
-    await api.post("/academics/teachers/", form);
     
+    const res = await api.post("/academics/teachers/", form);
+    console.log("------- CREATE data ",res)
     resetForm();
     loadTeachers();
     setLoading(false);
