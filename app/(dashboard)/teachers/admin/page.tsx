@@ -43,6 +43,7 @@ export default function TeachersPage() {
 
   // CREATE
   const handleCreate = async () => {
+    console.log("------- CREATE ")
     if (!form.first_name || !form.last_name || !form.phone || !form.password) {
       alert("Tous les champs sont obligatoires");
       return;
@@ -50,7 +51,7 @@ export default function TeachersPage() {
 
     setLoading(true);
     await api.post("/academics/teachers/", form);
-    console.log("------- données ")
+    
     resetForm();
     loadTeachers();
     setLoading(false);
@@ -60,6 +61,7 @@ export default function TeachersPage() {
   
   // UPDATE
   const handleUpdate = async () => {
+    console.log("------- UPDATE ")
     setLoading(true);
 
     await api.put(`/academics/teachers/${selected.id}/`, {
@@ -75,6 +77,7 @@ export default function TeachersPage() {
 
   // DELETE
   const handleDelete = async (id: string) => {
+    console.log("------- DELETE ")
     if (!confirm("Supprimer ce professeur ?")) return;
 
     await api.delete(`/academics/teachers/${id}/`);
@@ -83,6 +86,7 @@ export default function TeachersPage() {
 
   // SELECT
   const handleEdit = (t: any) => {
+    console.log("------- EDITE ")
     setSelected(t);
     setForm({
       first_name: t.first_name,
