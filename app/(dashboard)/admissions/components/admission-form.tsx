@@ -21,6 +21,12 @@ export default function AdmissionForm() {
     parent_email: "",
   });
 
+  const [successModal, setSuccessModal] = useState({
+    open: false,
+    phone: "",
+    password: "",
+  });
+
   const [classrooms, setClassrooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [academicYears, setAcademicYears] = useState<any[]>([]);
@@ -81,9 +87,20 @@ export default function AdmissionForm() {
 
       const res = await api.post("/students/admissions/", payload);
 
-      alert("Student created successfully");
+      setSuccessModal({
+        open: true,
+        phone:
+          res.data.results?.parent_phone ??
+          res.data.parent_phone ??
+          form.parent_phone,
+        password:
+          res.data.results?.parent_temp_password ??
+          res.data.parent_temp_password ??
+          "",
+      });
       console.log("11111 ",res.data)
       console.log("2222 ", res.data.results)
+      
       // reset
       setForm({
         student_first_name: "",
@@ -108,7 +125,17 @@ export default function AdmissionForm() {
     }
   };
 
+  const copyCredentials = async () => {
+    await navigator.clipboard.writeText(
+  `Téléphone : ${successModal.phone}
+  Mot de passe : ${successModal.password}`
+    );
+  
+    alert("Identifiants copiés.");
+  };
+
   return (
+    <div>
     <div className="bg-white p-6 rounded-xl border max-w-xl space-y-4">
 
       {/* 🎓 STUDENT */}
@@ -232,5 +259,112 @@ export default function AdmissionForm() {
       </button>
 
     </div>
+    {successModal.open && (
+
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+
+          <div className="flex justify-center mb-4">
+
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+
+              <span className="text-4xl">✅</span>
+
+            </div>
+
+          </div>
+
+          <h2 className="text-2xl font-bold text-center">
+
+            Admission réussie
+
+          </h2>
+
+          <p className="text-gray-500 text-center mt-2">
+
+            Le compte parent a été créé avec succès.
+
+          </p>
+
+          <div className="bg-gray-100 rounded-xl p-4 mt-6 space-y-3">
+
+            <div>
+
+              <p className="text-xs text-gray-500">
+
+                Téléphone
+
+              </p>
+
+              <p className="font-bold text-lg">
+
+                {successModal.phone}
+
+              </p>
+
+            </div>
+
+            <div>
+
+              <p className="text-xs text-gray-500">
+
+                Mot de passe
+
+              </p>
+
+              <p className="font-bold text-lg text-[#6214BE]">
+
+                {successModal.password}
+
+              </p>
+
+            </div>
+
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 mt-6">
+
+            <button
+
+              onClick={copyCredentials}
+
+              className="border rounded-lg py-3 font-semibold"
+
+            >
+
+              Copier
+
+            </button>
+
+            <button
+
+              onClick={() =>
+                setSuccessModal({
+                  open: false,
+                  phone: "",
+                  password: "",
+                })
+              }
+
+              className="bg-[#6214BE] text-white rounded-lg py-3 font-semibold"
+
+            >
+
+              Fermer
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      )}
+    </div>
+    
   );
+
+  
 }
