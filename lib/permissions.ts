@@ -3,6 +3,15 @@ export const menuPermissions: Record<
   string[]
 > = {
 
+  timeslot:[
+    "admin",
+    "Accès A",
+  ],
+
+  parents:[
+    "admin",
+    "Accès A",
+  ],
   
   announcements: [
     "admin",
@@ -11,52 +20,52 @@ export const menuPermissions: Record<
 
   dashboard: [
     "admin",
-    "Directeur",
+    "Accès A",
   ],
 
   reinscription: [
     "admin", 
-    "Directeur"
+    "Accès A"
   ],
   term: [
     "admin",
-    "Directeur",
+    "Accès A",
     
   ],
 
   admission: [
     "admin",
-    "Directeur",
+    "Accès A",
     
   ],
 
   staff: [
     "admin",
-    "Directeur",
+    "Accès A",
     
     
   ],
 
   classroom: [
     "admin",
-    "Directeur",
+    "Accès A",
     "Censeur",
   ],
 
   subjects: [
     "admin",
-    "Directeur",
+    "Accès A",
     
   ],
   assignment: [
     "admin",
-    "Directeur",
+    "Accès A",
     
     
   ],
   schedule: [
     "admin",
-    "Directeur",
+    "Accès A",
     "Censeur",
     "Educateur"
     
@@ -64,14 +73,14 @@ export const menuPermissions: Record<
 
   grade: [
     "admin",
-    "Directeur",
+    "Accès A",
     "Censeur",
     
   ],
 
   messages: [
     "admin",
-    "Directeur",
+    "Accès A",
     "teacher",
     "Econome",
     "Educateur",
@@ -82,33 +91,33 @@ export const menuPermissions: Record<
 
   students: [
     "admin",
-    "Directeur",
+    "Accès A",
     "teacher",
     "Educateur"
   ],
 
   teachers: [
     "admin",
-    "Directeur",
+    "Accès A",
     
   ],
 
   academics: [
     "admin",
-    "Directeur",
+    "Accès A",
     "teacher",
     
   ],
 
   evaluations: [
     "admin",
-    "Directeur",
+    "Accès A",
     "Censeur",
   ],
 
   teacherAttendance: [
     "admin",
-    "Directeur",
+    "Accès A",
     "Censeur",
     "Educateur"
     
@@ -116,7 +125,7 @@ export const menuPermissions: Record<
 
   studentAttendance: [
     "admin",
-    "Directeur",
+    "Accès A",
     "teacher",
     "Educateur"
    
@@ -125,20 +134,20 @@ export const menuPermissions: Record<
 
   staffAttendance: [
     "admin",
-    "Directeur",
+    "Accès A",
     "Educateur"
     
   ],
 
   finance: [
     "admin",
-    "Directeur",
+    "Accès A",
     "econome",
   ],
 
   settings: [
     "admin",
-    "Directeur",
+    "Accès A",
   ],
 };
 

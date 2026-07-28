@@ -47,7 +47,7 @@ export default function SubjectsPage() {
         />
 
         <input
-          placeholder="Code"
+          placeholder="Abrév"
           className="border p-2"
           value={form.code}
           onChange={(e)=>setForm({...form, code:e.target.value})}

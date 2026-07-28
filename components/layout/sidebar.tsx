@@ -65,9 +65,10 @@ export default function Sidebar() {
     {
       section: "Académique",
       items: [
-        { key: "teachers", label: "Professeurs", href: "/teachers/admin", icon: UserCog },
+        { key: "teachers", label: "Enseignant", href: "/teachers/admin", icon: UserCog },
         { key: "subjects", label: "Matières", href: "/subjects", icon: BookOpen },
-        {/* key: "assignment", label: "Affectations", href: "/assignments", icon: Layers3 */},
+        { key: "assignment", label: "Affectations", href: "/assignments", icon: Layers3 },
+        { key: "timeslot", label: "Créneaux horaires", href: "/timeslots", icon: Layers3 },
         { key: "schedule", label: "Emploi du temps", href: "/schedule", icon: CalendarDays },
         { key: "evaluations", label: "Évaluations",href: "/assessments",icon: FileSpreadsheet,},
         { key: "grade", label: "Notes",href: "/grades",icon: PenSquare,},
@@ -78,11 +79,12 @@ export default function Sidebar() {
     {
       section: "Gestion",
       items: [
-        { key: "finance", label: "Finance", href: "/finance", icon: Wallet },
-        { key: "teacherAttendance",label: "Présence Prof", href: "/attendance/teachers", icon: Calendar },
+        { key: "finance", label: "Comptabilité", href: "/finance", icon: Wallet },
+        { key: "teacherAttendance",label: "Présence Enseignant", href: "/attendance/teachers", icon: Calendar },
         { key: "studentAttendance",label: "Présence Elève", href: "/attendance/students", icon: CalendarCheck },
         { key: "staffAttendance",label: "Présence Personnel", href: "/attendance/staff", icon: Users },
-        { key: "settings",label: "Settings",href: "/settings",icon: Settings},
+        { key: "settings",label: "Paramètres",href: "/settings",icon: Settings},
+        { key: "parents",label: "Parents",href: "/dashboard/parents",icon: UserPlus},
         
       ],
     },
@@ -97,25 +99,7 @@ export default function Sidebar() {
   ] 
   
   
-  const renderItem = (item: any) => {
-    const isActive = pathname.startsWith(item.href);
-    const Icon = item.icon as React.ElementType;
 
-    return (
-      <Link
-        key={item.href}
-        href={item.href}
-        className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${
-          isActive
-            ? "bg-white text-black font-medium border-l-4 border-black"
-            : "hover:bg-purple-500"
-        }`}
-      >
-        <Icon size={18} />
-        {item.label}
-      </Link>
-    );
-  };
 
 
   return (

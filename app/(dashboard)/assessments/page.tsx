@@ -20,7 +20,7 @@ export default function EvaluationsPage() {
         </h1>
 
         <p className="text-gray-500 mt-1">
-          Gestion des notes et devoirs
+        PROGRAMMATION DES EVALUATIONS
         </p>
 
       </div>
@@ -30,14 +30,14 @@ export default function EvaluationsPage() {
       <div className="flex gap-6 border-b">
 
         <Tab
-          label="Notes"
+          label="Evaluation"
           value="grades"
           tab={tab}
           setTab={setTab}
         />
 
         <Tab
-          label="Homework"
+          label="Exercice"
           value="homework"
           tab={tab}
           setTab={setTab}

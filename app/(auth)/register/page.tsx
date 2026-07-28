@@ -47,10 +47,10 @@ export default function RegisterPage() {
     } else {
       formData.append("logo", "");
     }
-
+    await api.post("/auth/register/", formData);
     try {
       // Register
-      await api.post("/auth/register/", formData);
+      
       router.push("/pending");
       // Auto login
       /*const res = await api.post("/auth/login/", {
@@ -63,7 +63,7 @@ export default function RegisterPage() {
       
 
     } catch (err: any) {
-      console.error(err.response?.data?.detail);
+        //console.error(err.response?.data?.detail);
       alert(err.response?.data?.detail);
 
     } finally {

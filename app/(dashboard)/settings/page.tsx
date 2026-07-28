@@ -366,7 +366,7 @@ export default function SettingsPage() {
                 text-sm
                 font-medium
               ">
-                Système académique
+                Decoupage de l'année academique
               </label>
 
               <select

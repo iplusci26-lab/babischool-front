@@ -1,125 +1,302 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { useState } from "react";
 
-export default function ClassroomsPage() {
-  const [classes, setClasses] = useState([]);
-  const [classroomlevel, setClassroomlevel] = useState([]);
-  const [form, setForm] = useState({
-    name: "",
-    classroom_level: "",
-    capacity: "",
-    annual_tuition_fee: "",
-  });
+import { useAcademicStructure } from "./hooks/useAcademicStructure";
 
-  const fetchClasses = async () => {
-    const res = await api.get("/students/classrooms/");
-    setClasses(res.data);
-    
-  };
+import EntityColumn from "./components/EntityColumn";
 
-  const createClass = async () => {
-    try {
-  
-      const payload = {
-        name: form.name,
-        classroom_level: form.classroom_level,
-        capacity: Number(form.capacity),
-        annual_tuition_fee: Number(
-          form.annual_tuition_fee
-        ),
-      };
-  
-      await api.post(
-        "/students/classrooms/",
-        payload
-      );
-  
-      fetchClasses();
-  
-    } catch (error: any) {
-  
-      console.log(error.response?.data);
-  
-    }
-  };
+import CycleCard from "./components/CycleCard";
+import LevelCard from "./components/LevelCard";
+import ClassroomCard from "./components/ClassroomCard";
+import GroupCard from "./components/GroupCard";
 
-  useEffect(() => {
-    fetchClasses();
-    api.get("/students/classlevel/").then((res) => {
-      setClassroomlevel(res.data);
-      console.log(res.data);
-      });
-  }, []);
+import CycleModal from "./components/CycleModal";
+import LevelModal from "./components/LevelModal";
+import ClassroomModal from "./components/ClassroomModal";
+import GroupModal from "./components/GroupModal";
 
-  return (
-    <div className="space-y-6">
+export default function AcademicStructurePage() {
 
-      <h1 className="text-2xl font-bold">Classes</h1>
+  const {
+    loading,
+    saving,
 
-      {/* ➕ CREATE */}
-      <div className="space-y-4 max-w-xl">
-        <input
-          placeholder="Class name (ex: 6ème A)"
-          className="border p-2 w-full"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
+    cycles,
+    levels,
+    classrooms,
+    groups,
 
-        <input
-        placeholder="Capacité de la classe"
-        type="number"
-        className="border p-2 w-full"
-        value={form.capacity}
-        onChange={(e) =>
-            setForm({ ...form, capacity: e.target.value })
-        }
-        />
+    selectedCycleId,
+    selectedLevelId,
+    selectedClassroomId,
 
-        <input
-        placeholder="Scolarité annuelle"
-        type="number"
-        className="border p-2 w-full"
-        value={form.annual_tuition_fee}
-        onChange={(e) =>
-            setForm({ ...form, annual_tuition_fee: e.target.value })
-        }
-        />
+    cycleForm,
+    levelForm,
+    classroomForm,
+    groupForm,
 
-        <select
-        className="border p-2 w-full"
-        value={form.classroom_level}
-        onChange={(e) =>
-            setForm({ ...form, classroom_level: e.target.value })
-        }
-        >
-        <option value="">Niveau</option>
+    actions,
+} = useAcademicStructure();
 
-        {classroomlevel.map((c: any) => (
-            <option key={c.id} value={c.id}>
-            {c.name}
-            </option>
-        ))}
-        </select>
+const [cycleModalOpen, setCycleModalOpen] =
+    useState(false);
 
-        <button
-          onClick={createClass}
-          className="bg-purple-700 w-full text-white p-2 rounded cursor-pointer"
-        >
-          Ajouter
-        </button>
-      </div>
+const [levelModalOpen, setLevelModalOpen] =
+    useState(false);
 
-      {/* 📋 LIST */}
-      <div className="bg-white border rounded-xl">
-        {classes.map((c: any) => (
-          <div key={c.id} className="p-3 border-b">
-            {c.name}
+const [classroomModalOpen, setClassroomModalOpen] =
+    useState(false);
+
+const [groupModalOpen, setGroupModalOpen] =
+    useState(false);
+
+
+    return (
+
+      <div className="space-y-6">
+      
+          <div>
+      
+              <h1 className="text-3xl font-bold">
+      
+                  Structure académique
+      
+              </h1>
+      
+              <p className="text-gray-500">
+      
+                  Gérez les cycles,
+                  niveaux,
+                  classes
+                  et groupes pédagogiques.
+      
+              </p>
+      
           </div>
-        ))}
-      </div>
+          <div className="
+                grid
+                gap-6
 
-    </div>
-  );
+                grid-cols-1
+
+                md:grid-cols-2
+
+                xl:grid-cols-4
+            "
+        >
+          <EntityColumn
+    title="Cycles"
+    count={cycles.length}
+    loading={loading}
+    emptyMessage="Aucun cycle"
+
+    onAdd={() => {
+        actions.setCycleForm({
+            name: "",
+            code: "",
+          
+            display_order: 1,
+            is_active: true,
+        });
+
+        setCycleModalOpen(true);
+    }}
+>
+
+    {cycles.map((cycle) => (
+
+        <CycleCard
+
+            key={cycle.id}
+
+            cycle={cycle}
+
+            selected={
+                selectedCycleId === cycle.id
+            }
+
+            onSelect={() =>
+                actions.selectCycle(cycle.id)
+            }
+
+            onEdit={() => {
+
+                actions.openCycleForm(cycle);
+
+                setCycleModalOpen(true);
+
+            }}
+
+            onDelete={() =>
+                actions.deleteCycle(cycle.id)
+            }
+
+        />
+
+    ))}
+
+</EntityColumn>
+
+<EntityColumn
+  title="Niveaux"
+  count={levels.length}
+  loading={loading}
+  emptyMessage="Aucun niveau"
+  onAdd={() => {
+    actions.resetLevelForm();
+    setLevelModalOpen(true);
+  }}
+>
+  {levels
+    .filter(
+      (level) =>
+        level.cycle === selectedCycleId
+    )
+    .map((level) => (
+      <LevelCard
+        key={level.id}
+        level={level}
+        selected={
+          selectedLevelId === level.id
+        }
+        onSelect={() =>
+          actions.selectLevel(level.id)
+        }
+        onEdit={() => {
+          actions.openLevelForm(level);
+          setLevelModalOpen(true);
+        }}
+        onDelete={() =>
+          actions.deleteLevel(level.id)
+        }
+      />
+    ))}
+</EntityColumn>
+
+<EntityColumn
+  title="Classes"
+  count={classrooms.length}
+  loading={loading}
+  emptyMessage="Aucune classe"
+  onAdd={() => {
+    actions.resetClassroomForm();
+    setClassroomModalOpen(true);
+  }}
+>
+  {classrooms
+    .filter(
+      (classroom) =>
+        classroom.classroom_level ===
+        selectedLevelId
+    )
+    .map((classroom) => (
+      <ClassroomCard
+        key={classroom.id}
+        classroom={classroom}
+        selected={
+          selectedClassroomId ===
+          classroom.id
+        }
+        onSelect={() =>
+          actions.selectClassroom(
+            classroom.id
+          )
+        }
+        onEdit={() => {
+          actions.openClassroomForm(
+            classroom
+          );
+
+          setClassroomModalOpen(true);
+        }}
+        onDelete={() =>
+          actions.deleteClassroom(
+            classroom.id
+          )
+        }
+      />
+    ))}
+</EntityColumn>
+
+<EntityColumn
+  title="Groupes"
+  count={groups.length}
+  loading={loading}
+  emptyMessage="Aucun groupe"
+  onAdd={() => {
+    actions.resetGroupForm();
+    setGroupModalOpen(true);
+  }}
+>
+  {groups
+    .filter(
+      (group) =>
+        group.classroom ===
+        selectedClassroomId
+    )
+    .map((group) => (
+      <GroupCard
+        key={group.id}
+        group={group}
+        selected={false}
+        onSelect={() => {}}
+        onEdit={() => {
+          actions.openGroupForm(group);
+
+          setGroupModalOpen(true);
+        }}
+        onDelete={() =>
+          actions.deleteGroup(group.id)
+        }
+      />
+    ))}
+</EntityColumn>
+
+</div>
+
+<CycleModal
+  open={cycleModalOpen}
+  saving={saving}
+  form={cycleForm}
+  onClose={() => setCycleModalOpen(false)}
+  onSave={actions.saveCycle}
+  onChange={actions.setCycleForm}
+/>
+
+<LevelModal
+  open={levelModalOpen}
+  saving={saving}
+  form={levelForm}
+  cycles={cycles}
+  onClose={() => setLevelModalOpen(false)}
+  onSave={actions.saveLevel}
+  onChange={actions.setLevelForm}
+/>
+
+<ClassroomModal
+  open={classroomModalOpen}
+  saving={saving}
+  form={classroomForm}
+  levels={levels}
+  classrooms={classrooms}
+  onClose={() =>
+    setClassroomModalOpen(false)
+  }
+  onSave={actions.saveClassroom}
+  onChange={actions.setClassroomForm}
+/>
+
+<GroupModal
+  open={groupModalOpen}
+  saving={saving}
+  form={groupForm}
+  classrooms={classrooms}
+  onClose={() => setGroupModalOpen(false)}
+  onSave={actions.saveGroup}
+  onChange={actions.setGroupForm}
+/>
+
+</div>
+);
 }
