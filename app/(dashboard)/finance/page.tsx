@@ -331,6 +331,7 @@ function FinanceStudents() {
     );
 
     setStudents(res.data);
+    console.log("--------------- studebt",res.data)
   };
 
   useEffect(() => {
@@ -349,7 +350,7 @@ function FinanceStudents() {
     );
 
   }, [students, search]);
-
+  console.log("--------------- paiement", filtered)
   const openPaymentModal = (
     student: any
   ) => {
@@ -424,7 +425,7 @@ function FinanceStudents() {
             <tbody>
 
               {filtered.map((s) => (
-
+                
                 <tr
                   key={s.id}
                   className="border-t"
