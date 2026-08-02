@@ -89,7 +89,7 @@ export default function RegisterPage() {
 
             {/* Replace with your logo */}
             <Image
-              src="/logo.png"
+              src="/images/babischool_logo.png"
               alt="BabiSchool"
               width={140}
               height={140}

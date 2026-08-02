@@ -91,7 +91,7 @@ export default function GroupModal({
         }
       />
 
-      <TextArea
+      {/*<TextArea
         label="Description"
         rows={3}
         placeholder="Description du groupe..."
@@ -101,7 +101,7 @@ export default function GroupModal({
             description: e.target.value,
           })
         }
-      />
+      />*/}
 
       <Input
         type="number"

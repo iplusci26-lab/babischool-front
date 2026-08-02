@@ -66,7 +66,7 @@ export default function StudentGrades({
       );
 
       setReport(res.data);
-      console.log("doneee ",res.data);
+      
 
     } catch (error) {
 

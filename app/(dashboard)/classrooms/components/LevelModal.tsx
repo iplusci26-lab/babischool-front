@@ -71,7 +71,7 @@ export default function LevelModal({
         }
       />
 
-      <TextArea
+      {/*<TextArea
         label="Description"
         rows={3}
         value={form.description}
@@ -80,7 +80,7 @@ export default function LevelModal({
             description: e.target.value,
           })
         }
-      />
+      />*/}
 
       <Input
         type="number"

@@ -43,19 +43,19 @@ export default function StudentAttendance({
     const total = records.length;
 
     const present = records.filter(
-      r => r.status === "present"
+      r => r.status === "PRESENT"
     ).length;
 
     const absent = records.filter(
-      r => r.status === "absent"
+      r => r.status === "ABSENT"
     ).length;
 
     const late = records.filter(
-      r => r.status === "late"
+      r => r.status === "LATE"
     ).length;
 
     const excused = records.filter(
-      r => r.status === "excused"
+      r => r.status === "EXCUSE"
     ).length;
 
     const attendanceRate = total > 0
@@ -88,34 +88,39 @@ export default function StudentAttendance({
 
       {/* STATS */}
 
-      <div className="grid md:grid-cols-5 gap-4">
+      <div className="grid gap-4 md:grid-cols-4">
 
         <StatCard
           title="Présence"
           value={`${stats.attendanceRate}%`}
+          color="purple"
         />
 
         <StatCard
           title="Présents"
           value={stats.present}
+          color="green"
         />
 
         <StatCard
           title="Absents"
           value={stats.absent}
+          color="red"
         />
 
         <StatCard
           title="Retards"
           value={stats.late}
+          color="orange"
         />
-
-        <StatCard
-          title="Justifiés"
-          value={stats.excused}
-        />
-
+        {/*<StatCard
+                title="Justifiés"
+                value={stats.excused}
+        />*/}
       </div>
+
+        
+
 
       {/* TABLE */}
 
@@ -249,23 +254,79 @@ function StatusBadge({
   );
 }
 
+
+
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  color?: "purple" | "green" | "red" | "orange";
+}
+
 function StatCard({
   title,
   value,
-}: any) {
+  color = "purple",
+}: StatCardProps) {
+
+  const colors = {
+    purple: {
+      bg: "bg-[#6214BE]/5",
+      border: "border-[#6214BE]/20",
+      title: "text-[#6214BE]",
+      value: "text-[#6214BE]",
+    },
+
+    green: {
+      bg: "bg-green-50",
+      border: "border-green-200",
+      title: "text-green-700",
+      value: "text-green-800",
+    },
+
+    red: {
+      bg: "bg-red-50",
+      border: "border-red-200",
+      title: "text-red-700",
+      value: "text-red-800",
+    },
+
+    orange: {
+      bg: "bg-orange-50",
+      border: "border-orange-200",
+      title: "text-orange-700",
+      value: "text-orange-800",
+    },
+  };
+
+  const style = colors[color];
 
   return (
 
-    <div className="bg-white border rounded-3xl p-5">
+    <div
+      className={`
+        rounded-2xl
+        border
+        ${style.border}
+        ${style.bg}
+        p-6
+        shadow-sm
+        transition-all
+        duration-200
+        hover:-translate-y-1
+        hover:shadow-md
+      `}
+    >
 
-      <div className="text-sm text-gray-500">
+      <p className={`text-sm font-medium ${style.title}`}>
         {title}
-      </div>
+      </p>
 
-      <div className="text-3xl font-bold mt-2">
+      <h2 className={`mt-3 text-4xl font-bold ${style.value}`}>
         {value}
-      </div>
+      </h2>
 
     </div>
+
   );
+
 }

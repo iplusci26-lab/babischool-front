@@ -1,273 +1,110 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { useState } from "react";
+
+import StaffAttendanceFilters from "./components/StaffAttendanceFilters";
+import StaffAttendanceSummary from "./components/StaffAttendanceSummary";
+import StaffAttendanceTable from "./components/StaffAttendanceTable";
+
+import { useStaffAttendance } from "./hooks/useStaffAttendance";
 
 export default function StaffAttendancePage() {
 
-  const [records, setRecords] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const {
+    records,
+    loading,
+    submitting,
+    error,
 
-  const loadAttendance = async () => {
+    search,
+    setSearch,
 
-    try {
+    stats,
 
-      setLoading(true);
+    updateStatus,
+    submit,
+  } = useStaffAttendance();
 
-      const res = await api.get(
-        "/attendance/staff/today/"
-      );
+  const [activeTab] = useState<
+    "attendance"
+  >("attendance");
 
-      setRecords(res.data);
-
-    } catch (error) {
-
-      console.error(error);
-
-    } finally {
-
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-
-    loadAttendance();
-
-  }, []);
-
-  const updateStatus = (
-    id: string,
-    status: string
-  ) => {
-
-    setRecords((prev) =>
-      prev.map((r) =>
-        r.id === id
-          ? {
-              ...r,
-              status,
-            }
-          : r
-      )
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <p className="text-gray-500">
+          Chargement...
+        </p>
+      </div>
     );
-  };
+  }
 
-  const submit = async () => {
+  if (error) {
+    return (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
+        {error}
+      </div>
+    );
+  }
 
-    try {
-
-      await api.post(
-        "/attendance/staff/mark/",
-        {
-          attendances: records,
-        }
-      );
-
-      alert("Présence enregistrée");
-
-    } catch (error) {
-
-      console.error(error);
-    }
-  };
-
-  const stats = {
-
-    present: records.filter(
-      (r) => r.status === "present"
-    ).length,
-
-    absent: records.filter(
-      (r) => r.status === "absent"
-    ).length,
-
-    late: records.filter(
-      (r) => r.status === "late"
-    ).length,
-  };
   return (
+    <div className="space-y-6">
 
-    <div className="p-6 space-y-6">
+      {/* ==========================
+              HEADER
+      ========================== */}
 
-      {/* HEADER */}
-
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
         <div>
 
-          <h1 className="text-3xl font-bold">
-            Présence Personnel
+          <h1 className="text-2xl font-bold text-gray-900">
+            Présence du personnel administratif
           </h1>
 
-          <p className="text-gray-500 mt-1">
-            Gestion RH du personnel scolaire
+          <p className="mt-1 text-sm text-gray-500">
+            Gérez les présences quotidiennes du personnel administratif.
           </p>
 
         </div>
 
         <button
           onClick={submit}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-3 rounded-2xl"
+          disabled={submitting}
+          className="rounded-xl bg-[#6214BE] px-5 py-3 font-medium text-white transition hover:bg-[#4d0fa0] disabled:cursor-not-allowed disabled:opacity-60"
         >
           Enregistrer
         </button>
 
       </div>
 
-       {/* STATS */}
+      {/* ==========================
+            RECHERCHE
+      ========================== */}
 
-       <div className="grid md:grid-cols-3 gap-4">
+      <StaffAttendanceFilters
+        search={search}
+        onSearchChange={setSearch}
+        employeeCount={records.length}
+      />
 
-<Card
-  title="Présents"
-  value={stats.present}
-/>
+      {/* ==========================
+            STATISTIQUES
+      ========================== */}
 
-<Card
-  title="Absents"
-  value={stats.absent}
-/>
+      <StaffAttendanceSummary
+        stats={stats}
+      />
 
-<Card
-  title="Retards"
-  value={stats.late}
-/>
+      {/* ==========================
+              TABLEAU
+      ========================== */}
 
-</div>
-
-{/* TABLE */}
-
-<div className="bg-white border rounded-3xl overflow-hidden">
-
-<div className="overflow-x-auto">
-
-  <table className="w-full">
-
-    <thead className="bg-gray-50">
-
-      <tr className="text-left text-sm text-gray-500">
-
-        <th className="p-4">Nom</th>
-        <th className="p-4">Fonction</th>
-        <th className="p-4">Statut</th>
-        <th className="p-4">Actions</th>
-
-      </tr>
-
-    </thead>
-
-    <tbody>
-
-{records.map((record) => (
-
-  <tr
-    key={record.id}
-    className="border-t"
-  >
-
-    <td className="p-4 font-medium">
-      {record.user_name}
-    </td>
-
-    <td className="p-4 capitalize">
-      {record.user_type}
-    </td>
-
-    <td className="p-4">
-
-      <span
-        className={`px-3 py-1 rounded-full text-sm ${
-          record.status === "present"
-            ? "bg-green-100 text-green-700"
-            : record.status === "absent"
-            ? "bg-red-100 text-red-700"
-            : record.status === "late"
-            ? "bg-orange-200 text-orange-500"
-            : "bg-gray-200 text-gray-500"
-        }`}
-      >
-        {record.status}
-      </span>
-
-    </td>
-    <td className="p-4">
-
-                    <div className="flex gap-2 flex-wrap">
-
-                      <button
-                        onClick={() =>
-                          updateStatus(
-                            record.id,
-                            "present"
-                          )
-                        }
-                        className="px-3 py-2 rounded-xl bg-green-100"
-                      >
-                        ✅
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          updateStatus(
-                            record.id,
-                            "absent"
-                          )
-                        }
-                        className="px-3 py-2 rounded-xl bg-red-100"
-                      >
-                        ❌
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          updateStatus(
-                            record.id,
-                            "late"
-                          )
-                        }
-                        className="px-3 py-2 rounded-xl bg-orange-100"
-                      >
-                        ⏱️
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </div>
-
-      {loading && (
-        <div>Chargement...</div>
-      )}
-
-    </div>
-  );
-}
-
-function Card({ title, value }: any) {
-
-  return (
-
-    <div className="bg-white border rounded-3xl p-5">
-
-      <div className="text-gray-500 text-sm">
-        {title}
-      </div>
-
-      <div className="text-3xl font-bold mt-2">
-        {value}
-      </div>
+      <StaffAttendanceTable
+        records={records}
+        loading={submitting}
+        onStatusChange={updateStatus}
+      />
 
     </div>
   );

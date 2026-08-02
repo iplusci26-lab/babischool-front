@@ -80,7 +80,7 @@ export const menuPermissions: Record<
 
   messages: [
     "admin",
-    "Accès A",
+    //"Accès A",
     "teacher",
     "Econome",
     "Educateur",

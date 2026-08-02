@@ -10,30 +10,30 @@ import { useAuth } from "@/lib/hooks/useAuth";
 
 import {
   LayoutDashboard,
-  UserPlus,
+  CalendarRange,
+  UsersRound,
+  Building2,
+  FilePlus2,
   Users,
-  GraduationCap,
-  School,
-  Wallet,
-  CalendarCheck,
-  MessageCircle,
-  UserCog,
-  BookOpen,
-  ClipboardList,
-  Calendar,
-  Clock,
-  Layers3,
-  CalendarDays,
-  FileSpreadsheet,
-  PenSquare,
-  MessageSquare,
-  Briefcase,
-  Settings,
   RefreshCcw,
-  Bell,
-  Megaphone
-
+  BookOpen,
+  Presentation,
+  GitBranchPlus,
+  Clock3,
+  CalendarDays,
+  ClipboardCheck,
+  NotebookPen,
+  Banknote,
+  UserCheck,
+  BadgeCheck,
+  BriefcaseBusiness,
+  Settings,
+  Users2,
+  Megaphone,
+  MessagesSquare,
 } from "lucide-react";
+
+
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -51,49 +51,156 @@ export default function Sidebar() {
     {
       section: "Principal",
       items: [
-        { key: "dashboard", label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-        { key: "term", label: "Période", href: "/terms", icon: GraduationCap },
-        { key: "staff", label: "Personnel", href: "/staff", icon: UserCog },
-        { key: "classroom", label: "Classes", href: "/classrooms", icon: School },
-        { key: "admission", label: "Inscription", href: "/admissions", icon: ClipboardList },
-        { key: "students", label: "Elèves", href: "/students", icon: GraduationCap },
-        { key: "reinscription", label: "Réinscription", href: "/re-enrollment", icon: RefreshCcw},
+        {
+          key: "dashboard",
+          label: "Dashboard",
+          href: "/dashboard",
+          icon: LayoutDashboard,
+        },
+        {
+          key: "term",
+          label: "Période",
+          href: "/terms",
+          icon: CalendarRange,
+        },
+        {
+          key: "staff",
+          label: "Personnel",
+          href: "/staff",
+          icon: UsersRound,
+        },
+        {
+          key: "classroom",
+          label: "Classes",
+          href: "/classrooms",
+          icon: Building2,
+        },
+        {
+          key: "admission",
+          label: "Inscription",
+          href: "/admissions",
+          icon: FilePlus2,
+        },
+        {
+          key: "students",
+          label: "Élèves",
+          href: "/students",
+          icon: Users,
+        },
+        {
+          key: "reinscription",
+          label: "Réinscription",
+          href: "/re-enrollment",
+          icon: RefreshCcw,
+        },
       ],
     },
-
 
     {
       section: "Académique",
       items: [
-        { key: "teachers", label: "Enseignant", href: "/teachers/admin", icon: UserCog },
-        { key: "subjects", label: "Matières", href: "/subjects", icon: BookOpen },
-        { key: "assignment", label: "Affectations", href: "/assignments", icon: Layers3 },
-        { key: "timeslot", label: "Créneaux horaires", href: "/timeslots", icon: Layers3 },
-        { key: "schedule", label: "Emploi du temps", href: "/schedule", icon: CalendarDays },
-        { key: "evaluations", label: "Évaluations",href: "/assessments",icon: FileSpreadsheet,},
-        { key: "grade", label: "Notes",href: "/grades",icon: PenSquare,},
-        
+        {
+          key: "subjects",
+          label: "Matières",
+          href: "/subjects",
+          icon: BookOpen,
+        },
+        {
+          key: "teachers",
+          label: "Enseignants",
+          href: "/teachers/admin",
+          icon: Presentation,
+        },
+        {
+          key: "assignment",
+          label: "Affectations",
+          href: "/assignments",
+          icon: GitBranchPlus,
+        },
+        {
+          key: "timeslot",
+          label: "Heures de cours",
+          href: "/timeslots",
+          icon: Clock3,
+        },
+        {
+          key: "schedule",
+          label: "Emploi du temps",
+          href: "/schedule",
+          icon: CalendarDays,
+        },
+        {
+          key: "evaluations",
+          label: "Évaluations",
+          href: "/assessments",
+          icon: ClipboardCheck,
+        },
+        {
+          key: "grade",
+          label: "Notes",
+          href: "/grades",
+          icon: NotebookPen,
+        },
       ],
     },
 
     {
       section: "Gestion",
       items: [
-        { key: "finance", label: "Comptabilité", href: "/finance", icon: Wallet },
-        { key: "teacherAttendance",label: "Présence Enseignant", href: "/attendance/teachers", icon: Calendar },
-        { key: "studentAttendance",label: "Présence Elève", href: "/attendance/students", icon: CalendarCheck },
-        { key: "staffAttendance",label: "Présence Personnel", href: "/attendance/staff", icon: Users },
-        { key: "settings",label: "Paramètres",href: "/settings",icon: Settings},
-        { key: "parents",label: "Parents",href: "/dashboard/parents",icon: UserPlus},
-        
+        {
+          key: "finance",
+          label: "Comptabilité",
+          href: "/finance",
+          icon: Banknote,
+        },
+        {
+          key: "teacherAttendance",
+          label: "Présence Enseignant",
+          href: "/attendance/teachers",
+          icon: UserCheck,
+        },
+        {
+          key: "studentAttendance",
+          label: "Présence Élève",
+          href: "/attendance/students",
+          icon: BadgeCheck,
+        },
+        {
+          key: "staffAttendance",
+          label: "Présence Administratif",
+          href: "/attendance/staff",
+          icon: BriefcaseBusiness,
+        },
+        {
+          key: "settings",
+          label: "Paramètres",
+          href: "/settings",
+          icon: Settings,
+        },
+        {
+          key: "parents",
+          label: "Parents",
+          href: "/dashboard/parents",
+          icon: Users2,
+        },
       ],
     },
 
     {
       section: "Communication",
       items: [
-        { key: "announcements", label: "Annonces", href: "/annoucements", icon: Megaphone },
-        { key: "messages", label: "Message", href: "/messaging", icon: MessageCircle },
+        {
+          key: "announcements",
+          label: "Annonces",
+          href: "/annoucements",
+          icon: Megaphone,
+        },
+        {
+          key: "messages",
+          label: "Messages",
+          href: "/messaging",
+          icon: MessagesSquare,
+        },
       ],
     },
   ] 
@@ -108,8 +215,10 @@ export default function Sidebar() {
       {/* LOGO + SCHOOL */}
       <div className="mb-8 flex items-center gap-3">
         {school?.logo ? (
+
+      
           <img
-            src={`${process.env.NEXT_PUBLIC_API_URL}${school.logo}`}
+            src={school.logo instanceof File? URL.createObjectURL(school.logo): school.logo}
             className="w-10 h-10  rounded object-cover"  
           />
         ) : (

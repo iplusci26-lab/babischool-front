@@ -85,22 +85,22 @@ export default function TermsPage() {
 
           <p className="mt-1 text-gray-500">
 
-            Configurez les années académiques et
-            les périodes de votre établissement.
+          Configurez les années académiques et le découpage de l'année scolaire.
 
           </p>
 
         </div>
 
-        <Button
+        <button
           onClick={openAcademicYearModal}
-          className="gap-2"
-        >
+          className="flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-3 font-medium text-white
+                  hover:bg-purple-700 cursor-pointer disabled:opacity-50"
+            >
           <Plus size={18} />
 
           Nouvelle année
 
-        </Button>
+        </button>
 
       </div>
 
@@ -223,7 +223,7 @@ export default function TermsPage() {
 
         </div>
 
-        <Button
+        {/*<Button
           onClick={() => createNewTerm(selectedAcademicYearId)}
           className="gap-2"
         >
@@ -232,7 +232,7 @@ export default function TermsPage() {
 
           Nouvelle période
 
-        </Button>
+        </Button>*/}
 
       </div>
 

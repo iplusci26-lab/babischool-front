@@ -138,7 +138,7 @@ export function useTerms() {
   };
 
   const selectAcademicYear = (id: string) => {
-    console.log("Année sélectionnée :", id);
+   
     setSelectedAcademicYearId(id);
 
     setEditingTerm(null);
@@ -312,8 +312,7 @@ export function useTerms() {
       };
     
       const createTerm = async () => {
-        console.log("selectedAcademicYearId =", selectedAcademicYearId);
-        console.log("Term Form :", termForm);
+        
         await api.post(
           "/academics/terms/",
           termForm
@@ -393,8 +392,7 @@ export function useTerms() {
        * Public API
        * ============================== */
       useEffect(() => {
-        console.log("selectedAcademicYearId =", selectedAcademicYearId);
-        console.log("termForm.academic_year =", termForm.academic_year);
+       
       }, [selectedAcademicYearId, termForm]);
       return {
         /* States */

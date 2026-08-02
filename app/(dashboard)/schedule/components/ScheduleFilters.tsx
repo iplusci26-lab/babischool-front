@@ -1,159 +1,133 @@
 "use client";
 
+import SearchSelect from "@/components/ui/SearchSelect";
+
 import {
-    ClassroomOption,
-    ScheduleFilter,
-    TeacherOption,
+  ClassroomOption,
+  ScheduleFilter,
+  TeacherOption,
 } from "@/types/classSchedule";
 
 interface ScheduleFiltersProps {
 
-    filters: ScheduleFilter;
+  filters: ScheduleFilter;
 
-    classrooms: ClassroomOption[];
+  classrooms: ClassroomOption[];
 
-    teachers: TeacherOption[];
+  teachers: TeacherOption[];
 
-    onChange: (
-        filters: ScheduleFilter
-    ) => void;
+  onChange: (
+    filters: ScheduleFilter
+  ) => void;
 
 }
 
 export default function ScheduleFilters({
 
-    filters,
+  filters,
 
-    classrooms,
+  classrooms,
 
-    teachers,
+  teachers,
 
-    onChange,
+  onChange,
 
 }: ScheduleFiltersProps) {
-   
-    return (
 
-        <div className="mb-6 rounded-lg border bg-white p-4 shadow-sm">
+  return (
 
-            <div className="grid gap-4 md:grid-cols-2">
+    <div className="mb-6 rounded-lg border bg-white p-4 shadow-sm">
 
-                {/* Classe */}
+      <div className="grid gap-4 md:grid-cols-2">
 
-                <div>
+        <SearchSelect
 
-                    <label className="mb-1 block text-sm font-medium">
+          label="Classe"
 
-                        Classe
+          placeholder="Toutes les classes"
 
-                    </label>
+          value={filters.classroom ?? ""}
 
-                    <select
+          options={[
 
-                        value={filters.classroom ?? ""}
+            {
 
-                        onChange={(e) =>
-                            onChange({
-                                ...filters,
-                                classroom:
-                                    e.target.value || undefined,
-                            })
-                        }
+              value: "",
 
-                        className="w-full rounded-lg border px-3 py-2"
+              label: "Toutes les classes",
 
-                    >
+            },
 
-                        <option value="">
+            ...classrooms.map((classroom) => ({
 
-                            Toutes les classes
+              value: classroom.id,
 
-                        </option>
+              label: classroom.name,
 
-                        {
+            })),
 
-                            classrooms.map((classroom) => (
+          ]}
 
-                                <option
+          onChange={(value) =>
 
-                                    key={classroom.id}
+            onChange({
 
-                                    value={classroom.id}
+              ...filters,
 
-                                >
+              classroom: value || undefined,
 
-                                    {classroom.name}
+            })
 
-                                </option>
+          }
 
-                            ))
+        />
 
-                        }
+        <SearchSelect
 
-                    </select>
+          label="Enseignant"
 
-                </div>
+          placeholder="Tous les enseignants"
 
-                {/* Enseignant */}
+          value={filters.teacher ?? ""}
 
-                <div>
+          options={[
 
-                    <label className="mb-1 block text-sm font-medium">
+            {
 
-                        Enseignant
+              value: "",
 
-                    </label>
+              label: "Tous les enseignants",
 
-                    <select
+            },
 
-                        value={filters.teacher ?? ""}
+            ...teachers.map((teacher) => ({
 
-                        onChange={(e) =>
-                            onChange({
-                                ...filters,
-                                teacher:
-                                    e.target.value || undefined,
-                            })
-                        }
+              value: teacher.id,
 
-                        className="w-full rounded-lg border px-3 py-2"
+              label: teacher.full_name,
 
-                    >
+            })),
 
-                        <option value="">
+          ]}
 
-                            Tous les enseignants
+          onChange={(value) =>
 
-                        </option>
+            onChange({
 
-                        {
+              ...filters,
 
-                            teachers.map((teacher) => (
+              teacher: value || undefined,
 
-                                <option
+            })
 
-                                    key={teacher.id}
+          }
 
-                                    value={teacher.id}
+        />
 
-                                >
+      </div>
 
-                                    {teacher.full_name}
+    </div>
 
-                                </option>
-
-                            ))
-
-                        }
-
-                    </select>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    );
+  );
 
 }

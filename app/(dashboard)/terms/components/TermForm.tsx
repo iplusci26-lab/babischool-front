@@ -186,7 +186,7 @@ export default function TermForm({
         <button
           onClick={onSubmit}
           disabled={loading}
-          className="flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-3 font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+          className="flex items-center gap-2 cursor-pointer rounded-xl bg-purple-600 px-5 py-3 font-medium text-white hover:bg-purple-700 disabled:opacity-50"
         >
 
           <Save size={18} />

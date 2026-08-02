@@ -161,7 +161,7 @@ export default function ScheduleCell({
 
                         <div className="text-xs text-gray-400">
 
-                            Salle : {schedule.room}
+                            Classe : {schedule.room}
 
                         </div>
 

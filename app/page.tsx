@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+
 
 export default function Home() {
   return (
@@ -21,14 +23,28 @@ export default function Home() {
       {/* Content */}
       <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center text-white">
 
-        {/* Logo / Title */}
-        <div className="mb-6 flex items-center gap-3">
-          <span className="text-5xl">🎓</span>
 
-          <h1 className="text-5xl font-extrabold md:text-7xl">
-            BabiSchool
-          </h1>
-        </div>
+        {/* Logo / Title */}
+
+            <div className="mb-8 flex flex-col items-center">
+
+            <div className="rounded-3xl bg-white/10 p-5 backdrop-blur-md shadow-2xl">
+
+              <Image
+                src="/images/babischool_logo.png"
+                alt="Logo BabiSchool"
+                width={110}
+                height={110}
+                priority
+                className="h-auto w-auto"
+              />
+
+            </div>
+
+            
+            </div>
+
+
 
         {/* Welcome Text */}
         <h2 className="mb-6 max-w-4xl text-3xl font-bold leading-tight md:text-6xl">
@@ -40,7 +56,7 @@ export default function Home() {
           écoles vers une gestion simple, efficace et moderne.
         </p>
 
-        <div className="mb-8 h-1 w-20 rounded-full bg-yellow-400" />
+        <div className="mb-8 h-1 w-24 rounded-full bg-gradient-to-r from-yellow-300 via-white to-yellow-300" />
 
         <p className="mb-12 max-w-3xl text-base text-white/80 md:text-xl">
           Gérez vos élèves, enseignants, classes et bien plus encore,

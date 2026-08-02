@@ -60,7 +60,7 @@ const [groupModalOpen, setGroupModalOpen] =
       
               <h1 className="text-3xl font-bold">
       
-                  Structure académique
+                  Créations des classes
       
               </h1>
       
@@ -86,10 +86,10 @@ const [groupModalOpen, setGroupModalOpen] =
             "
         >
           <EntityColumn
-    title="Cycles"
+    title="Type etablissement"
     count={cycles.length}
     loading={loading}
-    emptyMessage="Aucun cycle"
+    emptyMessage="Aucun type etablissement"
 
     onAdd={() => {
         actions.setCycleForm({

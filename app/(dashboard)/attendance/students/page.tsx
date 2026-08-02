@@ -1,246 +1,189 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { useState } from "react";
 
-export default function AttendancePage() {
+import StudentAttendanceSummary from "./components/StudentAttendanceSummary";
+import StudentAttendanceSessionCard from "./components/StudentAttendanceSessionCard";
+import StudentAttendanceFilters from "./components/StudentAttendanceFilters";
+import EmptyAttendance from "./components/EmptyAttendance";
 
-  const [schedules, setSchedules] = useState<any[]>([]);
-  const [selected, setSelected] = useState("");
-  const [records, setRecords] = useState<any[]>([]);
-  const [session, setSession] = useState<any>(null);
+import { useStudentAttendance } from "./hooks/useStudentAttendance";
+
+export default function StudentAttendancePage() {
+
+  const {
+    dashboard,
+    classrooms,
+    loading,
+    submitting, 
+    error,
+
+    selectedClassroom,
+    selectedDate,
+
+    setSelectedClassroom,
+    setSelectedDate,
+    handleStartAttendance,
+    handleAttendance,
+    handleJustification,
+  } = useStudentAttendance();
+
+  const [activeTab, setActiveTab] = useState<
+    "attendance" | "history"
+  >("attendance");
+
   
 
-  const loadSchedules = async () => {
-    const res = await api.get("/academics/schedules/");
-    setSchedules(res.data.results || res.data);
-  };
 
-  const loadSession = async (schedule_id:string) => {
-    const res = await api.get(
-      `/attendance/session/?schedule_id=${schedule_id}`
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <p className="text-gray-500">
+          Chargement...
+        </p>
+      </div>
     );
+  }
 
-    setSession(res.data);
-    setRecords(res.data.students || []);
-    console.log(res.data)
-  };
-  
-  useEffect(()=>{
-    loadSchedules();
-    
-  },[]);
-
-  const updateStatus = (
-    id:string, 
-    status:string
-  ) => {
-    setRecords((prev) =>
-      prev.map((r) =>
-        r.record_id  === id 
-        ? { ...r, status } 
-        : r
-      )
+  if (error) {
+    return (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
+        {error}
+      </div>
     );
-    console.log(status)
-  };
+  }
 
-  const submit = async () => {
-
-    const payload = records.map(r => ({
-      record_id: r.record_id,
-      status: r.status,
-      minutes_late: r.minutes_late || 0
-    }));
-    
-    await api.post("/attendance/take/", {
-      schedule_id: selected,
-      updates: payload
-    });
-    
-    alert("Présence enregistrée");
-  };
-  
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
 
-      <h1 className="text-xl font-bold">
-        Appel par cours
-      </h1>
+      {/* ===========================
+            HEADER
+      =========================== */}
 
-      <select
-        className="border p-3 rounded-lg w-full max-w-md"
-        value={selected}
-        onChange={(e)=>{
-          setSelected(e.target.value);
-          loadSession(e.target.value);
-        }}
-      >
-        <option value="">Choisir cours</option>
+      <div>
 
-        {schedules.map(s=>(
-          <option key={s.id} value={s.id}>
-            {s.classroom_name} - {s.subject_name} - {s.weekday}
-          </option>
-        ))}
-      </select>
-      
-       {/* HEADER SESSION */}
+        <h1 className="text-2xl font-bold text-gray-900">
+          Présence des élèves
+        </h1>
 
-       {session && (
+        <p className="mt-1 text-sm text-gray-500">
+        Effectuez l'appel des élèves par classe et par séance de cours.
+        Les données affichées correspondent au contexte sélectionné ci-dessous.
+        </p>
 
-          <div className="bg-white rounded-2xl shadow p-5 space-y-3">
-
-            <div className="flex justify-between items-center">
-
-              <div>
-
-                <h2 className="text-2xl font-bold">
-                  {session.schedule.subject}
-                </h2>
-
-                <p className="text-gray-500">
-                  {session.schedule.classroom}
-                </p>
-
-              </div>
-
-              <div>
-
-                {session.is_closed ? (
-
-                  <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm">
-                    Session clôturée
-                  </span>
-
-                ) : (
-
-                  <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
-                    Session ouverte
-                  </span>
-
-                )}
-
-              </div>
-
-            </div>
-
-            <div className="text-sm text-gray-600">
-
-              {session.schedule.weekday} •{" "}
-              {session.schedule.start_time} -{" "}
-              {session.schedule.end_time}
-
-            </div>
-
-            {/* STATS */}
-
-            <div className="grid grid-cols-4 gap-3 pt-2">
-
-              <div className="border rounded-xl p-3 text-center">
-                <div className="text-sm text-gray-500">
-                  Total
-                </div>
-
-                <div className="text-xl font-bold">
-                  {session.stats.total}
-                </div>
-              </div>
-
-              <div className="border rounded-xl p-3 text-center">
-                <div className="text-sm text-gray-500">
-                  Présents
-                </div>
-
-                <div className="text-xl font-bold text-green-600">
-                  {records.filter(r => r.status === "present").length}
-                </div>
-              </div>
-
-              <div className="border rounded-xl p-3 text-center">
-                <div className="text-sm text-gray-500">
-                  Absents
-                </div>
-
-                <div className="text-xl font-bold text-red-600">
-                  {records.filter(r => r.status === "absent").length}
-                </div>
-              </div>
-
-              <div className="border rounded-xl p-3 text-center">
-                <div className="text-sm text-gray-500">
-                  Retards
-                </div>
-
-                <div className="text-xl font-bold text-orange-600">
-                  {records.filter(r => r.status === "late").length}
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-          )}
-      <div className="space-y-3">
-        {records.map((r) => (
-          <div
-            key={r.record_id}
-            className="bg-white rounded-xl shadow p-4 flex justify-between items-center"
-          >
-            <div className="font-medium">
-                {r.student_name}
-            </div>
-            {records.length > 0 && !session?.is_closed && (
-            <div className="flex gap-2">
-
-              <button
-                onClick={() => updateStatus(r.record_id, "present")}
-                className={`px-3 py-1 rounded-lg ${
-                  r.status === "present"
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-100"
-                }`}
-              >
-                ✅
-              </button>
-
-              <button
-                onClick={() => updateStatus(r.record_id, "absent")}
-                className={`px-3 py-1 rounded-lg ${
-                  r.status === "absent"
-                    ? "bg-red-500 text-white"
-                    : "bg-gray-100"
-                }`}
-              >
-                ❌
-              </button>
-
-              <button
-                onClick={() => updateStatus(r.record_id, "late")}
-                className={`px-3 py-1 rounded-lg ${
-                  r.status === "late"
-                    ? "bg-orange-500 text-white"
-                    : "bg-gray-100"
-                }`}
-              >
-                ⏱️
-              </button>
-
-            </div>
-            )}
-          </div>
-        ))}
       </div>
 
-      {records.length > 0 && !session?.is_closed && (
+      {/* ===========================
+            TABS
+      =========================== */}
+
+      <div className="flex rounded-xl bg-gray-100 p-1 w-fit">
+
         <button
-          onClick={submit}
-          className="bg-purple-600 text-white p-2 rounded"
+          onClick={() => setActiveTab("attendance")}
+          className={`rounded-lg px-5 py-2 text-sm font-medium transition ${
+            activeTab === "attendance"
+              ? "bg-[#6214BE] text-white shadow"
+              : "text-gray-600 hover:text-[#6214BE]"
+          }`}
         >
-          Enregistrer
+          Appel
         </button>
+
+        <button
+          onClick={() => setActiveTab("history")}
+          className={`rounded-lg px-5 py-2 text-sm font-medium transition ${
+            activeTab === "history"
+              ? "bg-[#6214BE] text-white shadow"
+              : "text-gray-600 hover:text-[#6214BE]"
+          }`}
+        >
+          Historique
+        </button>
+
+      </div>
+
+      {/* ===========================
+            FILTRES
+      =========================== */}
+
+      <StudentAttendanceFilters
+        classrooms={classrooms}
+        selectedClassroom={selectedClassroom}
+        selectedDate={selectedDate}
+        sessionCount={dashboard?.summary.total_sessions ?? 0}
+        onClassroomChange={setSelectedClassroom}
+        onDateChange={setSelectedDate}
+      />
+
+      {/* ===========================
+            APPEL
+      =========================== */}
+
+      {activeTab === "attendance" && (
+
+        <>
+
+          {dashboard && (
+            <StudentAttendanceSummary
+              summary={dashboard.summary}
+            />
+          )}
+
+          {!selectedClassroom ? (
+
+            <div className="rounded-xl border bg-white p-10 text-center text-gray-500">
+
+              Sélectionnez une classe pour afficher
+              les cours du jour.
+
+            </div>
+
+          ) : dashboard?.sessions.length === 0 ? (
+
+            <EmptyAttendance />
+
+          ) : (
+
+            <div className="space-y-5">
+
+              {dashboard?.sessions.map((session) => (
+
+                <StudentAttendanceSessionCard
+                  key={session.session_id ?? `schedule-${session.schedule_id}`}
+                  session={session}
+                  loading={submitting}
+                  onStartAttendance={handleStartAttendance}
+                  onAttendanceChange={handleAttendance}
+                 
+                />
+
+              ))}
+   
+            </div>
+
+          )}
+
+        </>
+
+      )}
+
+      {/* ===========================
+            HISTORIQUE
+      =========================== */}
+
+      {activeTab === "history" && (
+
+        <div className="rounded-xl border bg-white p-10 text-center text-gray-500">
+
+          L'historique sera disponible dans une prochaine version.
+
+        </div>
+
       )}
 
     </div>
   );
+
 }

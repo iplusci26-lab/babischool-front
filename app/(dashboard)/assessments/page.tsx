@@ -2,84 +2,147 @@
 
 import { useState } from "react";
 
-import GradesTab from "./components/evaluation-tabs";
-import HomeworkTab from "./components/homework-tabs";
+import AssessmentTab from "./components/AssessmentTab";
+import ScheduledAssessmentTab from "./components/ScheduledAssessmentTab";
+import HomeworkTab from "./components/HomeworkTab";
 
 export default function EvaluationsPage() {
 
-  const [tab, setTab] = useState("grades");
+  const [tab, setTab] = useState("assessment");
 
   return (
 
-    <div className="space-y-6">
+    <div className="space-y-8">
+
+      {/* Header */}
 
       <div>
 
         <h1 className="text-3xl font-bold">
-          Evaluations
+
+          Évaluations
+
         </h1>
 
-        <p className="text-gray-500 mt-1">
-        PROGRAMMATION DES EVALUATIONS
+        <p className="mt-2 text-gray-500">
+
+          Gérez les évaluations, leur programmation
+          ainsi que les exercices de maison.
+
         </p>
 
       </div>
 
-      {/* TABS */}
+      {/* Onglets */}
 
-      <div className="flex gap-6 border-b">
-
-        <Tab
-          label="Evaluation"
-          value="grades"
-          tab={tab}
-          setTab={setTab}
-        />
+      <div className="flex gap-2 border-b">
 
         <Tab
-          label="Exercice"
+          value="assessment"
+          current={tab}
+          onClick={setTab}
+        >
+          📝 Évaluations classe
+        </Tab>
+
+        <Tab
+          value="scheduled"
+          current={tab}
+          onClick={setTab}
+        >
+          📅 Évaluations programmées
+        </Tab>
+
+        <Tab
           value="homework"
-          tab={tab}
-          setTab={setTab}
-        />
+          current={tab}
+          onClick={setTab}
+        >
+          🏠 Exercices de maison
+        </Tab>
 
       </div>
 
-      {/* CONTENT */}
+      {/* Contenu */}
 
-      {tab === "grades" && (
-        <GradesTab />
+      {tab === "assessment" && (
+
+        <AssessmentTab />
+
+      )}
+
+      {tab === "scheduled" && (
+
+        <ScheduledAssessmentTab />
+
       )}
 
       {tab === "homework" && (
+
         <HomeworkTab />
+
       )}
 
     </div>
+
   );
+
+}
+
+interface TabProps {
+
+  children: React.ReactNode;
+
+  value: string;
+
+  current: string;
+
+  onClick: (value: string) => void;
+
 }
 
 function Tab({
-  label,
+
+  children,
+
   value,
-  tab,
-  setTab
-}: any) {
+
+  current,
+
+  onClick,
+
+}: TabProps) {
+
+  const active = current === value;
 
   return (
 
     <button
-      onClick={() => setTab(value)}
+
+      onClick={() => onClick(value)}
+
       className={`
-        pb-3 font-medium
+        -mb-px
+        rounded-t-2xl
+        border-b-2
+        px-5
+        py-3
+        text-sm
+        font-medium
+        transition
         ${
-          tab === value
-            ? "border-b-2 border-primary text-primary"
-            : "text-gray-500"
+          active
+            ? "border-[#6214BE] text-[#6214BE]"
+            : "border-transparent text-gray-500 hover:text-[#6214BE]"
         }
       `}
+
     >
-      {label}
+
+      {children}
+
     </button>
+
   );
+
 }

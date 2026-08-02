@@ -31,7 +31,7 @@ export default function ProfilePage() {
       );
 
       setProfile(res.data);
-      console.log(res.data)
+      
 
     } catch (err) {
 
@@ -174,11 +174,11 @@ export default function ProfilePage() {
               {profile.avatar ? (
 
                 <img
-                  src={`https://iplus-api.onrender.com${
+                  src={
                     profile.avatar instanceof File
                       ? URL.createObjectURL(profile.avatar)
                       : profile.avatar
-              }`}
+              }
                   alt="avatar"
                   className="w-30 h-30  rounded object-cover"
                 />

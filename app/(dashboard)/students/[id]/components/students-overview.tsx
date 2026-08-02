@@ -178,7 +178,7 @@ export default function StudentOverview({
         <div className="bg-white border rounded-3xl p-5 space-y-4">
 
           <h3 className="text-lg font-semibold">
-            Informations financières
+            Scolarité
           </h3>
 
           <InfoRow

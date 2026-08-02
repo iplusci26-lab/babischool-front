@@ -79,7 +79,7 @@ export default function StudentStats({
         title="Garçons"
         value={boys}
         color="bg-blue-100 text-blue-600"
-        icon={<GraduationCap size={26} />}
+        icon={<UserRound size={26} />}
       />
 
       <StatCard

@@ -46,7 +46,7 @@ export default function FinancePage() {
           </h1>
 
           <p className="text-gray-500 mt-1">
-            Gestion financière de l’établissement
+            Comptabilité de l'établissement
           </p>
 
         </div>
@@ -152,6 +152,7 @@ function FinanceDashboard() {
     );
 
     setData(res.data);
+    console.log("-------------------- data ", res.data)
   };
 
   useEffect(() => {
@@ -192,7 +193,7 @@ function FinanceDashboard() {
         />
 
         <KpiCard
-          title="Reste à payer"
+          title="Reste à encaisser"
           value={`${Number(
             data.total_balance
           ).toLocaleString()} FCFA`}
@@ -200,8 +201,8 @@ function FinanceDashboard() {
         />
 
         <KpiCard
-          title="Élèves solvables"
-          value={data.paid_students}
+          title="Élèves non solvables"
+          value={data.unpaid_students}
           icon={<Users size={20} />}
         />
 

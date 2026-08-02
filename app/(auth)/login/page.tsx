@@ -32,7 +32,7 @@ export default function LoginPage() {
       
       localStorage.setItem("token", res.data.access);
      
-       console.log("donnée ",res.data);
+      
       if (res.data.school_active.active == true) {
         router.push("/profile");
       } else {
@@ -78,7 +78,7 @@ export default function LoginPage() {
 
             {/* Replace with your logo */}
             <Image
-              src="/logo.png"
+              src="/images/babischool_logo.png"
               alt="BabiSchool"
               width={140}
               height={140}

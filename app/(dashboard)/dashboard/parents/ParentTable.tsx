@@ -32,7 +32,7 @@ export default function ParentTable({
   const columns: DataTableColumn<Parent>[] = [
     {
       key: "full_name",
-      title: "Nom",
+      title: "Nom Prénom",
     },
 
     {

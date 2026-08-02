@@ -225,7 +225,7 @@ export default function ClassSchedulesPage() {
 
                 <p className="text-sm text-gray-500">
 
-                    Gestion des séances de cours
+                    Gestion des heures de cours
 
                 </p>
 
