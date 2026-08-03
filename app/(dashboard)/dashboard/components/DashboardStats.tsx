@@ -67,7 +67,7 @@ export default function DashboardStats({
     },
 
     {
-      title: "Recettes",
+      title: "Caisse",
       value: `${Number(
         data.total_payments
       ).toLocaleString("fr-FR")} FCFA`,

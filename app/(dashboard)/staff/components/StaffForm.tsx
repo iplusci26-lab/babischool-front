@@ -187,7 +187,7 @@ export default function StaffForm({
 
                     <label className="mb-2 block text-sm font-medium">
 
-                        Accès (Rôle)
+                        Accès
 
                     </label>
 

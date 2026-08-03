@@ -50,9 +50,10 @@ export default function DashboardHeader({
 
           <p className="mt-3 max-w-2xl text-gray-500">
 
-            Bienvenue sur votre espace de gestion.
-            Retrouvez en un coup d'œil les principaux
-            indicateurs de votre établissement.
+            Bienvenue sur votre espace de controle et de supervision des activités dans votre établissement.
+            Consultez les statistiques et les données essentielles.
+
+            
 
           </p>
 

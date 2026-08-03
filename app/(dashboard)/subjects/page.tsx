@@ -97,8 +97,8 @@ export default function SubjectsPage() {
         <p className="mt-1 text-sm text-gray-500">
 
           Configurez les matières enseignées dans
-          votre établissement ainsi que leur
-          coefficient utilisé dans le calcul des
+          votre établissement ainsi que les
+          coefficients utilisés dans le calcul des
           moyennes.
 
         </p>
@@ -185,13 +185,7 @@ export default function SubjectsPage() {
               className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#6214BE] focus:outline-none"
             />
 
-            <p className="mt-2 text-xs text-gray-500">
-
-              Plus le coefficient est élevé,
-              plus cette matière influence la
-              moyenne générale de l'élève.
-
-            </p>
+            
 
           </div>
 
@@ -202,7 +196,7 @@ export default function SubjectsPage() {
               className="w-70 rounded-xl bg-[#6214BE] px-5 py-3 font-medium text-white transition hover:bg-[#4d0fa0]"
             >
 
-              Ajouter la matière
+              Ajouter matière
 
             </button>
 

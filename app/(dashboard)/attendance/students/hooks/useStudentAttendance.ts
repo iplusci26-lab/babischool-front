@@ -141,14 +141,16 @@ export function useStudentAttendance() {
   
           }
         );
-  
+        console.log("---------------- ",response.data);
         setAttendanceOptions(response.data);
+        console.log("Attendance options :", response.data);
+        
         if (response.data.length > 0) {
 
           setSelectedOption(
             response.data[0].value
           );
-        
+          console.log("Selected option :", selectedOption);
         } else {
         
           setSelectedOption("");

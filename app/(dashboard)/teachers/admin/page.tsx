@@ -10,6 +10,7 @@ import {
   UserPlus,
   Phone,
   GraduationCap,
+  UserCheck,
 } from "lucide-react";
 
 export default function TeachersPage() {
@@ -243,7 +244,7 @@ export default function TeachersPage() {
 
                 <div className="flex items-center gap-2 font-semibold text-gray-800">
 
-                  <GraduationCap
+                  <UserCheck
                     size={18}
                     className="text-[#6214BE]"
                   />
