@@ -220,7 +220,7 @@ export default function StaffTable({
 
                                 <td className="px-6 py-4">
 
-                                    <span className="rounded-full bg-red-800 px-3 py-1 text-xs font-medium text-violet-700">
+                                    <span className="rounded-full bg-red-400 px-3 py-1 text-xs font-medium text-red-600">
 
                                         {person.role?.name || "-"}
 
