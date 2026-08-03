@@ -22,16 +22,25 @@ interface StudentAttendanceRecord {
 }
 
 interface AttendanceSession {
+
   session_id: string | null;
-  schedule_id: string;
-  student_count: number;
-  subject_name: string;
+
+  option_type: "schedule" | "period";
+
+  option_value: string;
+
+  option_label: string;
+
   teacher_name: string;
+
   classroom_name: string;
-  start_time: string;
-  end_time: string;
+
+  student_count: number;
+
   status: SessionStatus;
+
   records: StudentAttendanceRecord[];
+
 }
 
 interface AttendanceOption {
@@ -134,6 +143,17 @@ export function useStudentAttendance() {
         );
   
         setAttendanceOptions(response.data);
+        if (response.data.length > 0) {
+
+          setSelectedOption(
+            response.data[0].value
+          );
+        
+        } else {
+        
+          setSelectedOption("");
+        
+        }
   
       } catch {
   
@@ -155,9 +175,21 @@ export function useStudentAttendance() {
    * Charger le dashboard
    */
   const loadDashboard = useCallback(async () => {
-    if (!selectedClassroom) {
+    if (!selectedClassroom || !selectedOption ) {
       setDashboard(null);
       return;
+    }
+
+    const option = attendanceOptions.find(
+      (o) => o.value === selectedOption
+    );
+  
+    if (!option) {
+  
+      setDashboard(null);
+  
+      return;
+  
     }
 
     try {
@@ -167,8 +199,15 @@ export function useStudentAttendance() {
         "/attendance/dashboard/",
         {
           params: {
+      
             classroom_id: selectedClassroom,
+      
             date: selectedDate,
+      
+            option_type: option.type,
+      
+            option_value: option.value,
+      
           },
         }
       );
@@ -181,7 +220,14 @@ export function useStudentAttendance() {
     } finally {
       setLoading(false);
     }
-  }, [selectedClassroom, selectedDate]);
+  }, [selectedClassroom,
+
+    selectedDate,
+  
+    selectedOption,
+  
+    attendanceOptions,
+  ]);
 
 
   /**
@@ -192,9 +238,7 @@ export function useStudentAttendance() {
     try {
   
       const option = attendanceOptions.find(
-  
         (o) => o.value === selectedOption
-  
       );
   
       if (!option) {
@@ -228,11 +272,8 @@ export function useStudentAttendance() {
       }
   
       await api.post(
-  
         "/attendance/sessions/",
-  
         payload,
-  
       );
   
       await loadDashboard();
@@ -240,7 +281,7 @@ export function useStudentAttendance() {
     } catch {
   
       setError(
-        "Impossible de démarrer la séance d'appel."
+        "Impossible de démarrer l'appel."
       );
   
     } finally {

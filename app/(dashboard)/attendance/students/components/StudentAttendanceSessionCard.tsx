@@ -2,7 +2,6 @@
 
 import {
   BookOpen,
-  Clock,
   User,
   CheckCircle2,
   AlertCircle,
@@ -26,18 +25,20 @@ interface StudentAttendanceRecord {
 
 interface AttendanceSession {
   session_id: string | null;
-  schedule_id: string;
 
-  status: SessionStatus;
+  option_type: "schedule" | "period";
+
+  option_value: string;
+
+  option_label: string;
 
   student_count: number;
 
-  subject_name: string;
-  teacher_name: string;
   classroom_name: string;
 
-  start_time: string;
-  end_time: string;
+  teacher_name: string;
+
+  status: SessionStatus;
 
   records: StudentAttendanceRecord[];
 }
@@ -47,9 +48,7 @@ interface StudentAttendanceSessionCardProps {
 
   loading?: boolean;
 
-  onStartAttendance: (
-    scheduleId: string
-  ) => void;
+  onStartAttendance: () => void;
 
   onAttendanceChange: (
     recordId: string,
@@ -63,9 +62,10 @@ export default function StudentAttendanceSessionCard({
   onStartAttendance,
   onAttendanceChange,
 }: StudentAttendanceSessionCardProps) {
+
   const isNotStarted =
     session.status === "NOT_STARTED";
-  
+
   const isOpen =
     session.status === "OPEN";
 
@@ -107,138 +107,145 @@ export default function StudentAttendanceSessionCard({
 
   return (
     <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
-            {/* Header */}
 
-            <div className="border-b bg-gray-50 p-5">
+      {/* ===========================
+            HEADER
+      =========================== */}
 
-<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="border-b bg-gray-50 p-5">
 
-  <div>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
-    <div className="flex items-center gap-2">
+          <div>
 
-      <BookOpen
-        size={18}
-        className="text-[#6214BE]"
-      />
+            <div className="flex items-center gap-2">
 
-      <h2 className="text-lg font-semibold text-gray-900">
-        {session.subject_name}
-      </h2>
+              <BookOpen
+                size={18}
+                className="text-[#6214BE]"
+              />
 
-    </div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {session.option_label}
+              </h2>
 
-    <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-500">
+            </div>
 
-      <span className="flex items-center gap-1">
+            <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-500">
 
-        <User size={15} />
+              <span className="flex items-center gap-1">
 
-        {session.teacher_name}
+                <User size={15} />
 
-      </span>
+                {session.teacher_name}
 
-      <span className="flex items-center gap-1">
+              </span>
 
-        <Clock size={15} />
+              <span>
+                {session.classroom_name}
+              </span>
 
-        {session.start_time} - {session.end_time}
+            </div>
 
-      </span>
+          </div>
 
-      <span>{session.classroom_name}</span>
+          <div className="flex flex-col items-end gap-3">
 
-    </div>
+            <span className="text-sm text-gray-500">
+              {session.student_count} élève(s)
+            </span>
 
-  </div>
+            {isNotStarted && (
 
-  <div className="flex flex-col items-end gap-3">
+              <button
+                disabled={loading}
+                onClick={onStartAttendance}
+                className="flex items-center gap-2 rounded-lg bg-[#6214BE] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#4d0fa0] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <PlayCircle size={18} />
+                Commencer l'appel
+              </button>
 
-    <span className="text-sm text-gray-500">
-      {session.student_count} élève(s)
-    </span>
+            )}
 
-    {isNotStarted && (
-      <button
-        disabled={loading}
-        onClick={() =>
-          onStartAttendance(session.schedule_id)
-        }
-        className="flex items-center gap-2 rounded-lg bg-[#6214BE] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#4d0fa0] disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        <PlayCircle size={18} />
-        Commencer l'appel
-      </button>
-    )}
+            {isOpen && (
 
-    {isOpen && (
-      <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
-        Appel en cours
-      </span>
-    )}
+              <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+                Appel en cours
+              </span>
 
-    {isClosed && (
-      <span className="flex items-center gap-2 rounded-full bg-gray-200 px-3 py-1 text-sm font-medium text-gray-700">
-        <Lock size={14} />
-        Séance clôturée
-      </span>
-    )}
+            )}
 
-  </div>
+            {isClosed && (
 
-</div>
+              <span className="flex items-center gap-2 rounded-full bg-gray-200 px-3 py-1 text-sm font-medium text-gray-700">
 
-</div>
+                <Lock size={14} />
 
-{/* Résumé */}
+                Séance clôturée
 
-<div className="grid grid-cols-3 border-b bg-white">
+              </span>
 
-<div className="flex items-center justify-center gap-2 p-3">
+            )}
 
-  <CheckCircle2
-    size={18}
-    className="text-green-600"
-  />
+          </div>
 
-  <span className="font-medium text-green-600">
-    {presentCount}
-  </span>
+        </div>
 
-</div>
+      </div>
 
-<div className="flex items-center justify-center gap-2 border-x p-3">
+      {/* ===========================
+            RÉSUMÉ
+      =========================== */}
 
-  <AlertCircle
-    size={18}
-    className="text-amber-600"
-  />
+      <div className="grid grid-cols-3 border-b bg-white">
 
-  <span className="font-medium text-amber-600">
-    {lateCount}
-  </span>
+        <div className="flex items-center justify-center gap-2 p-3">
 
-</div>
+          <CheckCircle2
+            size={18}
+            className="text-green-600"
+          />
 
-<div className="flex items-center justify-center gap-2 p-3">
+          <span className="font-medium text-green-600">
+            {presentCount}
+          </span>
 
-  <XCircle
-    size={18}
-    className="text-red-600"
-  />
+        </div>
 
-  <span className="font-medium text-red-600">
-    {absentCount}
-  </span>
+        <div className="flex items-center justify-center gap-2 border-x p-3">
 
-</div>
+          <AlertCircle
+            size={18}
+            className="text-amber-600"
+          />
 
-</div>
-      {/* Corps de la carte */}
+          <span className="font-medium text-amber-600">
+            {lateCount}
+          </span>
+
+        </div>
+
+        <div className="flex items-center justify-center gap-2 p-3">
+
+          <XCircle
+            size={18}
+            className="text-red-600"
+          />
+
+          <span className="font-medium text-red-600">
+            {absentCount}
+          </span>
+
+        </div>
+
+      </div>
+
+      {/* ===========================
+            CONTENU
+      =========================== */}
 
       <div>
-
-        {/* Séance non démarrée */}
 
         {isNotStarted && (
 
@@ -254,15 +261,14 @@ export default function StudentAttendanceSessionCard({
             </h3>
 
             <p className="max-w-md text-sm text-gray-500">
-              Cliquez sur <strong>Commencer l'appel</strong> pour générer
-              automatiquement les fiches de présence des élèves.
+
+              Cliquez sur <strong>Commencer l'appel</strong> pour générer automatiquement les fiches de présence des élèves.
+
             </p>
 
           </div>
 
         )}
-
-        {/* Séance ouverte */}
 
         {isOpen && (
 
@@ -323,8 +329,6 @@ export default function StudentAttendanceSessionCard({
           </>
 
         )}
-
-        {/* Séance clôturée */}
 
         {isClosed && (
 
