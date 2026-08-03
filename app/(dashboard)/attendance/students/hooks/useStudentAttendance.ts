@@ -34,6 +34,16 @@ interface AttendanceSession {
   records: StudentAttendanceRecord[];
 }
 
+interface AttendanceOption {
+
+  type: "schedule" | "period";
+
+  value: string;
+
+  label: string;
+
+}
+
 interface AttendanceSummary {
   total_sessions: number;
   total_students: number;
@@ -57,10 +67,17 @@ export function useStudentAttendance() {
   const [selectedClassroom, setSelectedClassroom] =
     useState("");
 
-    const [selectedDate, setSelectedDate] =
+  const [selectedDate, setSelectedDate] =
     useState(
         new Date().toISOString().split("T")[0]
     );
+
+  
+  const [attendanceOptions, setAttendanceOptions] =
+    useState<AttendanceOption[]>([]);
+
+  const [selectedOption, setSelectedOption] =
+    useState("");
 
   const [loading, setLoading] = useState(true);
 
@@ -85,6 +102,54 @@ export function useStudentAttendance() {
       );
     }
   }, []);
+
+  const loadAttendanceOptions = useCallback(
+    async () => {
+  
+      if (!selectedClassroom) {
+  
+        setAttendanceOptions([]);
+  
+        setSelectedOption("");
+  
+        return;
+  
+      }
+  
+      try {
+  
+        const response = await api.get(
+          "/attendance/options/",
+          {
+  
+            params: {
+  
+              classroom: selectedClassroom,
+  
+              date: selectedDate,
+  
+            },
+  
+          }
+        );
+  
+        setAttendanceOptions(response.data);
+  
+      } catch {
+  
+        setAttendanceOptions([]);
+  
+      }
+  
+    },
+    [
+  
+      selectedClassroom,
+  
+      selectedDate,
+  
+    ]
+  );
 
   /**
    * Charger le dashboard
@@ -122,27 +187,69 @@ export function useStudentAttendance() {
   /**
  * Démarrer une séance d'appel
  */
-const handleStartAttendance = async (
-  scheduleId: string
-) => {
-  try {
-    setSubmitting(true);
+  const handleStartAttendance = async () => {
 
-    await api.post("/attendance/sessions/", {
-      schedule_id: scheduleId,
-      attendance_date: selectedDate,
-    });
-
-    await loadDashboard();
-
-  } catch {
-    setError(
-      "Impossible de démarrer la séance d'appel."
-    );
-  } finally {
-    setSubmitting(false);
-  }
-};
+    try {
+  
+      const option = attendanceOptions.find(
+  
+        (o) => o.value === selectedOption
+  
+      );
+  
+      if (!option) {
+  
+        setError(
+          "Veuillez sélectionner une séance."
+        );
+  
+        return;
+  
+      }
+  
+      setSubmitting(true);
+  
+      const payload: any = {
+  
+        classroom_id: selectedClassroom,
+  
+        attendance_date: selectedDate,
+  
+      };
+  
+      if (option.type === "schedule") {
+  
+        payload.schedule_id = option.value;
+  
+      } else {
+  
+        payload.period = option.value;
+  
+      }
+  
+      await api.post(
+  
+        "/attendance/sessions/",
+  
+        payload,
+  
+      );
+  
+      await loadDashboard();
+  
+    } catch {
+  
+      setError(
+        "Impossible de démarrer la séance d'appel."
+      );
+  
+    } finally {
+  
+      setSubmitting(false);
+  
+    }
+  
+  };
 
   /**
    * Modifier le statut
@@ -201,6 +308,16 @@ const handleStartAttendance = async (
     loadDashboard();
   }, [loadDashboard]);
 
+  useEffect(() => {
+
+    loadAttendanceOptions();
+  
+  }, [
+  
+    loadAttendanceOptions,
+  
+  ]);
+
   return {
     dashboard,
 
@@ -225,5 +342,11 @@ const handleStartAttendance = async (
     handleAttendance,
 
     handleJustification,
+
+    attendanceOptions,
+
+    selectedOption,
+
+    setSelectedOption,
   };
 }

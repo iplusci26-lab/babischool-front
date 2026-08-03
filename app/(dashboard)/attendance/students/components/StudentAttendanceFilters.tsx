@@ -7,41 +7,72 @@ interface Classroom {
   name: string;
 }
 
+interface AttendanceOption {
+  type: "schedule" | "period";
+  value: string;
+  label: string;
+}
+
 interface StudentAttendanceFiltersProps {
   classrooms: Classroom[];
 
+  attendanceOptions: AttendanceOption[];
+
   selectedClassroom: string;
   selectedDate: string;
+  selectedOption: string;
 
   sessionCount: number;
 
   onClassroomChange: (value: string) => void;
   onDateChange: (value: string) => void;
+  onOptionChange: (value: string) => void;
 }
 
 export default function StudentAttendanceFilters({
+
   classrooms,
+
+  attendanceOptions,
+
   selectedClassroom,
+
   selectedDate,
+
+  selectedOption,
+
   sessionCount,
+
   onClassroomChange,
+
   onDateChange,
+
+  onOptionChange,
+
 }: StudentAttendanceFiltersProps) {
 
   const selectedClass = classrooms.find(
     (c) => c.id === selectedClassroom
   );
 
+  const selectedAttendance = attendanceOptions.find(
+    (o) => o.value === selectedOption
+  );
+
   const formattedDate = selectedDate
-    ? new Date(selectedDate).toLocaleDateString("fr-FR", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
+    ? new Date(selectedDate).toLocaleDateString(
+        "fr-FR",
+        {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }
+      )
     : "Aujourd'hui";
 
   return (
+
     <div className="rounded-xl border bg-white shadow-sm">
 
       {/* ===========================
@@ -50,7 +81,9 @@ export default function StudentAttendanceFilters({
 
       <div className="border-b p-5">
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-3">
+
+          {/* Classe */}
 
           <SearchSelect
 
@@ -61,13 +94,18 @@ export default function StudentAttendanceFilters({
             value={selectedClassroom}
 
             options={classrooms.map((classroom) => ({
+
               value: classroom.id,
+
               label: classroom.name,
+
             }))}
 
             onChange={onClassroomChange}
 
           />
+
+          {/* Date */}
 
           <div>
 
@@ -83,7 +121,9 @@ export default function StudentAttendanceFilters({
 
               value={selectedDate}
 
-              onChange={(e) => onDateChange(e.target.value)}
+              onChange={(e) =>
+                onDateChange(e.target.value)
+              }
 
               className="
                 w-full
@@ -104,6 +144,30 @@ export default function StudentAttendanceFilters({
 
           </div>
 
+          {/* Séance / Période */}
+
+          <SearchSelect
+
+            label="Appel"
+
+            placeholder="Sélectionnez une séance"
+
+            value={selectedOption}
+
+            options={attendanceOptions.map((option) => ({
+
+              value: option.value,
+
+              label: option.label,
+
+            }))}
+
+            onChange={onOptionChange}
+
+            disabled={!selectedClassroom}
+
+          />
+
         </div>
 
       </div>
@@ -114,7 +178,9 @@ export default function StudentAttendanceFilters({
 
       {selectedClassroom && (
 
-        <div className="grid gap-4 bg-gradient-to-r from-violet-50 to-white p-5 md:grid-cols-3">
+        <div className="grid gap-4 bg-gradient-to-r from-violet-50 to-white p-5 md:grid-cols-4">
+
+          {/* Classe */}
 
           <div className="rounded-lg border border-violet-100 bg-white p-4">
 
@@ -132,6 +198,8 @@ export default function StudentAttendanceFilters({
 
           </div>
 
+          {/* Date */}
+
           <div className="rounded-lg border border-violet-100 bg-white p-4">
 
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
@@ -148,11 +216,31 @@ export default function StudentAttendanceFilters({
 
           </div>
 
+          {/* Appel */}
+
           <div className="rounded-lg border border-violet-100 bg-white p-4">
 
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
 
-              Séances du jour
+              Appel
+
+            </p>
+
+            <p className="mt-2 text-lg font-semibold text-[#6214BE]">
+
+              {selectedAttendance?.label ?? "-"}
+
+            </p>
+
+          </div>
+
+          {/* Nombre */}
+
+          <div className="rounded-lg border border-violet-100 bg-white p-4">
+
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+
+              Sessions du jour
 
             </p>
 
@@ -169,5 +257,7 @@ export default function StudentAttendanceFilters({
       )}
 
     </div>
+
   );
+
 }
