@@ -823,7 +823,7 @@ Mot de passe : ${successModal.password}`
 
                     <GraduationCap size={20} />
 
-                    Créer l'inscription
+                    Valider l'inscription
 
                   </>
 

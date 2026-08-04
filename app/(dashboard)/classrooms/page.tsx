@@ -86,10 +86,10 @@ const [groupModalOpen, setGroupModalOpen] =
             "
         >
           <EntityColumn
-    title="Type etablissement"
+    title="Type établissement"
     count={cycles.length}
     loading={loading}
-    emptyMessage="Aucun type etablissement"
+    emptyMessage="Aucun type établissement"
 
     onAdd={() => {
         actions.setCycleForm({

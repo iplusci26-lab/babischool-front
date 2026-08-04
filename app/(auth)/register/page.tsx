@@ -180,7 +180,7 @@ export default function RegisterPage() {
 
                 <input
                   name="phone_fix"
-                  placeholder="Téléphone fixe"
+                  placeholder="Deuxième contact"
                   className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
                   onChange={handleChange}
                 />

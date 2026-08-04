@@ -91,8 +91,8 @@ export default function TimeSlotModal({
     };
 
     const title = initialData
-        ? "Modifier un créneau"
-        : "Nouveau créneau";
+        ? "Modifier l'heure"
+        : "Nouvelle heure";
 
     if (!open) return null;
 
@@ -124,7 +124,7 @@ export default function TimeSlotModal({
                         {/* Nom */}
                         <div>
                             <label className="mb-1 block text-sm font-medium text-gray-700">
-                                Nom du créneau
+                                Libellé de l'heure
                             </label>
 
                             <input
@@ -227,7 +227,7 @@ export default function TimeSlotModal({
 
                             {form.slot_type === "BREAK" && (
                                 <p className="mt-2 rounded-md bg-orange-50 p-3 text-sm text-orange-700">
-                                    ☕ Les créneaux de type <strong>Pause</strong>{" "}
+                                    ☕ Les heures de type <strong>Pause</strong>{" "}
                                     apparaîtront dans l'emploi du temps mais ne
                                     pourront pas accueillir de séance
                                     d'enseignement.
@@ -240,12 +240,12 @@ export default function TimeSlotModal({
 
                             <div>
                                 <p className="font-medium text-gray-800">
-                                    Créneau actif
+                                    Heure active
                                 </p>
 
                                 <p className="text-sm text-gray-500">
-                                    Les créneaux désactivés ne seront plus
-                                    proposés dans les emplois du temps.
+                                    Les heures de cours désactivéss ne seront plus
+                                    proposées dans les emplois du temps.
                                 </p>
                             </div>
 

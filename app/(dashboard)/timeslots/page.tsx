@@ -47,7 +47,7 @@ export default function TimeSlotsPage() {
             console.error(err);
 
             setError(
-                "Impossible de charger les créneaux."
+                "Impossible de charger les heures."
             );
 
         } finally {
@@ -124,7 +124,7 @@ export default function TimeSlotsPage() {
 
             console.error(err);
 
-            toast.error("Impossible d'enregistrer le créneau.");
+            toast.error("Impossible d'enregistrer l'heure.");
 
         } finally {
 
@@ -139,7 +139,7 @@ export default function TimeSlotsPage() {
     ) => {
 
         const confirmed = window.confirm(
-            `Voulez-vous vraiment désactiver le créneau "${slot.name}" ?`
+            `Voulez-vous vraiment désactiver l'heure "${slot.name}" ?`
         );
 
         if (!confirmed) return;
@@ -154,7 +154,7 @@ export default function TimeSlotsPage() {
 
             console.error(err);
 
-            toast.error("Impossible d'enregistrer le créneau.");
+            toast.error("Impossible d'enregistrer l'heure.");
 
         }
 
@@ -169,11 +169,11 @@ export default function TimeSlotsPage() {
                 <div>
     
                     <h1 className="text-2xl font-bold">
-                        Créneaux horaires
+                        Horaires
                     </h1>
     
                     <p className="text-sm text-gray-500">
-                        Configurez les horaires utilisés par les emplois du temps.
+                        Configurez les horaires de cours.
                     </p>
     
                 </div>
@@ -182,7 +182,7 @@ export default function TimeSlotsPage() {
                     onClick={handleCreate}
                     className="rounded-lg bg-[#6214BE] px-4 py-2 text-white transition hover:bg-[#5110a0]"
                 >
-                    Nouveau créneau
+                    Nouvelle heure
                 </button>
     
             </div>
@@ -198,7 +198,7 @@ export default function TimeSlotsPage() {
             {loading ? (
     
                 <div className="rounded-xl border bg-white p-8 text-center text-gray-500">
-                    Chargement des créneaux...
+                    Chargement des heure...
                 </div>
     
             ) : timeSlots.length === 0 ? (
@@ -206,18 +206,18 @@ export default function TimeSlotsPage() {
                 <div className="rounded-xl border bg-white p-8 text-center">
     
                     <h3 className="text-lg font-semibold text-gray-800">
-                        Aucun créneau configuré
+                        Aucune heure configurée
                     </h3>
     
                     <p className="mt-2 text-sm text-gray-500">
-                        Commencez par créer votre premier créneau horaire.
+                        Commencez par créer votre première heure.
                     </p>
     
                     <button
                         onClick={handleCreate}
                         className="mt-5 rounded-lg bg-[#6214BE] px-4 py-2 text-white transition hover:bg-[#5110a0]"
                     >
-                        Nouveau créneau
+                        Nouvelle heure
                     </button>
     
                 </div>

@@ -45,7 +45,7 @@ export default function PendingActivationPage() {
           </div>
   
           <div className="text-sm text-gray-500">
-            Vous recevrez une confirmation dès que votre école sera activée.
+            Vous recevrez une confirmation dans 48 heures ouvrées.
           </div>
   
           

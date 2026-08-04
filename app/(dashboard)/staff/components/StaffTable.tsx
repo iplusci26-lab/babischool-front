@@ -153,7 +153,7 @@ export default function StaffTable({
 
                             <th className="px-6 py-3 text-center text-sm font-semibold">
 
-                                Actions
+                                Action
 
                             </th>
 

@@ -390,6 +390,10 @@ export default function SettingsPage() {
                   p-3
                 "
               >
+                
+                <option value="">
+                  Choisir un système
+                </option>
 
                 <option value="trimester">
                   Trimestre
@@ -397,6 +401,10 @@ export default function SettingsPage() {
 
                 <option value="semester">
                   Semestre
+                </option>
+
+                <option value="composition">
+                  Composition
                 </option>
 
               </select>
