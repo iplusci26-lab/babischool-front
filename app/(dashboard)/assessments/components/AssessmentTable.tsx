@@ -199,7 +199,7 @@ export default function AssessmentTable({
     {
       key: "actions",
 
-      title: "Actions",
+      title: "Action",
 
       render: (assessment) => (
 

@@ -118,7 +118,7 @@ export default function ScheduledAssessmentTab() {
           <p className="mt-2 text-gray-500">
 
             Planifiez les évaluations à venir.
-            Les enseignants, élèves et parents seront informés.
+            Les enseignants, les élèves et les parents seront informés.
 
           </p>
 

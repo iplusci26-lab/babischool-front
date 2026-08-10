@@ -167,7 +167,7 @@ export default function Sidebar() {
         },
         {
           key: "staffAttendance",
-          label: "Présence Administratif",
+          label: "Présence Administration",
           href: "/attendance/staff",
           icon: BriefcaseBusiness,
         },

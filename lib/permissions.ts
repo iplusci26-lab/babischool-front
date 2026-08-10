@@ -16,6 +16,7 @@ export const menuPermissions: Record<
   announcements: [
     "admin",
     "Directeur",
+    "Accès A"
   ],
 
   dashboard: [

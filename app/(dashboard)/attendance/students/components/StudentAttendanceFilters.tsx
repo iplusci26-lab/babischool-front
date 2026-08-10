@@ -148,7 +148,7 @@ export default function StudentAttendanceFilters({
 
           <SearchSelect
 
-            label="Appel"
+            label="Période de la journée"
 
             placeholder="Sélectionnez une séance"
 
@@ -222,7 +222,7 @@ export default function StudentAttendanceFilters({
 
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
 
-              Appel
+              Période de la journée
 
             </p>
 

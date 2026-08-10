@@ -42,11 +42,11 @@ export default function FinancePage() {
         <div>
 
           <h1 className="text-3xl font-bold text-gray-900">
-            Finance
+            Comptabilité
           </h1>
 
           <p className="text-gray-500 mt-1">
-            Comptabilité de l'établissement
+            Bilan synthétisé de la comptabilité de l'établissement
           </p>
 
         </div>
@@ -58,7 +58,7 @@ export default function FinancePage() {
       <div className="flex gap-3 border-b overflow-x-auto">
 
         <Tab
-          label="Dashboard"
+          label="Tableau de bord"
           value="dashboard"
           tab={tab}
           setTab={setTab}
@@ -415,7 +415,7 @@ function FinanceStudents() {
                 </th>
 
                 <th className="text-center p-4">
-                  Actions
+                  Action
                 </th>
 
               </tr>
@@ -887,7 +887,7 @@ function PaymentModal({
                 setReference(e.target.value)
               }
               className="w-full border rounded-2xl p-4 outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Référence paiement"
+              placeholder="Ex: Wave, Orange Money etc..."
             />
 
           </div>

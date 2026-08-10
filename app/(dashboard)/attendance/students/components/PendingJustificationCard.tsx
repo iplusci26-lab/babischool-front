@@ -147,7 +147,7 @@ export default function PendingJustificationCard({
             className="flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 font-medium text-white transition hover:bg-green-700 disabled:opacity-50"
           >
             <CheckCircle2 size={18} />
-            Justifier
+            Justifié
           </button>
 
           <button

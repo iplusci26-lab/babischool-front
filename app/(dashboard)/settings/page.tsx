@@ -173,14 +173,14 @@ export default function SettingsPage() {
           text-3xl
           font-bold
         ">
-          Settings
+          Paramètres
         </h1>
 
         <p className="
           text-gray-500
           mt-1
         ">
-          Configuration générale de l’école
+          Configuration des informations générales de l’école
         </p>
 
       </div>

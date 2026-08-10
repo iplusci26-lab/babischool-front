@@ -99,8 +99,7 @@ export default function StudentAttendancePage() {
 
         <p className="mt-1 text-sm text-gray-500">
 
-          Effectuez l'appel des élèves selon le contexte
-          sélectionné (classe, date et moment de l'appel).
+          Effectuez l'appel des élèves.
 
         </p>
 

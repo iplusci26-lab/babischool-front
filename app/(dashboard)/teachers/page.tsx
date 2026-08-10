@@ -95,7 +95,7 @@ export default function TeacherSchedulePage() {
       {/* 🧑‍🏫 INFO PROF */}
       <div className="bg-white p-4 rounded border">
         <div className="font-medium">
-          {user.first_name} {user.last_name}
+         {user.last_name}  {user.first_name} 
         </div>
         <div className="text-sm text-gray-500">
           Enseignant

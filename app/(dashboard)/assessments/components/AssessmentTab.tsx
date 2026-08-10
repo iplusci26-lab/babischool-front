@@ -174,7 +174,7 @@ export default function AssessmentTab() {
 
             <p className="mt-2 text-gray-500">
 
-              Créez les évaluations qui serviront
+              Indiquer les évaluations qui serviront
               à la saisie des notes des élèves.
 
             </p>

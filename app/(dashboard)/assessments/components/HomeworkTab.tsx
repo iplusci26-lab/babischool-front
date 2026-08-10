@@ -111,7 +111,7 @@ export default function HomeworkTab() {
 
           <p className="mt-2 text-gray-500">
 
-            Créez les exercices destinés aux élèves et suivez leur remise.
+            Communiquez les exercices à traiter à la maison.
 
           </p>
 

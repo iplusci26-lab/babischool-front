@@ -32,17 +32,17 @@ export default function ParentTable({
   const columns: DataTableColumn<Parent>[] = [
     {
       key: "full_name",
-      title: "Nom Prénom",
+      title: "Nom Prenom",
     },
 
     {
       key: "phone",
-      title: "Téléphone",
+      title: "Telephone",
     },
 
     {
       key: "children_count",
-      title: "Enfants",
+      title: "Enfant",
       className: "text-center",
       render: (parent) => (
         <span className="font-medium">
@@ -73,7 +73,7 @@ export default function ParentTable({
 
     {
       key: "actions",
-      title: "Actions",
+      title: "Action",
 
       render: (parent) => (
         <ActionMenu
