@@ -1,8 +1,10 @@
 "use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { api } from "@/lib/api";
 
 export default function RegisterPage() {
@@ -22,49 +24,112 @@ export default function RegisterPage() {
 
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: any) => {
+  // ----------------------------------------------------------
+  // VISIBILITE MOT DE PASSE
+  // ----------------------------------------------------------
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  // ----------------------------------------------------------
+  // CHANGE
+  // ----------------------------------------------------------
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e: any) => {
+  // ----------------------------------------------------------
+  // SUBMIT
+  // ----------------------------------------------------------
+
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
-    setLoading(true);
-
-    const formData = new FormData();
-
-    Object.entries(form).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        formData.append(key, String(value));
-      }
-    });
-
-    if (logo) {
-      formData.append("logo", logo);
-    } else {
-      formData.append("logo", "");
+    if (loading) {
+      return;
     }
-    await api.post("/auth/register/", formData);
+
+    // --------------------------------------------------------
+    // SECURITE : MOT DE PASSE
+    // --------------------------------------------------------
+
+    if (form.password.length !== 6) {
+      alert(
+        "Le mot de passe doit contenir exactement 6 caractères."
+      );
+
+      return;
+    }
+
     try {
-      // Register
-      
-      router.push("/pending");
-      // Auto login
-      /*const res = await api.post("/auth/login/", {
-        phone: form.phone,
-        password: form.password,
+      setLoading(true);
+
+      const formData = new FormData();
+
+      Object.entries(form).forEach(([key, value]) => {
+        if (
+          value !== undefined &&
+          value !== null
+        ) {
+          formData.append(
+            key,
+            String(value)
+          );
+        }
       });
 
-      localStorage.setItem("token", res.data.access);*/
+      if (logo) {
+        formData.append(
+          "logo",
+          logo
+        );
+      } else {
+        formData.append(
+          "logo",
+          ""
+        );
+      }
 
-      
+      await api.post(
+        "/auth/register/",
+        formData
+      );
+
+      router.push("/pending");
+
+      /*
+      // Auto login
+
+      const res = await api.post(
+        "/auth/login/",
+        {
+          phone: form.phone,
+          password: form.password,
+        }
+      );
+
+      localStorage.setItem(
+        "token",
+        res.data.access
+      );
+      */
 
     } catch (err: any) {
-        //console.error(err.response?.data?.detail);
-      alert(err.response?.data?.detail);
+      console.error(
+        err.response?.data
+      );
+
+      alert(
+        err.response?.data?.detail ||
+        "Une erreur est survenue lors de l'inscription."
+      );
 
     } finally {
       setLoading(false);
@@ -72,22 +137,30 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#F4EEFF] p-6">
+    <main className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
 
       {/* Main Card */}
+
       <div className="grid w-full max-w-6xl overflow-hidden rounded-[40px] bg-white shadow-2xl lg:grid-cols-2">
 
+        {/* ================================================== */}
         {/* LEFT SIDE */}
+        {/* ================================================== */}
+
         <div className="relative hidden flex-col items-center justify-center bg-[#6214BE] p-16 text-white lg:flex">
 
           {/* Decorative Blur */}
+
           <div className="absolute -left-10 top-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
+
           <div className="absolute bottom-10 right-0 h-56 w-56 rounded-full bg-pink-400/20 blur-3xl" />
 
-          {/* Logo */}
+          {/* Content */}
+
           <div className="relative z-10 flex flex-col items-center text-center">
 
-            {/* Replace with your logo */}
+            {/* Logo */}
+
             <Image
               src="/images/babischool_logo.png"
               alt="BabiSchool"
@@ -108,15 +181,21 @@ export default function RegisterPage() {
             <div className="mt-8 h-1 w-20 rounded-full bg-yellow-400" />
 
           </div>
+
         </div>
 
+        {/* ================================================== */}
         {/* RIGHT SIDE */}
+        {/* ================================================== */}
+
         <div className="flex items-center justify-center p-8 lg:p-14">
 
           <form
             onSubmit={handleSubmit}
             className="w-full max-w-xl"
           >
+
+            {/* Header */}
 
             <div className="mb-8">
 
@@ -130,7 +209,13 @@ export default function RegisterPage() {
 
             </div>
 
+            {/* Form */}
+
             <div className="grid gap-4">
+
+              {/* ================================================== */}
+              {/* ETABLISSEMENT */}
+              {/* ================================================== */}
 
               <input
                 name="school_name"
@@ -139,6 +224,8 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 required
               />
+
+              {/* Code + Sigle */}
 
               <div className="grid grid-cols-2 gap-4">
 
@@ -160,6 +247,8 @@ export default function RegisterPage() {
 
               </div>
 
+              {/* Téléphone */}
+
               <input
                 name="phone"
                 placeholder="Téléphone principal"
@@ -167,6 +256,8 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 required
               />
+
+              {/* Email + deuxième contact */}
 
               <div className="grid grid-cols-2 gap-4">
 
@@ -187,10 +278,14 @@ export default function RegisterPage() {
 
               </div>
 
+              {/* ================================================== */}
+              {/* LOGO */}
+              {/* ================================================== */}
+
               <div className="rounded-xl border border-dashed border-gray-300 p-4">
 
                 <label className="mb-2 block text-sm font-medium text-gray-600">
-                  Logo de l établissement
+                  Logo de l'établissement
                 </label>
 
                 <input
@@ -198,29 +293,113 @@ export default function RegisterPage() {
                   accept="image/*"
                   className="w-full text-sm"
                   onChange={(e) =>
-                    setLogo(e.target.files?.[0] || null)
+                    setLogo(
+                      e.target.files?.[0] || null
+                    )
                   }
                 />
 
               </div>
 
-              <input
-                name="password"
-                type="password"
-                placeholder="Mot de passe"
-                className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
-                onChange={handleChange}
-                required
-              />
+              {/* ================================================== */}
+              {/* MOT DE PASSE */}
+              {/* ================================================== */}
+
+              <div>
+
+                <label className="mb-2 block text-sm font-medium text-gray-600">
+                  Mot de passe
+                </label>
+
+                <div className="relative">
+
+                  <input
+                    name="password"
+                    type={
+                      showPassword
+                        ? "text"
+                        : "password"
+                    }
+                    value={form.password}
+                    placeholder="Mot de passe"
+                    maxLength={6}
+                    onChange={handleChange}
+                    required
+                    className="h-12 w-full rounded-xl border border-gray-200 px-4 pr-12 outline-none transition focus:border-[#6214BE]"
+                  />
+
+                  {/* Bouton afficher / masquer */}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowPassword(
+                        (prev) => !prev
+                      )
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-[#6214BE]"
+                    aria-label={
+                      showPassword
+                        ? "Masquer le mot de passe"
+                        : "Afficher le mot de passe"
+                    }
+                  >
+
+                    {showPassword ? (
+                      <EyeOff size={20} />
+                    ) : (
+                      <Eye size={20} />
+                    )}
+
+                  </button>
+
+                </div>
+
+                {/* Compteur */}
+
+                <div className="mt-1 flex justify-end">
+
+                  <span
+                    className={`text-xs ${
+                      form.password.length === 6
+                        ? "text-green-600"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    {form.password.length}/6
+                  </span>
+
+                </div>
+
+                {/* Information */}
+
+                <p className="mt-1 text-xs text-gray-500">
+                  Le mot de passe doit contenir exactement 6 caractères.
+                </p>
+
+              </div>
+
+              {/* ================================================== */}
+              {/* SUBMIT */}
+              {/* ================================================== */}
 
               <button
                 type="submit"
-                disabled={loading}
-                className="mt-4 h-12 cursor-pointer rounded-xl bg-[#6214BE] font-semibold text-white transition hover:scale-[1.02] hover:bg-[#4e10a0]"
+                disabled={
+                  loading ||
+                  form.password.length !== 6
+                }
+                className="mt-4 h-12 cursor-pointer rounded-xl bg-[#6214BE] font-semibold text-white transition hover:scale-[1.02] hover:bg-[#4e10a0] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:scale-100"
               >
-                {loading ? "Création..." : "Créer mon compte"}
+                {loading
+                  ? "Création..."
+                  : "Créer mon compte"}
               </button>
-                
+
+              {/* ================================================== */}
+              {/* LOGIN */}
+              {/* ================================================== */}
+
               <p className="pt-4 text-center text-sm text-gray-500">
 
                 Vous avez déjà un compte ?
@@ -232,12 +411,16 @@ export default function RegisterPage() {
                   Connexion
                 </Link>
 
-                </p>
+              </p>
+
             </div>
 
           </form>
+
         </div>
+
       </div>
+
     </main>
   );
 }
