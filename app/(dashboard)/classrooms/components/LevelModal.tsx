@@ -64,6 +64,7 @@ export default function LevelModal({
       <Input
         label="Nom"
         value={form.name}
+        placeholder="EX: 6ème, 4ème, Tle"
         onChange={(e) =>
           onChange({
             name: e.target.value,

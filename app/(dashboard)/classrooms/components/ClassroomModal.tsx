@@ -74,7 +74,7 @@ export default function ClassroomModal({
 
       <Input
         label="Classe"
-        placeholder="Ex : CM2 A, 4 ème, Tle C, 2nd C"
+        placeholder="Ex : CM2 A, 6ème 1, 4ème 1, Tle C, 2nd C"
         value={form.name}
         onChange={(e) =>
           onChange({

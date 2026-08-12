@@ -6,20 +6,18 @@ export const menuPermissions: Record<
   timeslot:[
     "admin",
     "Accès A",
-    "Accès C",
   ],
 
   parents:[
     "admin",
-    "Accès A",
-    "Accès C",
+    "Accès A", 
   ],
   
   announcements: [
     "admin",
     "Directeur",
     "Accès A",
-    "Accès C",
+    "Accès B",
   ],
 
   dashboard: [
@@ -31,59 +29,48 @@ export const menuPermissions: Record<
     "admin", 
     "Accès A"
   ],
+
   term: [
     "admin",
     "Accès A",
-    "Accès C",
-    
   ],
 
   admission: [
     "admin",
     "Accès A",
-    
-    "Accès C",
-    
   ],
 
   staff: [
     "admin",
     "Accès A",
-    
-    "Accès C",
-    
-    
   ],
 
   classroom: [
     "admin",
     "Accès A",
     "Censeur",
-    
+    "Accès B",
     "Accès C",
   ],
 
   subjects: [
     "admin",
     "Accès A",
-    
-    "Accès C",
+    "Accès B",
     
   ],
   assignment: [
     "admin",
     "Accès A",
-    
-    "Accès C",
-    
-    
+    "Accès B",
   ],
+
   schedule: [
     "admin",
     "Accès A",
     "Censeur",
     "Educateur",
-    
+    "Accès B",
     "Accès C",
     
   ],
@@ -92,8 +79,6 @@ export const menuPermissions: Record<
     "admin",
     "Accès A",
     "Censeur",
-    
-    "Accès C",
     
   ],
 
@@ -107,6 +92,7 @@ export const menuPermissions: Record<
     "Parent",
     "Accès compta",
     "Accès C",
+    "Accès B",
     
   ],
 
@@ -117,13 +103,13 @@ export const menuPermissions: Record<
     "Educateur",
     "Accès compta",
     "Accès C",
+    "Accès B",
   ],
 
   teachers: [
     "admin",
     "Accès A",
-    
-    "Accès C",
+    "Accès B",
     
   ],
 
@@ -131,8 +117,7 @@ export const menuPermissions: Record<
     "admin",
     "Accès A",
     "teacher",
-   
-    "Accès C",
+    "Accès B",
     
   ],
 
@@ -140,8 +125,7 @@ export const menuPermissions: Record<
     "admin",
     "Accès A",
     "Censeur",
-    
-    "Accès C",
+    "Accès B",
   ],
 
   teacherAttendance: [
@@ -149,8 +133,7 @@ export const menuPermissions: Record<
     "Accès A",
     "Censeur",
     "Educateur",
-   
-    "Accès C",
+    "Accès B",
     
   ],
 
@@ -159,7 +142,7 @@ export const menuPermissions: Record<
     "Accès A",
     "teacher",
     "Educateur",
-    
+    "Accès B",
     "Accès C",
    
   ],
@@ -169,9 +152,7 @@ export const menuPermissions: Record<
     "admin",
     "Accès A",
     "Educateur",
-    
-    "Accès C",
-    
+    "Accès B",
   ],
 
   finance: [
@@ -179,7 +160,6 @@ export const menuPermissions: Record<
     "Accès A",
     "econome",
     "Accès compta",
-    "Accès C",
   ],
 
   settings: [
