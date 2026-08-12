@@ -5,10 +5,15 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
+
+  // ==========================================================
+  // FORMULAIRE
+  // ==========================================================
 
   const [form, setForm] = useState({
     school_name: "",
@@ -20,126 +25,258 @@ export default function RegisterPage() {
     password: "",
   });
 
+  // ==========================================================
+  // LOGO
+  // ==========================================================
+
   const [logo, setLogo] = useState<File | null>(null);
+
+  // ==========================================================
+  // LOADING
+  // ==========================================================
 
   const [loading, setLoading] = useState(false);
 
-  // ----------------------------------------------------------
-  // VISIBILITE MOT DE PASSE
-  // ----------------------------------------------------------
+  // ==========================================================
+  // VISIBILITÉ MOT DE PASSE
+  // ==========================================================
 
   const [showPassword, setShowPassword] = useState(false);
 
-  // ----------------------------------------------------------
+  // ==========================================================
   // CHANGE
-  // ----------------------------------------------------------
+  // ==========================================================
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    const {
+      name,
+      value,
+    } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  // ----------------------------------------------------------
+  // ==========================================================
   // SUBMIT
-  // ----------------------------------------------------------
+  // ==========================================================
 
   const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
 
+    // --------------------------------------------------------
+    // Éviter les doubles soumissions
+    // --------------------------------------------------------
+
     if (loading) {
       return;
     }
 
-    // --------------------------------------------------------
-    // SECURITE : MOT DE PASSE
-    // --------------------------------------------------------
+    // ========================================================
+    // VALIDATION DES CHAMPS OBLIGATOIRES
+    // ========================================================
 
-    if (form.password.length !== 6) {
-      alert(
-        "Le mot de passe doit contenir exactement 6 caractères."
+    if (!form.school_name.trim()) {
+      toast.error(
+        "Le nom de l'établissement est obligatoire."
       );
-
       return;
     }
+
+    if (!form.school_code.trim()) {
+      toast.error(
+        "Le code de l'établissement est obligatoire."
+      );
+      return;
+    }
+
+    if (!form.school_sigle.trim()) {
+      toast.error(
+        "Le sigle de l'établissement est obligatoire."
+      );
+      return;
+    }
+
+    if (!form.phone.trim()) {
+      toast.error(
+        "Le téléphone principal est obligatoire."
+      );
+      return;
+    }
+
+    // ========================================================
+    // VALIDATION TÉLÉPHONE
+    // ========================================================
+
+    const phone = form.phone.trim();
+
+    if (!/^\d{10}$/.test(phone)) {
+      toast.error(
+        "Le numéro de téléphone doit contenir exactement 10 chiffres."
+      );
+      return;
+    }
+
+    // ========================================================
+    // VALIDATION MOT DE PASSE
+    // ========================================================
+
+    if (!form.password) {
+      toast.error(
+        "Le mot de passe est obligatoire."
+      );
+      return;
+    }
+
+    if (form.password.length !== 6) {
+      toast.error(
+        "Le mot de passe doit contenir exactement 6 caractères."
+      );
+      return;
+    }
+
+    // ========================================================
+    // ENVOI
+    // ========================================================
 
     try {
       setLoading(true);
 
+      // ------------------------------------------------------
+      // FormData
+      // ------------------------------------------------------
+
       const formData = new FormData();
 
-      Object.entries(form).forEach(([key, value]) => {
-        if (
-          value !== undefined &&
-          value !== null
-        ) {
-          formData.append(
-            key,
-            String(value)
-          );
+      Object.entries(form).forEach(
+        ([key, value]) => {
+          if (
+            value !== undefined &&
+            value !== null
+          ) {
+            formData.append(
+              key,
+              key === "password"
+                ? String(value)
+                : String(value).trim()
+            );
+          }
         }
-      });
+      );
+
+      // ------------------------------------------------------
+      // Logo
+      // ------------------------------------------------------
 
       if (logo) {
         formData.append(
           "logo",
           logo
         );
-      } else {
-        formData.append(
-          "logo",
-          ""
-        );
       }
+
+      // ======================================================
+      // REQUÊTE
+      // ======================================================
 
       await api.post(
         "/auth/register/",
         formData
       );
 
-      router.push("/pending");
+      // ======================================================
+      // SUCCÈS
+      // ======================================================
 
-      /*
-      // Auto login
-
-      const res = await api.post(
-        "/auth/login/",
-        {
-          phone: form.phone,
-          password: form.password,
-        }
+      toast.success(
+        "Établissement enregistré avec succès."
       );
 
-      localStorage.setItem(
-        "token",
-        res.data.access
-      );
-      */
+      // Petite pause pour laisser apparaître le toast
+      setTimeout(() => {
+        router.push("/pending");
+      }, 500);
 
     } catch (err: any) {
+
       console.error(
-        err.response?.data
+        "Erreur inscription :",
+        err?.response?.data
       );
 
-      alert(
-        err.response?.data?.detail ||
+      const data =
+        err?.response?.data;
+
+      // ======================================================
+      // ERREUR DETAIL
+      // ======================================================
+
+      if (data?.detail) {
+        toast.error(
+          data.detail
+        );
+
+        return;
+      }
+
+      // ======================================================
+      // ERREURS DE VALIDATION DRF
+      // ======================================================
+
+      if (
+        data &&
+        typeof data === "object"
+      ) {
+
+        const firstError =
+          Object.values(data)
+            .flat()
+            .find(
+              (message) =>
+                typeof message === "string"
+            );
+
+        if (firstError) {
+
+          toast.error(
+            firstError as string
+          );
+
+          return;
+        }
+      }
+
+      // ======================================================
+      // ERREUR GÉNÉRIQUE
+      // ======================================================
+
+      toast.error(
         "Une erreur est survenue lors de l'inscription."
       );
 
     } finally {
+
       setLoading(false);
+
     }
   };
+
+  // ==========================================================
+  // UI
+  // ==========================================================
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
 
-      {/* Main Card */}
+      {/* ================================================== */}
+      {/* MAIN CARD */}
+      {/* ================================================== */}
 
       <div className="grid w-full max-w-6xl overflow-hidden rounded-[40px] bg-white shadow-2xl lg:grid-cols-2">
 
@@ -195,7 +332,9 @@ export default function RegisterPage() {
             className="w-full max-w-xl"
           >
 
-            {/* Header */}
+            {/* ================================================== */}
+            {/* HEADER */}
+            {/* ================================================== */}
 
             <div className="mb-8">
 
@@ -209,28 +348,34 @@ export default function RegisterPage() {
 
             </div>
 
-            {/* Form */}
+            {/* ================================================== */}
+            {/* FORM */}
+            {/* ================================================== */}
 
             <div className="grid gap-4">
 
               {/* ================================================== */}
-              {/* ETABLISSEMENT */}
+              {/* NOM ÉTABLISSEMENT */}
               {/* ================================================== */}
 
               <input
                 name="school_name"
+                value={form.school_name}
                 placeholder="Nom de l'établissement"
                 className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
                 onChange={handleChange}
                 required
               />
 
-              {/* Code + Sigle */}
+              {/* ================================================== */}
+              {/* CODE + SIGLE */}
+              {/* ================================================== */}
 
               <div className="grid grid-cols-2 gap-4">
 
                 <input
                   name="school_code"
+                  value={form.school_code}
                   placeholder="Code"
                   className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
                   onChange={handleChange}
@@ -239,6 +384,7 @@ export default function RegisterPage() {
 
                 <input
                   name="school_sigle"
+                  value={form.school_sigle}
                   placeholder="Sigle"
                   className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
                   onChange={handleChange}
@@ -247,22 +393,30 @@ export default function RegisterPage() {
 
               </div>
 
-              {/* Téléphone */}
+              {/* ================================================== */}
+              {/* TÉLÉPHONE */}
+              {/* ================================================== */}
 
               <input
                 name="phone"
+                value={form.phone}
                 placeholder="Téléphone principal"
+                inputMode="numeric"
+                maxLength={10}
                 className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
                 onChange={handleChange}
                 required
               />
 
-              {/* Email + deuxième contact */}
+              {/* ================================================== */}
+              {/* EMAIL + DEUXIÈME CONTACT */}
+              {/* ================================================== */}
 
               <div className="grid grid-cols-2 gap-4">
 
                 <input
                   name="email"
+                  value={form.email}
                   type="email"
                   placeholder="Email"
                   className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
@@ -271,7 +425,10 @@ export default function RegisterPage() {
 
                 <input
                   name="phone_fix"
+                  value={form.phone_fix}
                   placeholder="Deuxième contact"
+                  inputMode="numeric"
+                  maxLength={10}
                   className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
                   onChange={handleChange}
                 />
@@ -298,6 +455,12 @@ export default function RegisterPage() {
                     )
                   }
                 />
+
+                {logo && (
+                  <p className="mt-2 text-xs text-gray-500">
+                    Fichier sélectionné : {logo.name}
+                  </p>
+                )}
 
               </div>
 
@@ -328,7 +491,9 @@ export default function RegisterPage() {
                     className="h-12 w-full rounded-xl border border-gray-200 px-4 pr-12 outline-none transition focus:border-[#6214BE]"
                   />
 
-                  {/* Bouton afficher / masquer */}
+                  {/* ================================================== */}
+                  {/* AFFICHER / MASQUER */}
+                  {/* ================================================== */}
 
                   <button
                     type="button"
@@ -337,7 +502,7 @@ export default function RegisterPage() {
                         (prev) => !prev
                       )
                     }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-[#6214BE]"
+                    className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-[#6214BE]"
                     aria-label={
                       showPassword
                         ? "Masquer le mot de passe"
@@ -355,7 +520,9 @@ export default function RegisterPage() {
 
                 </div>
 
-                {/* Compteur */}
+                {/* ================================================== */}
+                {/* COMPTEUR */}
+                {/* ================================================== */}
 
                 <div className="mt-1 flex justify-end">
 
@@ -371,10 +538,13 @@ export default function RegisterPage() {
 
                 </div>
 
-                {/* Information */}
+                {/* ================================================== */}
+                {/* INFORMATION */}
+                {/* ================================================== */}
 
                 <p className="mt-1 text-xs text-gray-500">
-                  Le mot de passe doit contenir exactement 6 caractères.
+                  Le mot de passe doit contenir exactement
+                  6 caractères.
                 </p>
 
               </div>
@@ -391,9 +561,11 @@ export default function RegisterPage() {
                 }
                 className="mt-4 h-12 cursor-pointer rounded-xl bg-[#6214BE] font-semibold text-white transition hover:scale-[1.02] hover:bg-[#4e10a0] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:scale-100"
               >
+
                 {loading
                   ? "Création..."
                   : "Créer mon compte"}
+
               </button>
 
               {/* ================================================== */}
