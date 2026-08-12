@@ -272,210 +272,439 @@ export default function RegisterPage() {
   // ==========================================================
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-
+    <main className="min-h-screen bg-gray-100 p-3 sm:p-4 lg:p-5">
+  
       {/* ================================================== */}
       {/* MAIN CARD */}
       {/* ================================================== */}
-
-      <div className="grid w-full max-w-6xl overflow-hidden rounded-[40px] bg-white shadow-2xl lg:grid-cols-2">
-
+  
+      <div
+        className="
+          mx-auto
+          grid
+          w-full
+          max-w-6xl
+          overflow-hidden
+          rounded-2xl
+          bg-white
+          shadow-2xl
+  
+          lg:grid-cols-2
+          lg:rounded-[30px]
+        "
+      >
+  
         {/* ================================================== */}
         {/* LEFT SIDE */}
         {/* ================================================== */}
-
-        <div className="relative hidden flex-col items-center justify-center bg-[#6214BE] p-16 text-white lg:flex">
-
+  
+        <div
+          className="
+            relative
+            hidden
+            flex-col
+            items-center
+            justify-center
+            bg-[#6214BE]
+            px-8
+            py-8
+            text-white
+  
+            lg:flex
+            lg:px-10
+            lg:py-10
+  
+            xl:px-12
+            xl:py-12
+          "
+        >
+  
           {/* Decorative Blur */}
-
-          <div className="absolute -left-10 top-10 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
-
-          <div className="absolute bottom-10 right-0 h-56 w-56 rounded-full bg-pink-400/20 blur-3xl" />
-
+  
+          <div
+            className="
+              absolute
+              -left-10
+              top-10
+              h-32
+              w-32
+              rounded-full
+              bg-white/10
+              blur-3xl
+            "
+          />
+  
+          <div
+            className="
+              absolute
+              bottom-10
+              right-0
+              h-44
+              w-44
+              rounded-full
+              bg-pink-400/20
+              blur-3xl
+            "
+          />
+  
           {/* Content */}
-
-          <div className="relative z-10 flex flex-col items-center text-center">
-
+  
+          <div
+            className="
+              relative
+              z-10
+              flex
+              flex-col
+              items-center
+              text-center
+            "
+          >
+  
             {/* Logo */}
-
+  
             <Image
               src="/images/babischool_logo.png"
               alt="BabiSchool"
-              width={140}
-              height={140}
-              className="mb-8"
+              width={110}
+              height={110}
+              className="mb-5 xl:mb-6"
             />
-
-            <h1 className="mb-4 text-5xl font-extrabold">
+  
+            <h1
+              className="
+                mb-3
+                text-4xl
+                font-extrabold
+  
+                xl:text-5xl
+              "
+            >
               BabiSchool
             </h1>
-
-            <p className="max-w-md text-lg leading-relaxed text-white/90">
+  
+            <p
+              className="
+                max-w-sm
+                text-base
+                leading-relaxed
+                text-white/90
+  
+                xl:text-lg
+              "
+            >
               La plateforme intelligente pour simplifier
               la gestion des établissements scolaires.
             </p>
-
-            <div className="mt-8 h-1 w-20 rounded-full bg-yellow-400" />
-
+  
+            <div
+              className="
+                mt-5
+                h-1
+                w-16
+                rounded-full
+                bg-yellow-400
+              "
+            />
+  
           </div>
-
+  
         </div>
-
+  
         {/* ================================================== */}
         {/* RIGHT SIDE */}
         {/* ================================================== */}
-
-        <div className="flex items-center justify-center p-8 lg:p-14">
-
+  
+        <div
+          className="
+            flex
+            items-center
+            justify-center
+  
+            px-5
+            py-6
+  
+            sm:px-7
+            sm:py-7
+  
+            lg:px-8
+            lg:py-7
+  
+            xl:px-10
+            xl:py-8
+          "
+        >
+  
           <form
             onSubmit={handleSubmit}
             className="w-full max-w-xl"
           >
-
+  
             {/* ================================================== */}
             {/* HEADER */}
             {/* ================================================== */}
-
-            <div className="mb-8">
-
-              <h2 className="text-4xl font-bold text-gray-900">
+  
+            <div className="mb-5">
+  
+              <h2
+                className="
+                  text-3xl
+                  font-bold
+                  text-gray-900
+  
+                  xl:text-4xl
+                "
+              >
                 Créer un compte
               </h2>
-
-              <p className="mt-2 text-gray-500">
+  
+              <p
+                className="
+                  mt-1
+                  text-sm
+                  text-gray-500
+  
+                  xl:text-base
+                "
+              >
                 Enregistrez votre établissement sur BabiSchool
               </p>
-
+  
             </div>
-
+  
             {/* ================================================== */}
             {/* FORM */}
             {/* ================================================== */}
-
-            <div className="grid gap-4">
-
+  
+            <div className="grid gap-3">
+  
               {/* ================================================== */}
               {/* NOM ÉTABLISSEMENT */}
               {/* ================================================== */}
-
+  
               <input
                 name="school_name"
                 value={form.school_name}
                 placeholder="Nom de l'établissement"
-                className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
+                className="
+                  h-11
+                  w-full
+                  rounded-xl
+                  border
+                  border-gray-200
+                  px-4
+                  text-sm
+                  outline-none
+                  transition
+                  focus:border-[#6214BE]
+                  focus:ring-1
+                  focus:ring-[#6214BE]/20
+                "
                 onChange={handleChange}
                 required
               />
-
+  
               {/* ================================================== */}
               {/* CODE + SIGLE */}
               {/* ================================================== */}
-
-              <div className="grid grid-cols-2 gap-4">
-
+  
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+  
                 <input
                   name="school_code"
                   value={form.school_code}
                   placeholder="Code"
-                  className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
+                  className="
+                    h-11
+                    w-full
+                    rounded-xl
+                    border
+                    border-gray-200
+                    px-4
+                    text-sm
+                    outline-none
+                    transition
+                    focus:border-[#6214BE]
+                    focus:ring-1
+                    focus:ring-[#6214BE]/20
+                  "
                   onChange={handleChange}
                   required
                 />
-
+  
                 <input
                   name="school_sigle"
                   value={form.school_sigle}
                   placeholder="Sigle"
-                  className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
+                  className="
+                    h-11
+                    w-full
+                    rounded-xl
+                    border
+                    border-gray-200
+                    px-4
+                    text-sm
+                    outline-none
+                    transition
+                    focus:border-[#6214BE]
+                    focus:ring-1
+                    focus:ring-[#6214BE]/20
+                  "
                   onChange={handleChange}
                   required
                 />
-
+  
               </div>
-
+  
               {/* ================================================== */}
               {/* TÉLÉPHONE */}
               {/* ================================================== */}
-
+  
               <input
                 name="phone"
                 value={form.phone}
                 placeholder="Téléphone principal"
                 inputMode="numeric"
                 maxLength={10}
-                className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
+                className="
+                  h-11
+                  w-full
+                  rounded-xl
+                  border
+                  border-gray-200
+                  px-4
+                  text-sm
+                  outline-none
+                  transition
+                  focus:border-[#6214BE]
+                  focus:ring-1
+                  focus:ring-[#6214BE]/20
+                "
                 onChange={handleChange}
                 required
               />
-
+  
               {/* ================================================== */}
               {/* EMAIL + DEUXIÈME CONTACT */}
               {/* ================================================== */}
-
-              <div className="grid grid-cols-2 gap-4">
-
+  
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+  
                 <input
                   name="email"
                   value={form.email}
                   type="email"
                   placeholder="Email"
-                  className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
+                  className="
+                    h-11
+                    w-full
+                    rounded-xl
+                    border
+                    border-gray-200
+                    px-4
+                    text-sm
+                    outline-none
+                    transition
+                    focus:border-[#6214BE]
+                    focus:ring-1
+                    focus:ring-[#6214BE]/20
+                  "
                   onChange={handleChange}
                 />
-
+  
                 <input
                   name="phone_fix"
                   value={form.phone_fix}
                   placeholder="Deuxième contact"
                   inputMode="numeric"
                   maxLength={10}
-                  className="h-12 rounded-xl border border-gray-200 px-4 outline-none transition focus:border-[#6214BE]"
+                  className="
+                    h-11
+                    w-full
+                    rounded-xl
+                    border
+                    border-gray-200
+                    px-4
+                    text-sm
+                    outline-none
+                    transition
+                    focus:border-[#6214BE]
+                    focus:ring-1
+                    focus:ring-[#6214BE]/20
+                  "
                   onChange={handleChange}
                 />
-
+  
               </div>
-
+  
               {/* ================================================== */}
               {/* LOGO */}
               {/* ================================================== */}
-
-              <div className="rounded-xl border border-dashed border-gray-300 p-4">
-
-                <label className="mb-2 block text-sm font-medium text-gray-600">
+  
+              <div
+                className="
+                  rounded-xl
+                  border
+                  border-dashed
+                  border-gray-300
+                  px-4
+                  py-3
+                "
+              >
+  
+                <label
+                  className="
+                    mb-1.5
+                    block
+                    text-xs
+                    font-medium
+                    text-gray-600
+                  "
+                >
                   Logo de l'établissement
                 </label>
-
+  
                 <input
                   type="file"
                   accept="image/*"
-                  className="w-full text-sm"
+                  className="
+                    w-full
+                    text-xs
+                  "
                   onChange={(e) =>
                     setLogo(
                       e.target.files?.[0] || null
                     )
                   }
                 />
-
+  
                 {logo && (
-                  <p className="mt-2 text-xs text-gray-500">
-                    Fichier sélectionné : {logo.name}
+                  <p className="mt-1 text-xs text-gray-500">
+                    {logo.name}
                   </p>
                 )}
-
+  
               </div>
-
+  
               {/* ================================================== */}
               {/* MOT DE PASSE */}
               {/* ================================================== */}
-
+  
               <div>
-
-                <label className="mb-2 block text-sm font-medium text-gray-600">
+  
+                <label
+                  className="
+                    mb-1.5
+                    block
+                    text-xs
+                    font-medium
+                    text-gray-600
+                  "
+                >
                   Mot de passe
                 </label>
-
+  
                 <div className="relative">
-
+  
                   <input
                     name="password"
                     type={
@@ -488,13 +717,23 @@ export default function RegisterPage() {
                     maxLength={6}
                     onChange={handleChange}
                     required
-                    className="h-12 w-full rounded-xl border border-gray-200 px-4 pr-12 outline-none transition focus:border-[#6214BE]"
+                    className="
+                      h-11
+                      w-full
+                      rounded-xl
+                      border
+                      border-gray-200
+                      px-4
+                      pr-12
+                      text-sm
+                      outline-none
+                      transition
+                      focus:border-[#6214BE]
+                      focus:ring-1
+                      focus:ring-[#6214BE]/20
+                    "
                   />
-
-                  {/* ================================================== */}
-                  {/* AFFICHER / MASQUER */}
-                  {/* ================================================== */}
-
+  
                   <button
                     type="button"
                     onClick={() =>
@@ -502,32 +741,49 @@ export default function RegisterPage() {
                         (prev) => !prev
                       )
                     }
-                    className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-[#6214BE]"
+                    className="
+                      absolute
+                      right-2
+                      top-1/2
+                      flex
+                      h-8
+                      w-8
+                      -translate-y-1/2
+                      items-center
+                      justify-center
+                      rounded-lg
+                      text-gray-500
+                      transition
+                      hover:bg-gray-100
+                      hover:text-[#6214BE]
+                    "
                     aria-label={
                       showPassword
                         ? "Masquer le mot de passe"
                         : "Afficher le mot de passe"
                     }
                   >
-
+  
                     {showPassword ? (
-                      <EyeOff size={20} />
+                      <EyeOff size={18} />
                     ) : (
-                      <Eye size={20} />
+                      <Eye size={18} />
                     )}
-
+  
                   </button>
-
+  
                 </div>
-
-                {/* ================================================== */}
-                {/* COMPTEUR */}
-                {/* ================================================== */}
-
-                <div className="mt-1 flex justify-end">
-
+  
+                {/* Compteur + information */}
+  
+                <div className="mt-1 flex items-center justify-between">
+  
+                  <p className="text-[11px] text-gray-500">
+                    Exactement 6 caractères.
+                  </p>
+  
                   <span
-                    className={`text-xs ${
+                    className={`text-xs font-medium ${
                       form.password.length === 6
                         ? "text-green-600"
                         : "text-gray-400"
@@ -535,64 +791,84 @@ export default function RegisterPage() {
                   >
                     {form.password.length}/6
                   </span>
-
+  
                 </div>
-
-                {/* ================================================== */}
-                {/* INFORMATION */}
-                {/* ================================================== */}
-
-                <p className="mt-1 text-xs text-gray-500">
-                  Le mot de passe doit contenir exactement
-                  6 caractères.
-                </p>
-
+  
               </div>
-
+  
               {/* ================================================== */}
               {/* SUBMIT */}
               {/* ================================================== */}
-
+  
               <button
                 type="submit"
                 disabled={
                   loading ||
                   form.password.length !== 6
                 }
-                className="mt-4 h-12 cursor-pointer rounded-xl bg-[#6214BE] font-semibold text-white transition hover:scale-[1.02] hover:bg-[#4e10a0] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:scale-100"
+                className="
+                  mt-2
+                  h-11
+                  w-full
+                  cursor-pointer
+                  rounded-xl
+                  bg-[#6214BE]
+                  text-sm
+                  font-semibold
+                  text-white
+                  transition
+                  hover:scale-[1.01]
+                  hover:bg-[#4e10a0]
+                  disabled:cursor-not-allowed
+                  disabled:bg-gray-300
+                  disabled:hover:scale-100
+                "
               >
-
                 {loading
                   ? "Création..."
                   : "Créer mon compte"}
-
               </button>
-
+  
               {/* ================================================== */}
               {/* LOGIN */}
               {/* ================================================== */}
-
-              <p className="pt-4 text-center text-sm text-gray-500">
-
+  
+              <p
+                className="
+                  pt-1
+                  text-center
+                  text-xs
+                  text-gray-500
+  
+                  sm:text-sm
+                "
+              >
+  
                 Vous avez déjà un compte ?
-
+  
                 <Link
                   href="/login"
-                  className="ml-2 cursor-pointer font-semibold text-[#6214BE] hover:underline"
+                  className="
+                    ml-2
+                    cursor-pointer
+                    font-semibold
+                    text-[#6214BE]
+                    hover:underline
+                  "
                 >
                   Connexion
                 </Link>
-
+  
               </p>
-
+  
             </div>
-
+  
           </form>
-
+  
         </div>
-
+  
       </div>
-
+  
     </main>
   );
 }
