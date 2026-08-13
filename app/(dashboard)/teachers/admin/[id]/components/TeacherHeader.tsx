@@ -39,7 +39,7 @@ export default function TeacherHeader({
             {teacher.avatar ? (
               <Image
                 src={teacher.avatar}
-                alt={`${teacher.first_name} ${teacher.last_name}`}
+                alt={`${teacher.last_name} ${teacher.first_name}`}
                 width={88}
                 height={88}
                 className="h-22 w-22 rounded-full border-4 border-[#6214BE]/10 object-cover"
@@ -55,7 +55,7 @@ export default function TeacherHeader({
               <div className="flex flex-wrap items-center gap-3">
 
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {teacher.first_name} {teacher.last_name}
+                {teacher.last_name} {teacher.first_name}
                 </h1>
 
                 <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">

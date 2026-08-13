@@ -147,7 +147,7 @@ export default function StudentRow({
 
           <button
             onClick={onView}
-            className="rounded-lg p-2 text-blue-600 transition hover:bg-blue-50"
+            className="rounded-lg cursor-pointer p-2 text-blue-600 transition hover:bg-blue-50"
             title="Voir"
           >
             <Eye size={18} />
@@ -155,7 +155,7 @@ export default function StudentRow({
 
           <button
            onClick={() => onEdit(student)}
-            className="rounded-lg p-2 text-amber-600 transition hover:bg-amber-50"
+            className="rounded-lg cursor-pointer p-2 text-amber-600 transition hover:bg-amber-50"
             title="Modifier"
           >
             <Pencil size={18} />

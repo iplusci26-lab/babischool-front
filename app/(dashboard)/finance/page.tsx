@@ -78,12 +78,7 @@ export default function FinancePage() {
           setTab={setTab}
         />
 
-        <Tab
-          label="Ledger"
-          value="ledger"
-          tab={tab}
-          setTab={setTab}
-        />
+        
 
       </div>
 

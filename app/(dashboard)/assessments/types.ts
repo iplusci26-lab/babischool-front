@@ -1,7 +1,8 @@
 export type AssessmentType =
   | "homework"
   | "test"
-  | "exam";
+  | "exam"
+  | "compo";
 
 export type AssessmentStatus =
   | "draft"
@@ -104,9 +105,9 @@ export interface AssessmentFormData {
 
   assessment_type: AssessmentType;
 
-  max_score: number;
+  max_score: number | string;
 
-  weight: number;
+  weight: number | string;
 
   date_assessment: string;
 
@@ -154,6 +155,8 @@ export const ASSESSMENT_TYPE_LABELS: Record<
   test: "Interrogation",
 
   exam: "Examen",
+
+  compo: "Composition",
 
 };
 

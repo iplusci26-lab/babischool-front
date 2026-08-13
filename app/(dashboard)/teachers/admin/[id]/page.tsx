@@ -2,95 +2,262 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+
 import { api } from "@/lib/api";
+
 import TeacherHeader from "./components/TeacherHeader";
 import TeacherSubjects from "./components/TeacherSubjects";
 import TeacherSchedule from "./components/TeacherSchedule";
 import TeacherStats from "./components/TeacherStats";
-const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
+
+const DAYS = [
+  "Lundi",
+  "Mardi",
+  "Mercredi",
+  "Jeudi",
+  "Vendredi",
+];
 
 export default function TeacherDetailPage() {
+
   const { id } = useParams();
 
-  const [teacher, setTeacher] = useState<any>(null);
-  const [schedules, setSchedules] = useState<any[]>([]);
-  const [assignments, setAssignments] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<"subjects" | "schedule">("subjects");
-  const extract = (res: any) => res.data.results || res.data;
+  const [teacher, setTeacher] =
+    useState<any>(null);
+
+  const [schedules, setSchedules] =
+    useState<any[]>([]);
+
+  const [assignments, setAssignments] =
+    useState<any[]>([]);
+
+  const [activeTab, setActiveTab] =
+    useState<"subjects" | "schedule">(
+      "subjects"
+    );
+
+  const extract = (res: any) =>
+    res.data.results || res.data;
 
   useEffect(() => {
+
+    if (!id) {
+      return;
+    }
+
     load();
-  }, []);
+
+  }, [id]);
 
   const load = async () => {
-    const teachers = await api.get("/academics/teachers/");
-    const found = extract(teachers).find((t: any) => t.id === id);
 
-    setTeacher(found);
+    try {
 
-    const schedulesRes = await api.get(
-      `/academics/schedules/?teacher_id=${id}`
-    );
+      // ======================================================
+      // ENSEIGNANT
+      // ======================================================
 
-    setSchedules(extract(schedulesRes));
+      const teachers =
+        await api.get(
+          "/academics/teachers/"
+        );
 
-    const assignmentsRes = await api.get(
-      `/academics/teaching-assignments/?teacher_id=${id}`
-    );
+      const teacherList =
+        extract(teachers);
 
-    setAssignments(extract(assignmentsRes));
+      const found =
+        teacherList.find(
+          (t: any) =>
+            t.id === id
+        );
+
+      setTeacher(found);
+
+      // ======================================================
+      // SÉANCES DE L'ENSEIGNANT
+      // ======================================================
+
+      /*
+       * IMPORTANT :
+       *
+       * Le backend attend ?teacher=
+       *
+       * et NON ?teacher_id=
+       */
+
+      const schedulesRes =
+        await api.get(
+          `/academics/schedules/?teacher=${id}`
+        );
+
+      const teacherSchedules =
+        extract(schedulesRes);
+
+      setSchedules(
+        teacherSchedules
+      );
+
+      console.log(
+        "SÉANCES ENSEIGNANT :",
+        teacherSchedules
+      );
+
+      // ======================================================
+      // AFFECTATIONS DE L'ENSEIGNANT
+      // ======================================================
+
+      const assignmentsRes =
+        await api.get(
+          `/academics/teaching-assignments/?teacher_id=${id}`
+        );
+
+      const teacherAssignments =
+        extract(assignmentsRes);
+
+      setAssignments(
+        teacherAssignments
+      );
+
+      console.log(
+        "AFFECTATIONS ENSEIGNANT :",
+        teacherAssignments
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Erreur chargement enseignant :",
+        error
+      );
+
+    }
+
   };
 
-  const getByDay = (day: string) =>
+  // ========================================================
+  // FILTRER PAR JOUR
+  // ========================================================
+
+  const getByDay = (
+    day: string
+  ) =>
     schedules
-      .filter((schedule) => schedule.weekday === day)
-      .sort((a, b) => a.start_time.localeCompare(b.start_time));
+      .filter(
+        (schedule) =>
+          schedule.weekday_label === day
+      )
+      .sort(
+        (a, b) =>
+          a.start_time.localeCompare(
+            b.start_time
+          )
+      );
 
   return (
-    <div className="space-y-6 p-6">
-      <TeacherHeader teacher={teacher} />
+
+    <div>
+
+      {/* ================================================== */}
+      {/* HEADER */}
+      {/* ================================================== */}
+
+      <TeacherHeader
+        teacher={teacher}
+      />
+
+      {/* ================================================== */}
+      {/* STATISTIQUES */}
+      {/* ================================================== */}
+
       <TeacherStats
         assignments={assignments}
         schedules={schedules}
       />
 
-      <div className="rounded-xl bg-gray-100 p-1 flex w-fit">
+      {/* ================================================== */}
+      {/* TABS */}
+      {/* ================================================== */}
 
-      <button
-        onClick={() => setActiveTab("subjects")}
-        className={`rounded-lg px-5 py-2 text-sm font-medium transition ${
-          activeTab === "subjects"
-            ? "bg-[#6214BE] text-white shadow"
-            : "text-gray-600 hover:text-[#6214BE]"
-        }`}
-      >
-        Matières
-      </button>
+      <div className="mt-6">
 
-      <button
-        onClick={() => setActiveTab("schedule")}
-        className={`rounded-lg px-5 py-2 text-sm font-medium transition ${
-          activeTab === "schedule"
-            ? "bg-[#6214BE] text-white shadow"
-            : "text-gray-600 hover:text-[#6214BE]"
-        }`}
-      >
-        Emploi du temps
-      </button>
+        <div className="rounded-xl bg-gray-100 p-1 flex w-fit">
+
+          <button
+            onClick={() =>
+              setActiveTab(
+                "subjects"
+              )
+            }
+            className={`
+              rounded-lg
+              px-5
+              py-2
+              text-sm
+              font-medium
+              transition
+              ${
+                activeTab === "subjects"
+                  ? "bg-[#6214BE] text-white shadow"
+                  : "text-gray-600 hover:text-[#6214BE]"
+              }
+            `}
+          >
+            Matières
+          </button>
+
+          <button
+            onClick={() =>
+              setActiveTab(
+                "schedule"
+              )
+            }
+            className={`
+              rounded-lg
+              px-5
+              py-2
+              text-sm
+              font-medium
+              transition
+              ${
+                activeTab === "schedule"
+                  ? "bg-[#6214BE] text-white shadow"
+                  : "text-gray-600 hover:text-[#6214BE]"
+              }
+            `}
+          >
+            Emploi du temps
+          </button>
+
+        </div>
 
       </div>
+
+      {/* ================================================== */}
+      {/* MATIÈRES */}
+      {/* ================================================== */}
+
       {activeTab === "subjects" && (
-          <TeacherSubjects
-            assignments={assignments}
-            schedules={schedules}
-          />
-        )}
+
+        <TeacherSubjects
+          assignments={assignments}
+          schedules={schedules}
+        />
+
+      )}
+
+      {/* ================================================== */}
+      {/* EMPLOI DU TEMPS */}
+      {/* ================================================== */}
 
       {activeTab === "schedule" && (
+
         <TeacherSchedule
           schedules={schedules}
         />
+
       )}
+
     </div>
+
   );
 }

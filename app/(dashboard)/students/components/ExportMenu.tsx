@@ -1,7 +1,16 @@
 "use client";
 
-import { Download, FileSpreadsheet, FileText } from "lucide-react";
-import { useState } from "react";
+import {
+  Download,
+  FileSpreadsheet,
+  FileText,
+} from "lucide-react";
+
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 interface ExportMenuProps {
   onExcel: () => void;
@@ -12,13 +21,141 @@ export default function ExportMenu({
   onExcel,
   onPDF,
 }: ExportMenuProps) {
+
   const [open, setOpen] = useState(false);
 
+  const menuRef =
+    useRef<HTMLDivElement>(null);
+
+  // ==========================================================
+  // FERMETURE AU CLIC EXTÉRIEUR
+  // ==========================================================
+
+  useEffect(() => {
+
+    const handleClickOutside = (
+      event: MouseEvent
+    ) => {
+
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(
+          event.target as Node
+        )
+      ) {
+        setOpen(false);
+      }
+
+    };
+
+    if (open) {
+
+      document.addEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+
+    }
+
+    return () => {
+
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+
+    };
+
+  }, [open]);
+
+  // ==========================================================
+  // FERMETURE AVEC ESCAPE
+  // ==========================================================
+
+  useEffect(() => {
+
+    const handleKeyDown = (
+      event: KeyboardEvent
+    ) => {
+
+      if (
+        event.key === "Escape"
+      ) {
+        setOpen(false);
+      }
+
+    };
+
+    if (open) {
+
+      document.addEventListener(
+        "keydown",
+        handleKeyDown
+      );
+
+    }
+
+    return () => {
+
+      document.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+
+    };
+
+  }, [open]);
+
+  // ==========================================================
+  // EXPORT EXCEL
+  // ==========================================================
+
+  const handleExcel = () => {
+
+    // Fermer immédiatement le menu
+    setOpen(false);
+
+    // Lancer l'export
+    onExcel();
+
+  };
+
+  // ==========================================================
+  // EXPORT PDF
+  // ==========================================================
+
+  const handlePDF = () => {
+
+    // Fermer immédiatement le menu
+    setOpen(false);
+
+    // Lancer l'export
+    onPDF();
+
+  };
+
+  // ==========================================================
+  // UI
+  // ==========================================================
+
   return (
-    <div className="relative">
+
+    <div
+      ref={menuRef}
+      className="relative"
+    >
+
+      {/* ================================================== */}
+      {/* BOUTON EXPORTER */}
+      {/* ================================================== */}
 
       <button
-        onClick={() => setOpen(!open)}
+        type="button"
+        onClick={() =>
+          setOpen((prev) => !prev)
+        }
+        aria-expanded={open}
+        aria-haspopup="menu"
         className="
           flex
           items-center
@@ -30,16 +167,25 @@ export default function ExportMenu({
           py-2
           shadow-sm
           transition
+          cursor-pointer
           hover:bg-gray-50
         "
       >
+
         <Download size={18} />
 
         Exporter
+
       </button>
 
+      {/* ================================================== */}
+      {/* MENU */}
+      {/* ================================================== */}
+
       {open && (
+
         <div
+          role="menu"
           className="
             absolute
             right-0
@@ -54,8 +200,14 @@ export default function ExportMenu({
           "
         >
 
+          {/* ================================================== */}
+          {/* EXCEL */}
+          {/* ================================================== */}
+
           <button
-            onClick={onExcel}
+            type="button"
+            role="menuitem"
+            onClick={handleExcel}
             className="
               flex
               w-full
@@ -64,18 +216,30 @@ export default function ExportMenu({
               px-4
               py-3
               text-left
+              transition
               hover:bg-gray-50
             "
           >
+
             <FileSpreadsheet
               size={18}
               className="text-green-600"
             />
 
-            Export Excel
+            <span>
+              Export Excel
+            </span>
+
           </button>
 
-          <button onClick={onPDF}
+          {/* ================================================== */}
+          {/* PDF */}
+          {/* ================================================== */}
+
+          <button
+            type="button"
+            role="menuitem"
+            onClick={handlePDF}
             className="
               flex
               w-full
@@ -84,20 +248,27 @@ export default function ExportMenu({
               px-4
               py-3
               text-left
+              transition
               hover:bg-gray-50
             "
           >
+
             <FileText
               size={18}
               className="text-red-600"
             />
 
-            Export PDF
+            <span>
+              Export PDF
+            </span>
+
           </button>
 
         </div>
+
       )}
 
     </div>
+
   );
 }

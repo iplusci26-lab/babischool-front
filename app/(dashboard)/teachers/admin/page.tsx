@@ -267,7 +267,7 @@ export default function TeachersPage() {
 
                 <Link href={`/teachers/admin/${teacher.id}`}>
 
-                  <button className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition">
+                  <button className="flex cursor-pointer items-center gap-2 px-3 py-2 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition">
 
                     <Eye size={16} />
 
@@ -279,7 +279,7 @@ export default function TeachersPage() {
 
                 <button
                   onClick={() => handleEdit(teacher)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition"
+                  className="flex items-center cursor-pointer gap-2 px-3 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition"
                 >
 
                   <Pencil size={16} />
@@ -290,7 +290,7 @@ export default function TeachersPage() {
 
                 <button
                   onClick={() => handleDelete(teacher.id)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition"
+                  className="flex items-center cursor-pointer gap-2 px-3 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition"
                 >
 
                   <Trash2 size={16} />

@@ -63,6 +63,7 @@ export default function StudentToolbar({
               py-2
               text-white
               hover:bg-violet-800
+              cursor-pointer
             "
           >
             <Plus size={18} />
