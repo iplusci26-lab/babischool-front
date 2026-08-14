@@ -703,15 +703,10 @@ function LedgerPage() {
 
 
 function PaymentModal({
-
   student,
-
   onClose,
-
-  onSuccess
-
+  onSuccess,
 }: any) {
-
   const [amount, setAmount] =
     useState("");
 
@@ -725,26 +720,25 @@ function PaymentModal({
     useState(false);
 
   const submit = async () => {
-
     try {
-
       setLoading(true);
 
       await api.post(
         "/finance/payments/",
         {
-
-          enrollment_id: student.id,
+          enrollment_id:
+            student.id,
 
           amount,
 
-          payment_date: new Date()
-            .toISOString()
-            .split("T")[0],
+          payment_date:
+            new Date()
+              .toISOString()
+              .split("T")[0],
 
           reference,
 
-          notes
+          notes,
         }
       );
 
@@ -755,7 +749,6 @@ function PaymentModal({
       onSuccess();
 
     } catch (error) {
-
       console.error(error);
 
       alert(
@@ -763,177 +756,418 @@ function PaymentModal({
       );
 
     } finally {
-
       setLoading(false);
     }
   };
 
   return (
+    <div
+      className="
+        fixed
+        inset-0
+        z-50
+        flex
+        items-start
+        justify-center
+        overflow-y-auto
+        bg-black/40
+        p-3
+        backdrop-blur-sm
+        sm:items-center
+        sm:p-4
+      "
+    >
 
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+      {/* ================================================== */}
+      {/* MODAL */}
+      {/* ================================================== */}
 
-      <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden">
+      <div
+        className="
+          flex
+          w-full
+          max-w-lg
+          flex-col
+          overflow-hidden
+          rounded-2xl
+          bg-white
+          shadow-2xl
+          sm:rounded-3xl
+          max-h-[calc(100vh-1.5rem)]
+          sm:max-h-[90vh]
+        "
+      >
 
+        {/* ================================================== */}
         {/* HEADER */}
+        {/* ================================================== */}
 
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white flex items-center justify-between">
+        <div
+          className="
+            flex
+            shrink-0
+            items-center
+            justify-between
+            bg-gradient-to-r
+            from-indigo-500
+            to-purple-600
+            p-4
+            text-white
+            sm:p-6
+          "
+        >
 
-          <div>
+          <div className="min-w-0">
 
-            <h2 className="text-2xl font-bold">
+            <h2
+              className="
+                truncate
+                text-xl
+                font-bold
+                sm:text-2xl
+              "
+            >
               Nouveau paiement
             </h2>
 
-            <p className="text-indigo-100 mt-1">
+            <p
+              className="
+                mt-1
+                truncate
+                text-sm
+                text-indigo-100
+                sm:text-base
+              "
+            >
               {student.student_name}
             </p>
 
           </div>
 
           <button
+            type="button"
             onClick={onClose}
-            className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center"
-          >
-
-            <X size={20} />
-
-          </button>
-
-        </div>
-
-        {/* BODY */}
-
-        <div className="p-6 space-y-5">
-
-          {/* INFO */}
-
-          <div className="grid grid-cols-2 gap-4">
-
-            <div className="bg-gray-50 rounded-2xl p-4">
-
-              <p className="text-sm text-gray-500">
-                Frais
-              </p>
-
-              <h3 className="font-bold text-lg mt-1">
-
-                {Number(
-                  student.tuition_fee
-                ).toLocaleString()} FCFA
-
-              </h3>
-
-            </div>
-
-            <div className="bg-red-50 rounded-2xl p-4">
-
-              <p className="text-sm text-red-500">
-                Solde
-              </p>
-
-              <h3 className="font-bold text-lg mt-1 text-red-600">
-
-                {Number(
-                  student.balance
-                ).toLocaleString()} FCFA
-
-              </h3>
-
-            </div>
-
-          </div>
-
-          {/* AMOUNT */}
-
-          <div>
-
-            <label className="block text-sm font-medium mb-2">
-
-              Montant
-
-            </label>
-
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) =>
-                setAmount(e.target.value)
-              }
-              className="w-full border rounded-2xl p-4 outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="50000"
-            />
-
-          </div>
-
-          {/* REFERENCE */}
-
-          <div>
-
-            <label className="block text-sm font-medium mb-2">
-
-              Référence
-
-            </label>
-
-            <input
-              type="text"
-              value={reference}
-              onChange={(e) =>
-                setReference(e.target.value)
-              }
-              className="w-full border rounded-2xl p-4 outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Ex: Wave, Orange Money etc..."
-            />
-
-          </div>
-
-          {/* NOTES */}
-
-          <div>
-
-            <label className="block text-sm font-medium mb-2">
-
-              Notes
-
-            </label>
-
-            <textarea
-              value={notes}
-              onChange={(e) =>
-                setNotes(e.target.value)
-              }
-              className="w-full border rounded-2xl p-4 outline-none focus:ring-2 focus:ring-indigo-500"
-              rows={4}
-              placeholder="Informations supplémentaires"
-            />
-
-          </div>
-
-        </div>
-
-        {/* FOOTER */}
-
-        <div className="p-6 border-t flex justify-end gap-3">
-
-          <button
-            onClick={onClose}
-            className="px-5 py-3 rounded-2xl border hover:bg-gray-50"
-          >
-
-            Annuler
-
-          </button>
-
-          <button
-            onClick={submit}
             disabled={loading}
-            className="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium disabled:opacity-50"
+            aria-label="Fermer"
+            className="
+              ml-3
+              flex
+              h-9
+              w-9
+              shrink-0
+              items-center
+              justify-center
+              rounded-full
+              bg-white/20
+              transition
+              hover:bg-white/30
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+              sm:h-10
+              sm:w-10
+            "
           >
+            <X size={20} />
+          </button>
 
+        </div>
+
+        {/* ================================================== */}
+        {/* BODY SCROLLABLE */}
+        {/* ================================================== */}
+
+        <div
+          className="
+            min-h-0
+            flex-1
+            overflow-y-auto
+            p-4
+            sm:p-6
+          "
+        >
+
+          <div className="space-y-5">
+
+            {/* ================================================= */}
+            {/* INFORMATIONS FINANCIÈRES */}
+            {/* ================================================= */}
+
+            <div
+              className="
+                grid
+                grid-cols-1
+                gap-3
+                sm:grid-cols-2
+                sm:gap-4
+              "
+            >
+
+              {/* FRAIS */}
+
+              <div
+                className="
+                  rounded-2xl
+                  bg-gray-50
+                  p-4
+                "
+              >
+
+                <p className="text-sm text-gray-500">
+                  Frais
+                </p>
+
+                <h3
+                  className="
+                    mt-1
+                    text-lg
+                    font-bold
+                  "
+                >
+                  {Number(
+                    student.tuition_fee
+                  ).toLocaleString()}{" "}
+                  FCFA
+                </h3>
+
+              </div>
+
+              {/* SOLDE */}
+
+              <div
+                className="
+                  rounded-2xl
+                  bg-red-50
+                  p-4
+                "
+              >
+
+                <p className="text-sm text-red-500">
+                  Solde
+                </p>
+
+                <h3
+                  className="
+                    mt-1
+                    text-lg
+                    font-bold
+                    text-red-600
+                  "
+                >
+                  {Number(
+                    student.balance
+                  ).toLocaleString()}{" "}
+                  FCFA
+                </h3>
+
+              </div>
+
+            </div>
+
+            {/* ================================================= */}
+            {/* MONTANT */}
+            {/* ================================================= */}
+
+            <div>
+
+              <label
+                className="
+                  mb-2
+                  block
+                  text-sm
+                  font-medium
+                "
+              >
+                Montant
+              </label>
+
+              <input
+                type="number"
+                min="0"
+                value={amount}
+                onChange={(e) =>
+                  setAmount(
+                    e.target.value
+                  )
+                }
+                className="
+                  h-12
+                  w-full
+                  rounded-2xl
+                  border
+                  border-gray-200
+                  px-4
+                  outline-none
+                  transition
+                  focus:border-indigo-500
+                  focus:ring-2
+                  focus:ring-indigo-500/20
+                  sm:h-14
+                "
+                placeholder="50000"
+              />
+
+            </div>
+
+            {/* ================================================= */}
+            {/* REFERENCE */}
+            {/* ================================================= */}
+
+            <div>
+
+              <label
+                className="
+                  mb-2
+                  block
+                  text-sm
+                  font-medium
+                "
+              >
+                Référence
+              </label>
+
+              <input
+                type="text"
+                value={reference}
+                onChange={(e) =>
+                  setReference(
+                    e.target.value
+                  )
+                }
+                className="
+                  h-12
+                  w-full
+                  rounded-2xl
+                  border
+                  border-gray-200
+                  px-4
+                  outline-none
+                  transition
+                  focus:border-indigo-500
+                  focus:ring-2
+                  focus:ring-indigo-500/20
+                  sm:h-14
+                "
+                placeholder="Ex : Wave, Orange Money etc..."
+              />
+
+            </div>
+
+            {/* ================================================= */}
+            {/* NOTES */}
+            {/* ================================================= */}
+
+            <div>
+
+              <label
+                className="
+                  mb-2
+                  block
+                  text-sm
+                  font-medium
+                "
+              >
+                Notes
+              </label>
+
+              <textarea
+                value={notes}
+                onChange={(e) =>
+                  setNotes(
+                    e.target.value
+                  )
+                }
+                rows={4}
+                className="
+                  min-h-[110px]
+                  w-full
+                  resize-y
+                  rounded-2xl
+                  border
+                  border-gray-200
+                  p-4
+                  outline-none
+                  transition
+                  focus:border-indigo-500
+                  focus:ring-2
+                  focus:ring-indigo-500/20
+                "
+                placeholder="Informations supplémentaires"
+              />
+
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* ================================================== */}
+        {/* FOOTER */}
+        {/* ================================================== */}
+
+        <div
+          className="
+            flex
+            shrink-0
+            flex-col-reverse
+            gap-3
+            border-t
+            bg-white
+            p-4
+            sm:flex-row
+            sm:justify-end
+            sm:p-6
+          "
+        >
+
+          {/* ANNULER */}
+
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={loading}
+            className="
+              w-full
+              rounded-2xl
+              border
+              px-5
+              py-3
+              transition
+              hover:bg-gray-50
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+              sm:w-auto
+            "
+          >
+            Annuler
+          </button>
+
+          {/* VALIDER */}
+
+          <button
+            type="button"
+            onClick={submit}
+            disabled={
+              loading ||
+              !amount
+            }
+            className="
+              w-full
+              rounded-2xl
+              bg-indigo-600
+              px-5
+              py-3
+              font-medium
+              text-white
+              transition
+              hover:bg-indigo-700
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+              sm:w-auto
+            "
+          >
             {loading
               ? "Enregistrement..."
               : "Valider paiement"}
-
           </button>
 
         </div>
