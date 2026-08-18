@@ -9,8 +9,8 @@ import {
 interface DashboardWeekCardProps {
   week: {
     total: number;
-    present: number;
-    rate: number;
+    absent: number;
+    absence_rate: number;
   };
 }
 
@@ -33,20 +33,20 @@ export default function DashboardWeekCard({
           </p>
 
           <h2 className="mt-1 text-2xl font-bold text-gray-900">
-            {week.rate}%
+            {week.absence_rate}%
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Taux moyen de présence
+            Taux moyen d'absence enseignant
           </p>
 
         </div>
 
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-100">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100">
 
           <TrendingUp
             size={28}
-            className="text-sky-700"
+            className="text-red-700"
           />
 
         </div>
@@ -58,9 +58,9 @@ export default function DashboardWeekCard({
       <div className="mb-6 h-3 overflow-hidden rounded-full bg-gray-100">
 
         <div
-          className="h-full rounded-full bg-sky-500 transition-all"
+          className="h-full rounded-full bg-red-400 transition-all"
           style={{
-            width: `${week.rate}%`,
+            width: `${week.absence_rate}%`,
           }}
         />
 
@@ -70,13 +70,13 @@ export default function DashboardWeekCard({
 
       <div className="grid grid-cols-2 gap-4">
 
-        <div className="rounded-2xl bg-violet-50 p-4">
+        <div className="rounded-2xl bg-green-50 p-4">
 
-          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100">
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
 
             <CalendarDays
               size={20}
-              className="text-violet-700"
+              className="text-green-700"
             />
 
           </div>
@@ -85,29 +85,29 @@ export default function DashboardWeekCard({
             Cours réalisés
           </p>
 
-          <p className="mt-1 text-2xl font-bold text-violet-700">
+          <p className="mt-1 text-2xl font-bold text-green-700">
             {week.total}
           </p>
 
         </div>
 
-        <div className="rounded-2xl bg-green-50 p-4">
+        <div className="rounded-2xl bg-red-50 p-4">
 
-          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-red-100">
 
             <BadgeCheck
               size={20}
-              className="text-green-700"
+              className="text-red-700"
             />
 
           </div>
 
           <p className="text-xs text-gray-500">
-            Présences
+            Absence
           </p>
 
-          <p className="mt-1 text-2xl font-bold text-green-700">
-            {week.present}
+          <p className="mt-1 text-2xl font-bold text-red-700">
+            {week.absent}
           </p>
 
         </div>

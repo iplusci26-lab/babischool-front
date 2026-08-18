@@ -39,8 +39,19 @@ export function useTeacherAttendance() {
       setError(null);
 
       const data = await getTodayAttendance();
-      console.log(data);
-      setDashboard(data);
+      const normalizedData = {
+        ...data,
+        courses: data.courses.map((course: any) => ({
+          ...course,
+          attendance_status:
+            course.attendance_status ?? "present",
+        })),
+      };
+      
+      console.log(normalizedData);
+      
+      setDashboard(normalizedData);
+
     } catch (err) {
       console.error(err);
       setError("Impossible de charger les présences.");

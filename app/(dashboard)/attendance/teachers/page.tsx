@@ -5,7 +5,7 @@ import AttendanceSummary from "./components/AttendanceSummary";
 import EmptyAttendance from "./components/EmptyAttendance";
 import { useState } from "react";
 import { useTeacherAttendance } from "./hooks/useTeacherAttendance";
-
+import { CalendarDays } from "lucide-react";
 export default function TeacherAttendancePage() {
 
   const [activeTab, setActiveTab] = useState<"courses" | "history">("courses");
@@ -88,10 +88,22 @@ export default function TeacherAttendancePage() {
       {activeTab === "courses" && (
   <>
         <AttendanceSummary summary={dashboard.summary} />
+        
+        <div className="mt-2 flex items-center gap-2 text-md font-bold text-[#6214BE]">
 
-        <h2 className="text-lg font-semibold text-gray-900">
-          Cours du jour
-        </h2>
+        <CalendarDays size={16} />
+
+        <span>
+          Présence du jour :{" "}
+          {new Date().toLocaleDateString("fr-FR", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </span>
+
+        </div>
 
         
       {dashboard.courses?.length === 0 ? (

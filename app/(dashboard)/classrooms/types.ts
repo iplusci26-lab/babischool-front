@@ -1,17 +1,4 @@
-// ===============================
-// Cycle
-// ===============================
 
-export interface Cycle {
-    id: string;
-    name: string;
-    code: string;
-    display_order: number;
-    is_active: boolean;
-  
-    created_at: string;
-    updated_at: string;
-  }
   
   // ===============================
   // Classroom Level
@@ -19,9 +6,6 @@ export interface Cycle {
   
   export interface ClassroomLevel {
     id: string;
-  
-    cycle: string;
-    cycle_name: string;
   
     name: string;
     description: string;
@@ -84,21 +68,9 @@ export interface Cycle {
   // Forms
   // ===============================
   
-  export interface CycleForm {
-    id?: string;
-  
-    name: string;
-    code: string;
-  
-    display_order: number;
-    is_active: boolean;
-    codeManuallyEdited?: boolean;
-  }
-  
+
   export interface ClassroomLevelForm {
     id?: string;
-  
-    cycle: string;
   
     name: string;
     description: string;
@@ -153,16 +125,14 @@ export interface Cycle {
     saving: boolean;
     error: string | null;
   
-    cycles: Cycle[];
+   
     levels: ClassroomLevel[];
     classrooms: Classroom[];
     groups: ClassroomGroup[];
   
-    selectedCycleId: string | null;
     selectedLevelId: string | null;
     selectedClassroomId: string | null;
-  
-    cycleForm: CycleForm;
+
     levelForm: ClassroomLevelForm;
     classroomForm: ClassroomForm;
     groupForm: ClassroomGroupForm;

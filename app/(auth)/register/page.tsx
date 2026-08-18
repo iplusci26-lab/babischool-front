@@ -19,6 +19,7 @@ export default function RegisterPage() {
     school_name: "",
     school_code: "",
     school_sigle: "",
+    cycle_type: "",
     email: "",
     phone_fix: "",
     phone: "",
@@ -110,6 +111,13 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!form.cycle_type) {
+      toast.error(
+        "Veuillez sélectionner le type d'établissement."
+      );
+      return;
+    }
+
     // ========================================================
     // VALIDATION TÉLÉPHONE
     // ========================================================
@@ -176,8 +184,7 @@ export default function RegisterPage() {
 
       if (logo) {
         formData.append(
-          "logo",
-          logo
+          "logo",logo ? logo : ""
         );
       }
 
@@ -185,6 +192,8 @@ export default function RegisterPage() {
       // REQUÊTE
       // ======================================================
 
+
+      console.log("------- logo ----------",form)
       await api.post(
         "/auth/register/",
         formData
@@ -502,6 +511,57 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 required
               />
+
+              <select
+                name="cycle"
+                value={form.cycle_type}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    cycle_type: e.target.value,
+                  }))
+                }
+                className="
+                  h-11
+                  w-full
+                  rounded-xl
+                  border
+                  border-gray-200
+                  px-4
+                  text-sm
+                  outline-none
+                  transition
+                  focus:border-[#6214BE]
+                  focus:ring-1
+                  focus:ring-[#6214BE]/20
+                "
+                required
+              >
+                <option value="">
+                  Type d'établissement
+                </option>
+                
+
+                <option value="PRESCOLAIRE">
+                  Préscolaire
+                </option>
+
+                <option value="PRIMAIRE">
+                  Primaire
+                </option>
+
+                <option value="SECONDAIRE">
+                  Secondaire
+                </option>
+
+                <option value="TECH_PRO">
+                  Ens-tech-Prof
+                </option>
+
+                <option value="SUPERIEUR">
+                  Supérieur
+                </option>
+              </select>
   
               {/* ================================================== */}
               {/* CODE + SIGLE */}

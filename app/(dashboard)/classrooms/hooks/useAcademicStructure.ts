@@ -11,8 +11,6 @@ import {
   ClassroomGroupForm,
   ClassroomLevel,
   ClassroomLevelForm,
-  Cycle,
-  CycleForm,
 } from "../types";
 
 import {
@@ -24,9 +22,7 @@ import {
  * CRUD Services
  * ========================================================== */
 
-const cycleService = new CrudService<Cycle, CycleForm>(
-  "/students/cycles/"
-);
+
 
 const levelService = new CrudService<
   ClassroomLevel,
@@ -47,7 +43,7 @@ const groupService = new CrudService<
  * Hook
  * ========================================================== */
 
-function generateCycleCode(name: string): string {
+/*function generateCycleCode(name: string): string {
     return name
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
@@ -58,7 +54,7 @@ function generateCycleCode(name: string): string {
       .join("")
       .toUpperCase()
       .substring(0, 10);
-  }
+  }*/
 
 export function useAcademicStructure() {
   const [state, dispatch] = useReducer(
@@ -102,18 +98,7 @@ export function useAcademicStructure() {
    * Loaders
    * ========================================================== */
 
-  const loadCycles = useCallback(async () => {
-    try {
-      const response = await cycleService.list();
-
-      dispatch({
-        type: "SET_CYCLES",
-        payload: response.results,
-      });
-    } catch (error) {
-      handleError(error);
-    }
-  }, []);
+ 
 
   const loadLevels = useCallback(async () => {
     try {
@@ -162,7 +147,6 @@ export function useAcademicStructure() {
 
     try {
       await Promise.all([
-        loadCycles(),
         loadLevels(),
         loadClassrooms(),
         loadGroups(),
@@ -171,7 +155,6 @@ export function useAcademicStructure() {
       setLoading(false);
     }
   }, [
-    loadCycles,
     loadLevels,
     loadClassrooms,
     loadGroups,
@@ -186,7 +169,7 @@ export function useAcademicStructure() {
         data: TForm,
         service: CrudService<any, TForm>,
         resetAction:
-          | "RESET_CYCLE_FORM"
+          
           | "RESET_LEVEL_FORM"
           | "RESET_CLASSROOM_FORM"
           | "RESET_GROUP_FORM"
@@ -233,7 +216,7 @@ export function useAcademicStructure() {
       const editEntity = <T>(
         entity: T,
         action:
-          | "SET_CYCLE_FORM"
+         
           | "SET_LEVEL_FORM"
           | "SET_CLASSROOM_FORM"
           | "SET_GROUP_FORM"
@@ -244,52 +227,7 @@ export function useAcademicStructure() {
         });
       };
     
-      /* ==========================================================
-       * Cycle
-       * ========================================================== */
-
-        const openCycleForm = (cycle: Cycle) => {
-            dispatch({
-                type: "SET_CYCLE_FORM",
-                payload: {
-                    id: cycle.id,
-                    name: cycle.name,
-                    code: cycle.code,
-                    display_order: cycle.display_order,
-                    is_active: cycle.is_active,
-                },
-            });
-        };
-
-
-        const resetCycleForm = () => {
-            dispatch({
-                type: "RESET_CYCLE_FORM",
-            });
-        };
-
-      const saveCycle = async () =>
-        saveEntity(
-          state.cycleForm.id,
-          state.cycleForm,
-          cycleService,
-          "RESET_CYCLE_FORM"
-        );
-    
-      const deleteCycle = async (id: string) =>
-        deleteEntity(id, cycleService);
-    
-      const editCycle = (cycle: Cycle) =>
-        editEntity(
-          {
-            id: cycle.id,
-            name: cycle.name,
-            code: cycle.code,
-            display_order: cycle.display_order,
-            is_active: cycle.is_active,
-          },
-          "SET_CYCLE_FORM"
-        );
+     
     
       /* ==========================================================
        * Classroom Level
@@ -306,8 +244,6 @@ export function useAcademicStructure() {
     
                 id: level.id,
     
-                cycle: level.cycle,
-    
                 name: level.name,
     
                 description: level.description ?? "",
@@ -323,22 +259,25 @@ export function useAcademicStructure() {
     };
 
     const resetLevelForm = () => {
-
-        dispatch({
-    
-            type: "RESET_LEVEL_FORM",
-    
-        });
-    
+      dispatch({
+        type: "SET_LEVEL_FORM",
+        payload: {
+         
+          name: "",
+          description: "",
+          display_order: 1,
+          is_active: true,
+        },
+      });
     };
 
-      const saveLevel = async () =>
-        saveEntity(
-          state.levelForm.id,
-          state.levelForm,
-          levelService,
-          "RESET_LEVEL_FORM"
-        );
+    const saveLevel = async () =>
+      saveEntity(
+        state.levelForm.id,
+        state.levelForm,
+        levelService,
+        "RESET_LEVEL_FORM"
+      );
     
       const deleteLevel = async (id: string) =>
         deleteEntity(id, levelService);
@@ -347,7 +286,7 @@ export function useAcademicStructure() {
         editEntity(
           {
             id: level.id,
-            cycle: level.cycle,
+           
             name: level.name,
             description: level.description,
             display_order: level.display_order,
@@ -495,13 +434,6 @@ export function useAcademicStructure() {
    * Selection
    * ========================================================== */
 
-  const selectCycle = (cycleId: string | null) => {
-    dispatch({
-      type: "SET_SELECTED_CYCLE",
-      payload: cycleId,
-    });
-  };
-
   const selectLevel = (levelId: string | null) => {
     dispatch({
       type: "SET_SELECTED_LEVEL",
@@ -520,31 +452,12 @@ export function useAcademicStructure() {
    * Forms
    * ========================================================== */
 
-  const setCycleForm = (
-    values: Partial<CycleForm>
-    ) => {
-    const nextForm = {
-        ...state.cycleForm,
-        ...values,
-    };
 
-    if (
-        values.name !== undefined &&
-        !nextForm.codeManuallyEdited
-    ) {
-        nextForm.code = generateCycleCode(values.name);
-    }
 
-    dispatch({
-        type: "SET_CYCLE_FORM",
-        payload: nextForm,
-    });
-    };
-
-  const setLevelForm = (form: ClassroomLevelForm) => {
+  const setLevelForm = (form: Partial<ClassroomLevelForm>) => {
     dispatch({
       type: "SET_LEVEL_FORM",
-      payload: form,
+      payload: form as ClassroomLevelForm,
     });
   };
 
@@ -555,10 +468,10 @@ export function useAcademicStructure() {
     });
   };
 
-  const setGroupForm = (form: ClassroomGroupForm) => {
+  const setGroupForm = (form: Partial<ClassroomGroupForm>) => {
     dispatch({
       type: "SET_GROUP_FORM",
-      payload: form,
+      payload: form as ClassroomGroupForm,
     });
   };
 
@@ -578,17 +491,11 @@ export function useAcademicStructure() {
     loadAll,
 
     // Sélection
-    selectCycle,
+  
     selectLevel,
     selectClassroom,
 
-    // Cycle
-    openCycleForm,
-    resetCycleForm,
-    setCycleForm,
-    saveCycle,
-    deleteCycle,
-
+   
     // Niveau
     openLevelForm,
     resetLevelForm,

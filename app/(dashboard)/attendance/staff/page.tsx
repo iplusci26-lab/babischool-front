@@ -5,7 +5,7 @@ import { useState } from "react";
 import StaffAttendanceFilters from "./components/StaffAttendanceFilters";
 import StaffAttendanceSummary from "./components/StaffAttendanceSummary";
 import StaffAttendanceTable from "./components/StaffAttendanceTable";
-
+import { CalendarDays } from "lucide-react";
 import { useStaffAttendance } from "./hooks/useStaffAttendance";
 
 export default function StaffAttendancePage() {
@@ -62,6 +62,8 @@ export default function StaffAttendancePage() {
             Présence du personnel administratif
           </h1>
 
+         
+
           <p className="mt-1 text-sm text-gray-500">
             Gérez les présences quotidiennes du personnel administratif.
           </p>
@@ -78,6 +80,22 @@ export default function StaffAttendancePage() {
 
       </div>
 
+      <div className="mt-2 flex items-center gap-2 text-md font-bold text-[#6214BE]">
+
+        <CalendarDays size={16} />
+
+        <span>
+          Présence du jour :{" "}
+          {new Date().toLocaleDateString("fr-FR", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </span>
+
+        </div>
+
       {/* ==========================
             RECHERCHE
       ========================== */}
@@ -87,6 +105,8 @@ export default function StaffAttendancePage() {
         onSearchChange={setSearch}
         employeeCount={records.length}
       />
+
+     
 
       {/* ==========================
             STATISTIQUES

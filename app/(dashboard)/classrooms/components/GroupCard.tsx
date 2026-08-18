@@ -32,11 +32,11 @@ export default function GroupCard({
         <div className="flex items-center justify-between w-full">
 
           <span className="text-sm text-gray-500">
-            {group.code || "-"}
+            {group.code  || "-"}
           </span>
 
           <span className="text-sm text-gray-500">
-            Ordre : {group.display_order}
+             - Ordre : {group.display_order}
           </span>
 
         </div>

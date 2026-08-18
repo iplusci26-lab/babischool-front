@@ -6,7 +6,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
-
+import { toast } from "sonner";
 export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +22,7 @@ export default function LoginPage() {
     // ----------------------------------------------------------
 
     if (password.length !== 6) {
-      alert("Le mot de passe doit contenir exactement 6 caractères.");
+      toast.error("Le mot de passe doit contenir exactement 6 caractères.");
       return;
     }
 
@@ -54,7 +54,7 @@ export default function LoginPage() {
         };
       };
 
-      alert(
+      toast.error(
         error.response?.data?.detail ||
           "Numéro ou mot de passe incorrect"
       );

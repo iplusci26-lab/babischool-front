@@ -2,18 +2,15 @@
 
 import EntityModal from "@/components/ui/EntityModal";
 import Input from "@/components/ui/Input";
-import TextArea from "@/components/ui/TextArea";
 import Select from "@/components/ui/Select";
 
-import { ClassroomLevelForm, Cycle } from "../types";
+import { ClassroomLevelForm } from "../types";
 
 interface LevelModalProps {
   open: boolean;
   saving: boolean;
 
   form: ClassroomLevelForm;
-
-  cycles: Cycle[];
 
   onClose: () => void;
   onSave: () => void;
@@ -27,7 +24,6 @@ export default function LevelModal({
   open,
   saving,
   form,
-  cycles,
   onClose,
   onSave,
   onChange,
@@ -44,27 +40,10 @@ export default function LevelModal({
       onClose={onClose}
       onSave={onSave}
     >
-      <Select
-        label="Cycle"
-        value={String(form.cycle)}
-        options={[
-          { label: "Sélectionner...", value: "" },
-          ...cycles.map((cycle) => ({
-            label: cycle.name,
-            value: String(cycle.id),
-          })),
-        ]}
-        onChange={(e) =>
-          onChange({
-            cycle: e.target.value,
-          })
-        }
-      />
-
       <Input
         label="Nom"
         value={form.name}
-        placeholder="EX: 6ème, 4ème, Tle"
+        placeholder="Ex : CP1, CE2, 6ème, Terminale"
         onChange={(e) =>
           onChange({
             name: e.target.value,
@@ -72,24 +51,14 @@ export default function LevelModal({
         }
       />
 
-      {/*<TextArea
-        label="Description"
-        rows={3}
-        value={form.description}
-        onChange={(e) =>
-          onChange({
-            description: e.target.value,
-          })
-        }
-      />*/}
-
       <Input
         type="number"
         label="Ordre"
         value={form.display_order}
         onChange={(e) =>
           onChange({
-            display_order: Number(e.target.value),
+            display_order:
+              Number(e.target.value) || 0,
           })
         }
       />
@@ -98,12 +67,19 @@ export default function LevelModal({
         label="Statut"
         value={String(form.is_active)}
         options={[
-          { label: "Actif", value: "true" },
-          { label: "Inactif", value: "false" },
+          {
+            label: "Actif",
+            value: "true",
+          },
+          {
+            label: "Inactif",
+            value: "false",
+          },
         ]}
         onChange={(e) =>
           onChange({
-            is_active: e.target.value === "true",
+            is_active:
+              e.target.value === "true",
           })
         }
       />

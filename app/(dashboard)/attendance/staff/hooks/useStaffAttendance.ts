@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 type AttendanceStatus =
   | "present"
@@ -196,8 +197,17 @@ export function useStaffAttendance() {
 
       );
 
+      console.log(records)
+      await loadAttendance();
+      toast.success(
+        "La feuille de présence du jour a été enregistrée "
+      );
+
     } catch {
 
+      toast.error(
+        "L'appel a echoué, veuillez reprendre svp, si l'erreur insite veuillez contacter l'administrateur"
+      );
       setError(
         "Impossible d'enregistrer les présences."
       );

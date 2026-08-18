@@ -6,24 +6,17 @@ import {
     ClassroomGroupForm,
     ClassroomLevel,
     ClassroomLevelForm,
-    Cycle,
-    CycleForm,
+
   } from "../types";
   
   /* ==========================================================
    * Initial Forms
    * ========================================================== */
   
-  export const initialCycleForm: CycleForm = {
-    name: "",
-    code: "",
-    display_order: 0,
-    is_active: true,
-    codeManuallyEdited: false,
-  };
+
   
   export const initialLevelForm: ClassroomLevelForm = {
-    cycle: "",
+   
     name: "",
     description: "",
     display_order: 0,
@@ -54,17 +47,14 @@ import {
     loading: false,
     saving: false,
     error: null,
-  
-    cycles: [],
+
     levels: [],
     classrooms: [],
     groups: [],
-  
-    selectedCycleId: null,
+
     selectedLevelId: null,
     selectedClassroomId: null,
-  
-    cycleForm: initialCycleForm,
+
     levelForm: initialLevelForm,
     classroomForm: initialClassroomForm,
     groupForm: initialGroupForm,
@@ -88,10 +78,7 @@ import {
         payload: string | null;
       }
   
-    | {
-        type: "SET_CYCLES";
-        payload: Cycle[];
-      }
+    
     | {
         type: "SET_LEVELS";
         payload: ClassroomLevel[];
@@ -105,10 +92,7 @@ import {
         payload: ClassroomGroup[];
       }
   
-    | {
-        type: "SET_SELECTED_CYCLE";
-        payload: string | null;
-      }
+    
     | {
         type: "SET_SELECTED_LEVEL";
         payload: string | null;
@@ -118,26 +102,21 @@ import {
         payload: string | null;
       }
   
-    | {
-        type: "SET_CYCLE_FORM";
-        payload: CycleForm;
-      }
+    
     | {
         type: "SET_LEVEL_FORM";
-        payload: ClassroomLevelForm;
+        payload: Partial<ClassroomLevelForm>;
       }
     | {
         type: "SET_CLASSROOM_FORM";
-        payload: ClassroomForm;
+        payload: Partial<ClassroomForm>;
       }
     | {
         type: "SET_GROUP_FORM";
-        payload: ClassroomGroupForm;
+        payload: Partial<ClassroomGroupForm>;
       }
   
-    | {
-        type: "RESET_CYCLE_FORM";
-      }
+    
     | {
         type: "RESET_LEVEL_FORM";
       }
@@ -175,12 +154,7 @@ import {
           error: action.payload,
         };
   
-      case "SET_CYCLES":
-        return {
-          ...state,
-          cycles: action.payload,
-        };
-  
+      
       case "SET_LEVELS":
         return {
           ...state,
@@ -199,11 +173,7 @@ import {
           groups: action.payload,
         };
   
-      case "SET_SELECTED_CYCLE":
-        return {
-          ...state,
-          selectedCycleId: action.payload,
-        };
+   
   
       case "SET_SELECTED_LEVEL":
         return {
@@ -217,14 +187,7 @@ import {
           selectedClassroomId: action.payload,
         };
   
-      case "SET_CYCLE_FORM":
-        return {
-          ...state,
-          cycleForm: {
-            ...state.cycleForm,
-            ...action.payload,
-          },
-        };
+    
   
       case "SET_LEVEL_FORM":
         return {
@@ -253,12 +216,7 @@ import {
           },
         };
   
-      case "RESET_CYCLE_FORM":
-        return {
-          ...state,
-          cycleForm: initialCycleForm,
-        };
-  
+    
       case "RESET_LEVEL_FORM":
         return {
           ...state,
