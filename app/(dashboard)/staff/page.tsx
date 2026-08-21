@@ -96,7 +96,7 @@ export default function StaffPage() {
             console.error(error);
 
             alert(
-                "Impossible d'ajouter le personnel."
+                "Impossible d'ajouter le personnel administratif     ."
             );
 
         }
@@ -153,7 +153,7 @@ export default function StaffPage() {
 
             <h1 className="text-2xl font-bold">
 
-                Personnel
+                Administration
 
             </h1>
 

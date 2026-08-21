@@ -446,15 +446,15 @@ export default function AnnouncementFormModal({
             >
 
               <option value="normal">
-                Normale
+                Normal
               </option>
 
               <option value="important">
-                Importante
+                Important
               </option>
 
               <option value="urgent">
-                Urgente
+                Urgent
               </option>
 
             </select>
@@ -538,7 +538,7 @@ export default function AnnouncementFormModal({
               </option>
 
               <option value="staff">
-                Personnel
+                Administration
               </option>
 
               <option value="teachers">

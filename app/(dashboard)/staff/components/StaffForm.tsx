@@ -78,13 +78,13 @@ export default function StaffForm({
 
                 <h2 className="text-lg font-semibold">
 
-                    Nouveau personnel
+                    Nouveau membre de l'administration
 
                 </h2>
 
                 <p className="text-sm text-gray-500 mt-1">
 
-                    Ajouter un membre du personnel et lui attribuer un accès.
+                    Ajouter un membre de l'administration et lui attribuer un accès.
 
                 </p>
 
@@ -241,7 +241,7 @@ export default function StaffForm({
 
                     {loading
                         ? "Enregistrement..."
-                        : "Ajouter le personnel"}
+                        : "Ajouter le personnel administratif"}
 
                 </button>
 

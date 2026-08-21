@@ -51,7 +51,7 @@ export default function StaffAttendanceFilters({
           <span className="font-semibold text-gray-900">
             {employeeCount}
           </span>{" "}
-          membre(s) du personnel affiché(s)
+          membre(s) du personnel administratif affiché(s)
         </div>
 
         {search && (

@@ -66,7 +66,7 @@ export default function AnnouncementDetailModal({
         return "Toute l'école";
 
       case "staff":
-        return "Personnel";
+        return "Administration";
 
       case "teachers":
         return "Enseignants";

@@ -28,7 +28,7 @@ export default function StaffDetailsModal({
                     <div>
 
                         <h2 className="text-xl font-semibold">
-                            Détails du personnel
+                            Détails du personnel administratif
                         </h2>
 
                         <p className="text-sm text-violet-100 mt-1">

@@ -87,13 +87,13 @@ export default function StaffTable({
 
                         <Users size={20} />
 
-                        Personnel
+                        Administration
 
                     </h2>
 
                     <p className="text-sm text-gray-500 mt-1">
 
-                        {filteredStaff.length} membre(s) du personnel
+                        {filteredStaff.length} membre(s) du personnel de l'administration
 
                     </p>
 
@@ -172,7 +172,7 @@ export default function StaffTable({
                                     className="py-10 text-center text-gray-500"
                                 >
 
-                                    Aucun personnel trouvé.
+                                    Aucun membre de l'administration trouvé.
 
                                 </td>
 

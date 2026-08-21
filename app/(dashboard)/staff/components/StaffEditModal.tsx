@@ -70,7 +70,7 @@ export default function StaffEditModal({
 
                         <h2 className="text-xl font-semibold">
 
-                            Modifier le personnel
+                            Modifier le personnel administratif
 
                         </h2>
 
