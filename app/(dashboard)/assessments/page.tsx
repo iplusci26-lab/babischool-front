@@ -58,7 +58,7 @@ export default function EvaluationsPage() {
           current={tab}
           onClick={setTab}
         >
-          🏠 Exercices de maison
+          🏠 Exercices
         </Tab>
 
       </div>

@@ -105,7 +105,7 @@ export default function HomeworkTab() {
 
           <h2 className="text-2xl font-bold">
 
-            Exercices de maison
+            Exercices
 
           </h2>
 
