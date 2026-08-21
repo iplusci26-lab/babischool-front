@@ -378,7 +378,8 @@ export function useAssessment(
 
       } catch (error: any) {
 
-        console.log("------------------- ", error)
+        console.log("------------------- ", error?.response?.data)
+        console.log("------------------- ", error?.response?.data.non_field_errors)
         console.error(
           "Erreur sauvegarde évaluation :",
           error?.response?.data ||
