@@ -377,10 +377,7 @@ export function useAssessment(
         await loadData();
 
       } catch (error: any) {
-
-        console.log("------------------- ", error?.response?.data)
-        console.log("------------------- ", error?.response?.data.non_field_errors[0])
-        console.error(
+          console.error(
           "Erreur sauvegarde évaluation :",
           error?.response?.data ||
           error

@@ -6,7 +6,7 @@ import { TeachingAssignment } from "@/types/teachingAssignment";
 import { Subject } from "@/types/subject";
 import { Teacher } from "@/types/teachers";
 import { ClassroomGroup } from "@/types/classroomGroup";
-
+import { toast } from "sonner";
 import { getSubjects } from "@/lib/api/subjects";
 import { getTeachers } from "@/lib/api/teachers";
 import { getClassroomGroups } from "@/lib/api/classroomGroups";
@@ -267,12 +267,16 @@ export default function AssignmentModal({
             if (error.response?.data) {
                 
                 setErrors(error.response?.data);
-
+                console.log("----------------------",error.response?.data)
             } else {
         
                 console.error(error);
+                console.log("----------------------",error)
         
             }
+
+
+            toast.error(error.response?.data);
     
           
             
