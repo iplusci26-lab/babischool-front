@@ -379,7 +379,7 @@ export function useAssessment(
       } catch (error: any) {
 
         console.log("------------------- ", error?.response?.data)
-        console.log("------------------- ", error?.response?.data.non_field_errors)
+        console.log("------------------- ", error?.response?.data.non_field_errors[0])
         console.error(
           "Erreur sauvegarde évaluation :",
           error?.response?.data ||
@@ -388,7 +388,7 @@ export function useAssessment(
 
         const data =
           error?.response?.data;
-        let errorss = error.non_field_errors
+        let errorss = error?.response?.data.non_field_errors[0]
         let message =
           editingAssessment
             ? "Impossible de modifier l'évaluation."
