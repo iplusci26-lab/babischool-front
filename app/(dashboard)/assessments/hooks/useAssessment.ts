@@ -185,7 +185,7 @@ export function useAssessment(
         );
 
       } catch (error) {
-
+        console.log("---------------------- ,",error)
         console.error(
           "Erreur chargement évaluations :",
           error
@@ -381,12 +381,12 @@ export function useAssessment(
         console.error(
           "Erreur sauvegarde évaluation :",
           error?.response?.data ||
-          error
+          error.non_field_errors
         );
 
         const data =
           error?.response?.data;
-
+        let errorss = error.non_field_errors
         let message =
           editingAssessment
             ? "Impossible de modifier l'évaluation."
@@ -423,7 +423,7 @@ export function useAssessment(
 
         }
 
-        setError(message);
+        setError(errorss);
 
       } finally {
 
