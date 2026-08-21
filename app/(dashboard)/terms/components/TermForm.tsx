@@ -81,13 +81,21 @@ export default function TermForm({
               onChange("term_type", e.target.value)
             }
             className="w-full rounded-xl border p-3 focus:border-purple-600 focus:outline-none"
-          >
+          > 
+            <option value="">
+              Choisir une option
+            </option>
+
             <option value="trimester">
               Trimestre
             </option>
 
             <option value="semester">
               Semestre
+            </option>
+
+            <option value="composition">
+              Composition
             </option>
 
           </select>

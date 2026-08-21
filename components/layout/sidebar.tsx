@@ -65,7 +65,7 @@ export default function Sidebar() {
         },
         {
           key: "staff",
-          label: "Personnel",
+          label: "Administration",
           href: "/staff",
           icon: UsersRound,
         },

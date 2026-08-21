@@ -40,6 +40,7 @@ interface AttendanceSession {
 
   status: SessionStatus;
 
+
   records: StudentAttendanceRecord[];
 }
 
@@ -47,6 +48,8 @@ interface StudentAttendanceSessionCardProps {
   session: AttendanceSession;
 
   loading?: boolean;
+
+  canStart: boolean;
 
   onStartAttendance: () => void;
 
@@ -59,6 +62,7 @@ interface StudentAttendanceSessionCardProps {
 export default function StudentAttendanceSessionCard({
   session,
   loading = false,
+  canStart,
   onStartAttendance,
   onAttendanceChange,
 }: StudentAttendanceSessionCardProps) {
@@ -158,12 +162,14 @@ export default function StudentAttendanceSessionCard({
             {isNotStarted && (
 
               <button
-                disabled={loading}
+                disabled={loading || !canStart}
                 onClick={onStartAttendance}
                 className="flex items-center gap-2 rounded-lg bg-[#6214BE] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#4d0fa0] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <PlayCircle size={18} />
-                Commencer l'appel
+                {canStart
+                  ? "Commencer l'appel"
+                  : "Appel indisponible"}
               </button>
 
             )}

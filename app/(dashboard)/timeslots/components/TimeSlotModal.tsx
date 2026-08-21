@@ -134,7 +134,7 @@ export default function TimeSlotModal({
                                     updateField("name", e.target.value)
                                 }
                                 className="w-full rounded-lg border px-3 py-2 focus:border-[#6214BE] focus:outline-none"
-                                placeholder="Ex : 1er cours"
+                                placeholder="Ex : 1ère heure"
                             />
                         </div>
 

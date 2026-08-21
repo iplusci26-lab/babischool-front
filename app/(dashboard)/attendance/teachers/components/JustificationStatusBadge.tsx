@@ -22,12 +22,12 @@ const STATUS_CONFIG: Record<
       "bg-orange-100 text-orange-800 border border-orange-200",
   },
   justified: {
-    label: "Justifiée",
+    label: "Justifié",
     className:
       "bg-green-100 text-green-800 border border-green-200",
   },
   unjustified: {
-    label: "Non justifiée",
+    label: "Non justifié",
     className:
       "bg-red-100 text-red-800 border border-red-200",
   },

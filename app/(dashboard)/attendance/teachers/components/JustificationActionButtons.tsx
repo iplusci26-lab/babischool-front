@@ -11,7 +11,7 @@ interface JustificationActionButtonsProps {
 const BUTTONS = [
   {
     value: "justified" as const,
-    label: "Justifier",
+    label: "Justifié",
     className:
       "border-green-300 text-green-700 hover:bg-green-50",
     activeClassName:
@@ -19,7 +19,7 @@ const BUTTONS = [
   },
   {
     value: "unjustified" as const,
-    label: "Non justifier",
+    label: "Non justifié",
     className:
       "border-red-300 text-red-700 hover:bg-red-50",
     activeClassName:

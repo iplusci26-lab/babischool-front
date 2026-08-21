@@ -448,7 +448,7 @@ Mot de passe : ${successModal.password}`
                       value={form.student_number}
                       onChange={handleChange}
                       maxLength={10}
-                      placeholder="Matricule"
+                      placeholder="12345678M"
                       className="w-full rounded-xl border pl-10 pr-4 py-3 focus:ring-2 focus:ring-[#6214BE] outline-none"
                     />
 

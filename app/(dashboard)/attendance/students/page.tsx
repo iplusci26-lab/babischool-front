@@ -41,6 +41,12 @@ export default function StudentAttendancePage() {
 
     handleAttendance,
 
+    saveAttendance,
+
+    hasPendingChanges,
+
+    canStartSelectedAttendance,
+
     handleJustification,
 
   } = useStudentAttendance();
@@ -216,8 +222,37 @@ export default function StudentAttendancePage() {
             <EmptyAttendance />
 
           ) : (
+            
+            
 
             <div className="space-y-5">
+              {hasPendingChanges && (
+              <div className="flex items-center justify-end">
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={saveAttendance}
+                  className="
+                    rounded-lg
+                    bg-[#6214BE]
+                    px-5
+                    py-2.5
+                    text-sm
+                    font-medium
+                    text-white
+                    shadow-sm
+                    transition
+                    hover:bg-[#4d0fa0]
+                    disabled:cursor-not-allowed
+                    disabled:opacity-50
+                  "
+                >
+                  {submitting
+                    ? "Enregistrement..."
+                    : "Enregistrer les présences"}
+                </button>
+              </div>
+            )}
 
               {dashboard.sessions.map((session) => (
 
@@ -231,7 +266,7 @@ export default function StudentAttendancePage() {
                   session={session}
 
                   loading={submitting}
-
+                  canStart={canStartSelectedAttendance()}
                   onStartAttendance={
                     handleStartAttendance
                   }

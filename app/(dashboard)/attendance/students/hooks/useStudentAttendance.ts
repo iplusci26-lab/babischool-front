@@ -51,6 +51,8 @@ interface AttendanceOption {
 
   label: string;
 
+  start_time: string | null;
+
 }
 
 interface AttendanceSummary {
@@ -80,6 +82,21 @@ export function useStudentAttendance() {
     useState(
         new Date().toISOString().split("T")[0]
     );
+    const [currentTime, setCurrentTime] = useState(
+      new Date()
+    );
+
+  const [pendingChanges, setPendingChanges] =
+    useState<
+      Record<
+        string,
+        {
+          status: AttendanceStatus;
+          minutes_late?: number;
+          remarks?: string;
+        }
+      >
+    >({});
 
   
   const [attendanceOptions, setAttendanceOptions] =
@@ -141,7 +158,7 @@ export function useStudentAttendance() {
   
           }
         );
-        console.log("---------------- ",response.data);
+        
         setAttendanceOptions(response.data);
         console.log("Attendance options :", response.data);
         
@@ -172,6 +189,44 @@ export function useStudentAttendance() {
   
     ]
   );
+
+
+  /* Verification l'heure appel est arrivé */
+
+  const canStartAttendance = (
+    option: AttendanceOption | undefined
+  ) => {
+    if (!option) {
+      return false;
+    }
+  
+    // Certaines périodes n'ont pas encore
+    // d'heure configurée.
+    if (!option.start_time) {
+      return true;
+    }
+  
+    const now = new Date();
+  
+    const [
+      hours,
+      minutes,
+      seconds = 0,
+    ] = option.start_time
+      .split(":")
+      .map(Number);
+  
+    const start = new Date();
+  
+    start.setHours(
+      hours,
+      minutes,
+      seconds,
+      0
+    );
+  
+    return now >= start;
+  };
 
   /**
    * Charger le dashboard
@@ -235,6 +290,7 @@ export function useStudentAttendance() {
   /**
  * Démarrer une séance d'appel
  */
+  
   const handleStartAttendance = async () => {
 
     try {
@@ -250,7 +306,22 @@ export function useStudentAttendance() {
         );
   
         return;
+      }
   
+      // ==========================================
+      // Vérification de l'heure
+      // ==========================================
+  
+      if (!canStartAttendance(option)) {
+  
+        const startTime =
+          option.start_time?.slice(0, 5);
+  
+        setError(
+          `L'appel ne peut pas commencer avant ${startTime}.`
+        );
+  
+        return;
       }
   
       setSubmitting(true);
@@ -291,35 +362,147 @@ export function useStudentAttendance() {
       setSubmitting(false);
   
     }
+  };
+
+  const canStartSelectedAttendance = () => {
+
+    const option = attendanceOptions.find(
+      (o) => o.value === selectedOption
+    );
   
+    if (!option) {
+      return false;
+    }
+  
+    if (!option.start_time) {
+      return true;
+    }
+  
+   
+  
+    const [
+      hours,
+      minutes,
+      seconds = 0,
+    ] = option.start_time
+      .split(":")
+      .map(Number);
+  
+      const start = new Date(currentTime);
+  
+    start.setHours(
+      hours,
+      minutes,
+      seconds,
+      0
+    );
+  
+    return currentTime >= start;
   };
 
   /**
    * Modifier le statut
    */
-  const handleAttendance = async (
+  const handleAttendance = (
     recordId: string,
     status: AttendanceStatus
   ) => {
-    try {
-      setSubmitting(true);
-
-      await api.patch(
-        `/attendance/records/${recordId}/`,
-        {
+  
+      setPendingChanges((current) => ({
+        ...current,
+    
+        [recordId]: {
+          ...current[recordId],
           status,
+        },
+      }));
+    
+      setDashboard((current) => {
+    
+        if (!current) {
+          return current;
         }
-      );
+    
+        return {
+          ...current,
+    
+          sessions: current.sessions.map(
+            (session) => ({
+              ...session,
+    
+              records: session.records.map(
+                (record) => {
+    
+                  if (record.id !== recordId) {
+                    return record;
+                  }
+    
+                  return {
+                    ...record,
+                    status,
+                  };
+    
+                }
+              ),
+    
+            })
+          ),
+        };
+    
+      });
+    };
 
-      await loadDashboard();
-    } catch {
-      setError(
-        "Impossible de mettre à jour la présence."
+  
+    const saveAttendance = async () => {
+
+      const changes = Object.entries(
+        pendingChanges
       );
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    
+      if (changes.length === 0) {
+        return;
+      }
+    
+      try {
+    
+        setSubmitting(true);
+    
+        setError("");
+    
+        const records = changes.map(
+          ([recordId, change]) => ({
+            record_id: recordId,
+            status: change.status,
+            minutes_late:
+              change.minutes_late ?? 0,
+            remarks:
+              change.remarks ?? "",
+          })
+        );
+    
+        await api.post(
+          "/attendance/records/bulk-update/",
+          {
+            records,
+          }
+        );
+    
+        setPendingChanges({});
+    
+        await loadDashboard();
+    
+      } catch (error) {
+    
+        setError(
+          "Impossible d'enregistrer les présences."
+        );
+    
+      } finally {
+    
+        setSubmitting(false);
+    
+      }
+    };
 
   /**
    * Justification (placeholder)
@@ -328,10 +511,23 @@ export function useStudentAttendance() {
     // sera développé plus tard
   };
 
+  useEffect(() => {
+
+    const interval = setInterval(() => {
+  
+      setCurrentTime(new Date());
+  
+    }, 1000);
+  
+    return () => clearInterval(interval);
+  
+  }, []);
+
   /**
    * Chargement initial
    */
   useEffect(() => {
+
     async function init() {
       setLoading(true);
 
@@ -362,34 +558,42 @@ export function useStudentAttendance() {
   ]);
 
   return {
-    dashboard,
 
-    classrooms,
+  dashboard,
 
-    loading,
+  classrooms,
 
-    submitting,
+  loading,
 
-    error,
+  submitting,
 
-    selectedClassroom,
+  error,
 
-    selectedDate,
+  selectedClassroom,
 
-    setSelectedClassroom,
+  selectedDate,
 
-    setSelectedDate,
+  setSelectedClassroom,
 
-    handleStartAttendance,
+  setSelectedDate,
 
-    handleAttendance,
+  handleStartAttendance,
 
-    handleJustification,
+  handleAttendance,
 
-    attendanceOptions,
+  saveAttendance,
 
-    selectedOption,
+  handleJustification,
 
-    setSelectedOption,
+  attendanceOptions,
+
+  selectedOption,
+
+  setSelectedOption,
+  
+  canStartSelectedAttendance,
+
+  hasPendingChanges:
+    Object.keys(pendingChanges).length > 0,
   };
 }
