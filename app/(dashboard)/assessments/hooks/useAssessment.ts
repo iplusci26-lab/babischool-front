@@ -1,6 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { api } from "@/lib/api";
 
@@ -15,153 +20,213 @@ import {
 } from "../types";
 
 const INITIAL_FORM: AssessmentFormData = {
+
   classroom: "",
+
+  classroom_group: "",
+
   subject: "",
+
   term: "",
+
   title: "",
+
   assessment_type: "test",
+
   max_score: 20,
+
   weight: 1,
+
   date_assessment: "",
+
   category: "class",
+
 };
 
 const INITIAL_FILTERS: AssessmentFilters = {
-  search: "",
-  classroom: "",
-  subject: "",
-  term: "",
-  assessment_type: "",
-};
 
-const INITIAL_SUMMARY: AssessmentSummary = {
-  total: 0,
-  homework: 0,
-  test: 0,
-  exam: 0,
+  search: "",
+
+  classroom: "",
+
+  subject: "",
+
+  term: "",
+
+  assessment_type: "",
+
 };
 
 export function useAssessment(
-   category: "class" | "scheduled"
+  category: "class" | "scheduled"
 ) {
 
-  const [assessments, setAssessments] =
-    useState<Assessment[]>([]);
+  const [
+    assessments,
+    setAssessments,
+  ] = useState<Assessment[]>([]);
 
- 
+  const [
+    classrooms,
+    setClassrooms,
+  ] = useState<Classroom[]>([]);
 
-  const [classrooms, setClassrooms] =
-    useState<Classroom[]>([]);
+  const [
+    subjects,
+    setSubjects,
+  ] = useState<Subject[]>([]);
 
-  const [subjects, setSubjects] =
-    useState<Subject[]>([]);
+  const [
+    terms,
+    setTerms,
+  ] = useState<Term[]>([]);
 
-  const [terms, setTerms] =
-    useState<Term[]>([]);
+  const [
+    form,
+    setForm,
+  ] = useState<AssessmentFormData>(
+    INITIAL_FORM
+  );
 
-  const [form, setForm] =
-    useState<AssessmentFormData>(INITIAL_FORM);
+  const [
+    filters,
+    setFilters,
+  ] = useState<AssessmentFilters>(
+    INITIAL_FILTERS
+  );
 
-  const [filters, setFilters] =
-    useState<AssessmentFilters>(INITIAL_FILTERS);
+  const [
+    editingAssessment,
+    setEditingAssessment,
+  ] = useState<Assessment | null>(
+    null
+  );
 
-  const [editingAssessment, setEditingAssessment] =
-    useState<Assessment | null>(null);
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [
+    submitting,
+    setSubmitting,
+  ] = useState(false);
 
-  const [submitting, setSubmitting] =
-    useState(false);
+  const [
+    error,
+    setError,
+  ] = useState("");
 
-  const [error, setError] =
-    useState("");
+  // ==========================================================
+  // CHARGEMENT
+  // ==========================================================
 
-  /**
-   * Chargement
-   */
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(
+    async () => {
 
-    try {
+      try {
 
-      setLoading(true);
-      setError("");
+        setLoading(true);
 
-      const [
+        setError("");
 
-        assessmentsRes,
+        const [
 
-        classroomsRes,
+          assessmentsRes,
 
-        subjectsRes,
+          classroomsRes,
 
-        termsRes,
+          subjectsRes,
 
-      ] = await Promise.all([
+          termsRes,
 
-        api.get("/academics/assessments/", {
-          params: {
-            category: category,
-          },
-        }),
+        ] = await Promise.all([
 
+          api.get(
+            "/academics/assessments/",
+            {
+              params: {
+                category,
+              },
+            }
+          ),
 
-        api.get("/students/classrooms/"),
+          api.get(
+            "/students/classrooms/"
+          ),
 
-        api.get("/academics/subjects/"),
+          api.get(
+            "/academics/subjects/"
+          ),
 
-        api.get("/academics/terms/"),
+          api.get(
+            "/academics/terms/"
+          ),
 
-      ]);
-   
-      setAssessments(
-        assessmentsRes.data ?? []
-      );
-      console.log("------------",assessmentsRes.data)
-     
-      setClassrooms(
-        classroomsRes.data.results ??
-        classroomsRes.data
-      );
-      
-      setSubjects(
-        subjectsRes.data.results ??
-        subjectsRes.data
-      );
-     
-      setTerms(
-        termsRes.data.results ??
-        termsRes.data
-      );
-      
-    } catch {
+        ]);
 
-      setError(
-        "Impossible de charger les évaluations."
-      );
+        setAssessments(
+          assessmentsRes.data ?? []
+        );
 
-    } finally {
+        setClassrooms(
+          classroomsRes.data.results ??
+          classroomsRes.data
+        );
 
-      setLoading(false);
+        setSubjects(
+          subjectsRes.data.results ??
+          subjectsRes.data
+        );
 
-    }
+        setTerms(
+          termsRes.data.results ??
+          termsRes.data
+        );
 
-  }, []);
+      } catch (error) {
 
-  /**
-   * Reset
-   */
+        console.error(
+          "Erreur chargement évaluations :",
+          error
+        );
+
+        setError(
+          "Impossible de charger les évaluations."
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    },
+    [category]
+  );
+
+  // ==========================================================
+  // RESET
+  // ==========================================================
+
   const resetForm = () => {
 
     setEditingAssessment(null);
 
-    setForm(INITIAL_FORM);
+    setForm({
+
+      ...INITIAL_FORM,
+
+      category,
+
+    });
 
   };
 
-  /**
-   * Prépare l'édition
-   */
+  // ==========================================================
+  // ÉDITION
+  // ==========================================================
+
   const editAssessment = (
     assessment: Assessment
   ) => {
@@ -172,268 +237,425 @@ export function useAssessment(
 
     setForm({
 
-      classroom: assessment.classroom,
+      classroom:
+        assessment.classroom,
 
-      subject: assessment.subject,
+      /**
+       * Si aucune groupe n'est associé,
+       * on utilise une chaîne vide pour
+       * le SearchSelect.
+       */
+      classroom_group:
+        assessment.classroom_group ??
+        "",
 
-      term: assessment.term,
+      subject:
+        assessment.subject,
 
-      title: assessment.title,
+      term:
+        assessment.term,
+
+      title:
+        assessment.title,
 
       assessment_type:
         assessment.assessment_type,
-      category: category,
+
       max_score:
         assessment.max_score,
 
       weight:
         assessment.weight,
 
-        date_assessment:
+      date_assessment:
         assessment.date_assessment,
+
+      category,
 
     });
 
   };
 
-  /**
-   * Création / Modification
-   */
-  const saveAssessment = async () => {
+  // ==========================================================
+  // PAYLOAD
+  // ==========================================================
 
-    try {
+  const buildPayload = () => {
 
-      setSubmitting(true);
-      setError("");
+    return {
 
-      if (editingAssessment) {
+      classroom:
+        form.classroom,
 
-        await api.patch(
+      /**
+       * "" signifie toute la classe.
+       *
+       * On envoie donc null au backend.
+       */
+      classroom_group:
+        form.classroom_group
+          ? form.classroom_group
+          : null,
 
-          `/academics/assessments/${editingAssessment.id}/`,
+      subject:
+        form.subject,
 
-          {
-            ...form,
-            category,
-          }
+      term:
+        form.term,
 
+      title:
+        form.title,
+
+      assessment_type:
+        form.assessment_type,
+
+      max_score:
+        form.max_score,
+
+      weight:
+        form.weight,
+
+      date_assessment:
+        form.date_assessment,
+
+      category,
+
+    };
+
+  };
+
+  // ==========================================================
+  // CRÉATION / MODIFICATION
+  // ==========================================================
+
+  const saveAssessment =
+    async () => {
+
+      try {
+
+        setSubmitting(true);
+
+        setError("");
+
+        const payload =
+          buildPayload();
+
+        // ----------------------------------------------------
+        // MODIFICATION
+        // ----------------------------------------------------
+
+        if (editingAssessment) {
+
+          await api.patch(
+
+            `/academics/assessments/${editingAssessment.id}/`,
+
+            payload
+
+          );
+
+        }
+
+        // ----------------------------------------------------
+        // CRÉATION
+        // ----------------------------------------------------
+
+        else {
+
+          await api.post(
+
+            "/academics/assessments/",
+
+            payload
+
+          );
+
+        }
+
+        resetForm();
+
+        await loadData();
+
+      } catch (error: any) {
+
+        console.error(
+          "Erreur sauvegarde évaluation :",
+          error?.response?.data ||
+          error
         );
 
-      } else {
+        const data =
+          error?.response?.data;
+
+        let message =
+          editingAssessment
+            ? "Impossible de modifier l'évaluation."
+            : "Impossible de créer l'évaluation.";
+
+        if (data?.classroom_group) {
+
+          message = Array.isArray(
+            data.classroom_group
+          )
+            ? data.classroom_group[0]
+            : data.classroom_group;
+
+        } else if (data?.classroom) {
+
+          message = Array.isArray(
+            data.classroom
+          )
+            ? data.classroom[0]
+            : data.classroom;
+
+        } else if (data?.subject) {
+
+          message = Array.isArray(
+            data.subject
+          )
+            ? data.subject[0]
+            : data.subject;
+
+        } else if (data?.detail) {
+
+          message =
+            data.detail;
+
+        }
+
+        setError(message);
+
+      } finally {
+
+        setSubmitting(false);
+
+      }
+
+    };
+
+  // ==========================================================
+  // PUBLICATION
+  // ==========================================================
+
+  const publishAssessment =
+    async (
+      id: string
+    ) => {
+
+      try {
+
+        setError("");
 
         await api.post(
 
-          "/academics/assessments/",
+          `/academics/assessments/${id}/publish/`
 
-          {
-            ...form,
-            category,
-          }
+        );
 
+        await loadData();
+
+      } catch (error: any) {
+
+        console.error(
+          "Erreur publication :",
+          error?.response?.data ||
+          error
+        );
+
+        setError(
+          error?.response?.data?.detail ||
+          "Impossible de publier l'évaluation."
         );
 
       }
 
-      resetForm();
+    };
 
-      await loadData();
+  // ==========================================================
+  // SUPPRESSION
+  // ==========================================================
 
-    } catch {
+  const deleteAssessment =
+    async (
+      id: string
+    ) => {
 
-      setError(
+      if (
+        !confirm(
+          "Supprimer cette évaluation ?"
+        )
+      ) {
 
-        editingAssessment
+        return;
 
-          ? "Impossible de modifier l'évaluation."
+      }
 
-          : "Impossible de créer l'évaluation."
+      try {
 
-      );
+        setError("");
 
-    } finally {
+        await api.delete(
 
-      setSubmitting(false);
+          `/academics/assessments/${id}/`
 
-    }
+        );
 
-  };
+        await loadData();
 
-  /**
-   * Publication
-   */
-  const publishAssessment = async (
-    id: string
-  ) => {
+      } catch (error: any) {
 
-    try {
+        console.error(
+          "Erreur suppression :",
+          error?.response?.data ||
+          error
+        );
 
-      await api.post(
+        setError(
+          error?.response?.data?.detail ||
+          "Impossible de supprimer l'évaluation."
+        );
 
-        `/academics/assessments/${id}/publish/`
+      }
 
-      );
+    };
 
-      await loadData();
+  // ==========================================================
+  // FERMETURE ÉDITION
+  // ==========================================================
 
-    } catch {
-
-      setError(
-        "Impossible de publier l'évaluation."
-      );
-
-    }
-
-  };
-
-  /**
-   * Suppression
-   */
-  const deleteAssessment = async (
-    id: string
-  ) => {
-
-    if (
-      !confirm(
-        "Supprimer cette évaluation ?"
-      )
-    ) return;
-
-    try {
-
-      await api.delete(
-
-        `/academics/assessments/${id}/`
-
-      );
-
-      await loadData();
-
-    } catch {
-
-      setError(
-        "Impossible de supprimer l'évaluation."
-      );
-
-    }
-
-  };
-
-  /**
-   * Fin édition
-   */
   const closeEdition = () => {
 
     resetForm();
 
   };
 
-  /**
-   * Filtres locaux
-   */
+  // ==========================================================
+  // FILTRES
+  // ==========================================================
+
   const filteredAssessments =
-    useMemo(() => {
-     
-      return assessments.filter(
+    useMemo(
+      () => {
 
-        (assessment) => {
+        return assessments.filter(
+          (assessment) => {
 
-          const search =
-            filters.search.toLowerCase();
+            const search =
+              filters.search
+                .toLowerCase();
 
-          return (
+            return (
 
-            (
+              (
+                !search ||
 
-              !search ||
+                assessment.title
+                  .toLowerCase()
+                  .includes(search)
+              )
 
-              assessment.title
-                .toLowerCase()
-                .includes(search)
+              &&
 
-            )
+              (
+                !filters.classroom ||
 
-            &&
+                assessment.classroom ===
+                filters.classroom
+              )
 
-            (
+              &&
 
-              !filters.classroom ||
+              (
+                !filters.subject ||
 
-              assessment.classroom ===
-              filters.classroom
+                assessment.subject ===
+                filters.subject
+              )
 
-            )
+              &&
 
-            &&
+              (
+                !filters.term ||
 
-            (
+                assessment.term ===
+                filters.term
+              )
 
-              !filters.subject ||
+              &&
 
-              assessment.subject ===
-              filters.subject
+              (
+                !filters.assessment_type ||
 
-            )
+                assessment.assessment_type ===
+                filters.assessment_type
+              )
 
-            &&
+            );
 
-            (
+          }
+        );
 
-              !filters.term ||
+      },
+      [
+        assessments,
+        filters,
+      ]
+    );
 
-              assessment.term ===
-              filters.term
+  // ==========================================================
+  // SUMMARY
+  // ==========================================================
 
-            )
+  const summary =
+    useMemo<AssessmentSummary>(
+      () => ({
 
-            &&
+        total:
+          filteredAssessments.length,
 
-            (
-
-              !filters.assessment_type ||
-
+        homework:
+          filteredAssessments.filter(
+            (assessment) =>
               assessment.assessment_type ===
-              filters.assessment_type
+              "homework"
+          ).length,
 
-            )
+        test:
+          filteredAssessments.filter(
+            (assessment) =>
+              assessment.assessment_type ===
+              "test"
+          ).length,
 
-          );
+        exam:
+          filteredAssessments.filter(
+            (assessment) =>
+              assessment.assessment_type ===
+              "exam"
+          ).length,
 
-        }
+      }),
+      [
+        filteredAssessments,
+      ]
+    );
 
-      );
+  // ==========================================================
+  // INITIALISATION
+  // ==========================================================
 
-    }, [
+  useEffect(
+    () => {
 
-      assessments,
+      loadData();
 
-      filters,
+    },
+    [loadData]
+  );
 
-    ]);
-
-    /* Tableau des types d'évaluations */
-    const summary = useMemo<AssessmentSummary>(() => ({
-
-      total: filteredAssessments.length,
-    
-      homework: filteredAssessments.filter(
-        a => a.assessment_type === "homework"
-      ).length,
-    
-      test: filteredAssessments.filter(
-        a => a.assessment_type === "test"
-      ).length,
-    
-      exam: filteredAssessments.filter(
-        a => a.assessment_type === "exam"
-      ).length,
-    
-    }), [filteredAssessments]);
-
-  useEffect(() => {
-
-    loadData();
-
-  }, [loadData]);
+  // ==========================================================
+  // RETURN
+  // ==========================================================
 
   return {
 
@@ -476,10 +698,9 @@ export function useAssessment(
 
     closeEdition,
 
-    reload: loadData,
-    
+    reload:
+      loadData,
 
   };
-  
 
 }

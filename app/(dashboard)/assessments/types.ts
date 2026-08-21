@@ -11,27 +11,61 @@ export type AssessmentStatus =
   | "published"
   | "republish_required";
 
-  export type AssessmentCategory =
+export type AssessmentCategory =
   | "class"
   | "scheduled";
+
+/* ===========================================================
+ * GROUPE DE CLASSE
+ * =========================================================== */
+
+export interface ClassroomGroup {
+
+  id: string;
+
+  name: string;
+
+  display_order?: number;
+
+  is_active?: boolean;
+
+}
+
+/* ===========================================================
+ * ASSESSMENT
+ * =========================================================== */
 
 export interface Assessment {
 
   id: string;
 
   classroom: string;
+
   classroom_name: string;
 
+  /**
+   * Groupe concerné par l'évaluation.
+   *
+   * null = toute la classe.
+   */
+  classroom_group?: string | null;
+
+  classroom_group_name?: string | null;
+
   subject: string;
+
   subject_name: string;
 
   teacher: string;
+
   teacher_name: string;
 
   created_by: string;
+
   created_by_name: string;
 
   term: string;
+
   term_name: string;
 
   title: string;
@@ -63,9 +97,14 @@ export interface Assessment {
   graded_students?: number;
 
   total_students?: number;
+
   category: AssessmentCategory;
 
 }
+
+/* ===========================================================
+ * CLASSE
+ * =========================================================== */
 
 export interface Classroom {
 
@@ -73,7 +112,13 @@ export interface Classroom {
 
   name: string;
 
+  groups?: ClassroomGroup[];
+
 }
+
+/* ===========================================================
+ * MATIÈRE
+ * =========================================================== */
 
 export interface Subject {
 
@@ -85,6 +130,10 @@ export interface Subject {
 
 }
 
+/* ===========================================================
+ * PÉRIODE
+ * =========================================================== */
+
 export interface Term {
 
   id: string;
@@ -93,9 +142,20 @@ export interface Term {
 
 }
 
+/* ===========================================================
+ * FORMULAIRE ÉVALUATION
+ * =========================================================== */
+
 export interface AssessmentFormData {
 
   classroom: string;
+
+  /**
+   * Groupe facultatif.
+   *
+   * "" = toute la classe
+   */
+  classroom_group: string;
 
   subject: string;
 
@@ -115,6 +175,10 @@ export interface AssessmentFormData {
 
 }
 
+/* ===========================================================
+ * SUMMARY
+ * =========================================================== */
+
 export interface AssessmentSummary {
 
   total: number;
@@ -126,6 +190,10 @@ export interface AssessmentSummary {
   exam: number;
 
 }
+
+/* ===========================================================
+ * FILTERS
+ * =========================================================== */
 
 export interface AssessmentFilters {
 
@@ -142,7 +210,7 @@ export interface AssessmentFilters {
 }
 
 /* ===========================================================
- * Libellés
+ * LIBELLÉS
  * =========================================================== */
 
 export const ASSESSMENT_TYPE_LABELS: Record<
@@ -178,7 +246,7 @@ export const ASSESSMENT_STATUS_LABELS: Record<
 };
 
 /* ===========================================================
- * Couleurs des badges
+ * COULEURS DES BADGES
  * =========================================================== */
 
 export const ASSESSMENT_STATUS_COLORS: Record<
@@ -199,7 +267,7 @@ export const ASSESSMENT_STATUS_COLORS: Record<
 };
 
 /* ===========================================================
- * Options Select
+ * OPTIONS TYPES D'ÉVALUATIONS
  * =========================================================== */
 
 export const ASSESSMENT_TYPE_OPTIONS = [
@@ -217,6 +285,11 @@ export const ASSESSMENT_TYPE_OPTIONS = [
   {
     value: "exam",
     label: "Examen",
+  },
+
+  {
+    value: "compo",
+    label: "Composition",
   },
 
 ];
@@ -252,35 +325,23 @@ export interface HomeworkSummary {
 export const HOMEWORK_STATUS_OPTIONS = [
 
   {
-
     value: "",
-
     label: "Tous les statuts",
-
   },
 
   {
-
     value: "pending",
-
     label: "À rendre",
-
   },
 
   {
-
     value: "completed",
-
     label: "Terminé",
-
   },
 
   {
-
     value: "overdue",
-
     label: "En retard",
-
   },
 
 ];

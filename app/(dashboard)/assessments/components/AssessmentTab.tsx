@@ -345,7 +345,7 @@ export default function AssessmentTab() {
 
             onChange={setForm}
 
-            onSubmit={handleSave}
+           
 
           />
 
