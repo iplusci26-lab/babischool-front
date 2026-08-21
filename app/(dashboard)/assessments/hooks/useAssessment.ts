@@ -378,10 +378,11 @@ export function useAssessment(
 
       } catch (error: any) {
 
+        console.log("------------------- ", error)
         console.error(
           "Erreur sauvegarde évaluation :",
           error?.response?.data ||
-          error.non_field_errors
+          error
         );
 
         const data =
