@@ -51,7 +51,7 @@ export function useStudents() {
   
     try {
       setSavingStudent(true);
-  
+      
       await api.patch(
         `/students/${selectedStudent.id}/`,
         data

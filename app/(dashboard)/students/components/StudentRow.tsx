@@ -26,7 +26,41 @@ export default function StudentRow({
   onEdit,
 }: StudentRowProps) {
   const initials = `${student.first_name?.charAt(0) ?? ""}${student.last_name?.charAt(0) ?? ""}`;
-  console.log("----------------- ",student);
+console.log(student)
+
+ // ==========================================================
+  // FORMATAGE DATE
+  // ==========================================================
+
+  /**
+   * Formate une date provenant de l'API.
+   *
+   * IMPORTANT :
+   * On protège le composant contre les dates invalides.
+   * Une mauvaise date ne doit jamais empêcher le select
+   * des évaluations de fonctionner.
+   */
+  function formatDate(
+    date: string | null | undefined
+  ) {
+    if (!date) {
+      return "Date inconnue";
+    }
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "Date inconnue";
+    }
+
+    return new Intl.DateTimeFormat("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(parsedDate);
+  }
+
+
   return (
     <tr className="border-t transition hover:bg-gray-50">
 
@@ -94,6 +128,17 @@ export default function StudentRow({
 
         </div>
 
+      </td>
+
+
+      {/* ================================================== */}
+      {/* Date de naissance */}
+      {/* ================================================== */}
+
+      <td className="px-4 py-3">
+        <span className="font-medium text-gray-700">
+          {formatDate(student.date_of_birth)}
+        </span>
       </td>
 
       {/* ================================================== */}
@@ -171,7 +216,7 @@ export default function StudentRow({
       {/* AFFECTATION */}
       {/* ================================================== */}
 
-      <td className="px-4 py-3">
+      <td className="px-4 py-3 text-center">
 
         <StatusBadge
           label={
@@ -192,7 +237,7 @@ export default function StudentRow({
       {/* REDOUBLANT */}
       {/* ================================================== */}
 
-      <td className="px-4 py-3">
+      <td className="px-4 py-3 text-center">
 
         <StatusBadge
           label={
