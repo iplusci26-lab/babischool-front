@@ -799,13 +799,14 @@ export default function GradesPage() {
                 key={item.id}
                 value={item.id}
               >
-                {item.title}
-                {" • "}
+                
                 {item.subject_name}
                 {" • "}
                 {item.classroom_name}
                 {" • "}
                 {item.term_name}
+                {" • "}
+                {item.created_at}
               </option>
             )
           )}
@@ -849,7 +850,7 @@ export default function GradesPage() {
                   <div className="flex flex-wrap items-center gap-3">
 
                     <h2 className="text-2xl font-semibold text-gray-900">
-                      {assessment.title}
+                      {assessment.created_at}
                     </h2>
 
                     {assessment.is_locked && (
