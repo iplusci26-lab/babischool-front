@@ -14,6 +14,10 @@ export interface Student {
     gender: "M" | "F";
   
     date_of_birth?: string;
+
+    is_assigned: boolean;
+    is_repeating: boolean;
+    birth_place: string;
   
     classroom: number;
     classroom_name: string;
