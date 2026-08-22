@@ -790,6 +790,7 @@ export default function GradesPage() {
           value={selected}
           onChange={(e) => {
 
+            console.log("---*** ", e.target.value)
             const value =
               e.target.value;
 
