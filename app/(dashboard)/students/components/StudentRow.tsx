@@ -202,7 +202,7 @@ export default function StudentRow({
           }
           color={
             student.is_repeating
-              ? "orange"
+              ? "yellow"
               : "gray"
           }
         />

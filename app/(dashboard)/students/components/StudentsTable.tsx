@@ -29,6 +29,10 @@ export default function StudentTable({
   onView,
   onEdit,
 }: StudentTableProps) {
+  // ==========================================================
+  // LOADING
+  // ==========================================================
+
   if (loading) {
     return (
       <div className="rounded-2xl border bg-white p-8 text-center shadow-sm">
@@ -37,17 +41,29 @@ export default function StudentTable({
     );
   }
 
+  // ==========================================================
+  // AUCUN ÉLÈVE
+  // ==========================================================
+
   if (!students.length) {
     return (
-      <div className="rounded-2xl border bg-white p-8 text-center shadow-sm text-gray-500">
+      <div className="rounded-2xl border bg-white p-8 text-center text-gray-500 shadow-sm">
         Aucun élève trouvé.
       </div>
     );
   }
 
+  // ==========================================================
+  // SÉLECTION
+  // ==========================================================
+
   const allSelected =
     students.length > 0 &&
     selectedStudents.length === students.length;
+
+  // ==========================================================
+  // RENDER
+  // ==========================================================
 
   return (
     <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
@@ -56,9 +72,15 @@ export default function StudentTable({
 
         <table className="min-w-full">
 
+          {/* ================================================== */}
+          {/* HEADER */}
+          {/* ================================================== */}
+
           <thead className="bg-gray-50">
 
             <tr>
+
+              {/* CHECKBOX */}
 
               <th className="w-12 px-4 py-3">
 
@@ -66,31 +88,56 @@ export default function StudentTable({
                   type="checkbox"
                   checked={allSelected}
                   onChange={onSelectAll}
+                  className="cursor-pointer"
                 />
 
               </th>
 
-              <th className="px-4 py-3 text-left text-sm font-semibold">
+              {/* ÉLÈVE */}
+
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                 Élève
               </th>
 
-              <th className="px-4 py-3 text-left text-sm font-semibold">
+              {/* MATRICULE */}
+
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                 Matricule
               </th>
 
-              <th className="px-4 py-3 text-left text-sm font-semibold">
+              {/* CLASSE */}
+
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                 Classe
               </th>
 
-              <th className="px-4 py-3 text-left text-sm font-semibold">
+              {/* PARENT */}
+
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                 Parent
               </th>
 
-              <th className="px-4 py-3 text-left text-sm font-semibold">
+              {/* SEXE */}
+
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                 Sexe
               </th>
 
-              <th className="w-36 px-4 py-3 text-center text-sm font-semibold">
+              {/* AFFECTATION */}
+
+              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                Affectation
+              </th>
+
+              {/* REDOUBLANT */}
+
+              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                Redoublant
+              </th>
+
+              {/* ACTIONS */}
+
+              <th className="w-36 px-4 py-3 text-center text-sm font-semibold text-gray-700">
                 Actions
               </th>
 
@@ -98,9 +145,14 @@ export default function StudentTable({
 
           </thead>
 
+          {/* ================================================== */}
+          {/* BODY */}
+          {/* ================================================== */}
+
           <tbody>
 
             {students.map((student) => (
+
               <StudentRow
                 key={student.id}
                 student={student}
@@ -108,9 +160,12 @@ export default function StudentTable({
                 onToggleSelection={() =>
                   onToggleSelection(student.id)
                 }
-                onView={() => onView(student)}
+                onView={() =>
+                  onView(student)
+                }
                 onEdit={onEdit}
               />
+
             ))}
 
           </tbody>
