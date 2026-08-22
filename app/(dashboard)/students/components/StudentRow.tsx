@@ -39,6 +39,7 @@ export default function StudentRow({
           type="checkbox"
           checked={selected}
           onChange={onToggleSelection}
+          className="cursor-pointer"
         />
       </td>
 
@@ -50,14 +51,14 @@ export default function StudentRow({
 
         <div className="flex items-center gap-3">
 
-          {/* PHOTO */}
+          {/* PHOTO / INITIALES */}
 
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-violet-100 font-semibold text-violet-700">
 
             {student.photo ? (
               <img
                 src={student.photo}
-                alt={student.first_name}
+                alt={student.display_name}
                 className="h-full w-full object-cover"
               />
             ) : (
@@ -66,7 +67,7 @@ export default function StudentRow({
 
           </div>
 
-          {/* INFORMATIONS */}
+          {/* NOM + INFORMATIONS */}
 
           <div className="min-w-0">
 
@@ -74,26 +75,17 @@ export default function StudentRow({
               {student.display_name}
             </div>
 
-            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
+            <div className="mt-1 text-xs text-gray-500">
 
-              {student.date_of_birth && (
-                <span>
-                  Né(e) le {student.date_of_birth}
-                </span>
-              )}
-
-              {student.birth_place && (
+              {student.birth_place ? (
                 <>
-                  {student.date_of_birth && (
-                    <span className="text-gray-300">
-                      •
-                    </span>
-                  )}
-
-                  <span>
+                  Né(e) à{" "}
+                  <span className="font-medium text-gray-600">
                     {student.birth_place}
                   </span>
                 </>
+              ) : (
+                "Lieu de naissance non renseigné"
               )}
 
             </div>
@@ -109,11 +101,9 @@ export default function StudentRow({
       {/* ================================================== */}
 
       <td className="px-4 py-3">
-
         <span className="font-medium text-gray-700">
           {student.student_number}
         </span>
-
       </td>
 
       {/* ================================================== */}
