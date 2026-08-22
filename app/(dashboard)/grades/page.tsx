@@ -41,24 +41,19 @@ export default function GradesPage() {
   // LOADING
   // ==========================================================
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [saving, setSaving] =
-    useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const [publishing, setPublishing] =
-    useState(false);
+  const [publishing, setPublishing] = useState(false);
 
   // ==========================================================
   // FILTRES
   // ==========================================================
 
-  const [search, setSearch] =
-    useState("");
+  const [search, setSearch] = useState("");
 
-  const [termFilter, setTermFilter] =
-    useState("");
+  const [termFilter, setTermFilter] = useState("");
 
   const [classroomFilter, setClassroomFilter] =
     useState("");
@@ -77,6 +72,40 @@ export default function GradesPage() {
     useRef<(HTMLInputElement | null)[]>([]);
 
   // ==========================================================
+  // FORMATAGE DATE
+  // ==========================================================
+
+  /**
+   * Formate une date provenant de l'API.
+   *
+   * IMPORTANT :
+   * On protège le composant contre les dates invalides.
+   * Une mauvaise date ne doit jamais empêcher le select
+   * des évaluations de fonctionner.
+   */
+  function formatDate(
+    date: string | null | undefined
+  ) {
+    if (!date) {
+      return "Date inconnue";
+    }
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "Date inconnue";
+    }
+
+    return new Intl.DateTimeFormat("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(parsedDate);
+  }
+
+  // ==========================================================
   // CHARGER LES ÉVALUATIONS
   // ==========================================================
 
@@ -86,12 +115,26 @@ export default function GradesPage() {
         "/academics/assessments/"
       );
 
-      console.log("------------------- ",res.data)
+      console.log(
+        "========== ÉVALUATIONS =========="
+      );
+
+      console.log(
+        "DATA :",
+        res.data
+      );
+
+      const data =
+        res.data?.results || res.data || [];
+
       setAssessments(
-        res.data.results || res.data
+        Array.isArray(data) ? data : []
       );
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Erreur chargement évaluations :",
+        error
+      );
 
       toast.error(
         "Impossible de charger les évaluations."
@@ -103,96 +146,99 @@ export default function GradesPage() {
   // CHARGER LES NOTES
   // ==========================================================
 
-  const loadGrades = async (assessmentId: string) => {
+  const loadGrades = async (
+    assessmentId: string
+  ) => {
     if (!assessmentId) {
       setAssessment(null);
       setStatistics(null);
       setGrades([]);
       return;
     }
-  
+
     try {
       setLoading(true);
-  
+
       console.log(
         "========== CHARGEMENT ÉVALUATION =========="
       );
-  
+
       console.log(
         "Assessment ID :",
         assessmentId
       );
-  
+
       const url =
         `/academics/assessments/${assessmentId}/grades/`;
-  
+
       console.log(
         "URL :",
         url
       );
-  
+
       const res = await api.get(url);
-  
+
       console.log(
         "STATUS :",
         res.status
       );
-  
+
       console.log(
         "DATA COMPLÈTE :",
         res.data
       );
-  
+
       console.log(
         "ASSESSMENT :",
         res.data?.assessment
       );
-  
+
       console.log(
         "STATISTICS :",
         res.data?.statistics
       );
-  
+
       console.log(
         "STUDENTS :",
         res.data?.students
       );
-  
+
       setAssessment(
         res.data?.assessment ?? null
       );
-  
+
       setStatistics(
         res.data?.statistics ?? null
       );
-  
+
       setGrades(
-        res.data?.students ?? []
+        Array.isArray(
+          res.data?.students
+        )
+          ? res.data.students
+          : []
       );
-  
     } catch (error: any) {
-  
       console.error(
         "========== ERREUR CHARGEMENT =========="
       );
-  
+
       console.error(error);
-  
+
       console.error(
         "STATUS :",
         error?.response?.status
       );
-  
+
       console.error(
         "DATA ERREUR :",
         error?.response?.data
       );
-  
+
       toast.error(
         error?.response?.data?.detail ||
-        "Impossible de charger les notes."
+          "Impossible de charger les notes."
       );
-  
     } finally {
       setLoading(false);
     }
@@ -257,22 +303,27 @@ export default function GradesPage() {
     useMemo(() => {
       return assessments.filter(
         (item) => {
+          const normalizedSearch =
+            search
+              .trim()
+              .toLowerCase();
+
           const matchesSearch =
-            !search ||
+            !normalizedSearch ||
             item.title
               ?.toLowerCase()
               .includes(
-                search.toLowerCase()
+                normalizedSearch
               ) ||
             item.subject_name
               ?.toLowerCase()
               .includes(
-                search.toLowerCase()
+                normalizedSearch
               ) ||
             item.classroom_name
               ?.toLowerCase()
               .includes(
-                search.toLowerCase()
+                normalizedSearch
               );
 
           const matchesTerm =
@@ -326,11 +377,11 @@ export default function GradesPage() {
   };
 
   const hasFilters =
-    search ||
-    termFilter ||
-    classroomFilter ||
-    subjectFilter ||
-    statusFilter;
+    Boolean(search) ||
+    Boolean(termFilter) ||
+    Boolean(classroomFilter) ||
+    Boolean(subjectFilter) ||
+    Boolean(statusFilter);
 
   // ==========================================================
   // MODIFICATION D'UNE NOTE
@@ -406,9 +457,7 @@ export default function GradesPage() {
         }
       );
 
-      await loadGrades(
-        selected
-      );
+      await loadGrades(selected);
 
       await loadAssessments();
 
@@ -430,11 +479,7 @@ export default function GradesPage() {
             "Cette évaluation est publiée. Les notes ne sont plus modifiables."
         );
 
-        // On recharge l'évaluation
-        // pour synchroniser l'interface.
-        await loadGrades(
-          selected
-        );
+        await loadGrades(selected);
 
         return;
       }
@@ -479,9 +524,7 @@ export default function GradesPage() {
         `/academics/assessments/${selected}/publish/`
       );
 
-      await loadGrades(
-        selected
-      );
+      await loadGrades(selected);
 
       await loadAssessments();
 
@@ -587,16 +630,6 @@ export default function GradesPage() {
 
     return "text-red-600";
   };
-
-  function formatDate(date: string) {
-    return new Intl.DateTimeFormat("fr-FR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(date));
-  }
 
   // ==========================================================
   // RENDER
@@ -844,12 +877,14 @@ export default function GradesPage() {
           className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-[#6214BE] focus:ring-2 focus:ring-[#6214BE]/20"
           value={selected}
           onChange={(e) => {
-
-           
             const value =
               e.target.value;
-            console.log("ÉVALUATION SÉLECTIONNÉE :",
-                value);
+
+            console.log(
+              "ÉVALUATION SÉLECTIONNÉE :",
+              value
+            );
+
             setSelected(value);
 
             loadGrades(value);
@@ -866,14 +901,15 @@ export default function GradesPage() {
                 key={item.id}
                 value={item.id}
               >
-                
                 {item.subject_name}
                 {" • "}
                 {item.classroom_name}
                 {" • "}
                 {item.term_name}
                 {" • "}
-                {formatDate(item.created_at)}
+                {formatDate(
+                  item.created_at
+                )}
               </option>
             )
           )}
@@ -917,7 +953,7 @@ export default function GradesPage() {
                   <div className="flex flex-wrap items-center gap-3">
 
                     <h2 className="text-2xl font-semibold text-gray-900">
-                      {formatDate(assessment.created_at)}
+                      {assessment.title}
                     </h2>
 
                     {assessment.is_locked && (
@@ -943,6 +979,12 @@ export default function GradesPage() {
                         {" • "}
                         {assessment.term_name}
                       </>
+                    )}
+
+                    {" • "}
+
+                    {formatDate(
+                      assessment.created_at
                     )}
 
                   </p>
