@@ -12,14 +12,9 @@ import { Student } from "../types";
 
 interface StudentRowProps {
   student: Student;
-
   selected: boolean;
-
-  
-  onToggleSelection: () =>void;
-
+  onToggleSelection: () => void;
   onView: () => void;
-
   onEdit: (student: Student) => void;
 }
 
@@ -30,36 +25,40 @@ export default function StudentRow({
   onView,
   onEdit,
 }: StudentRowProps) {
-  const initials = `${student.first_name.charAt(0)}${student.last_name.charAt(0)}`;
-  
+  const initials = `${student.first_name?.charAt(0) ?? ""}${student.last_name?.charAt(0) ?? ""}`;
+
   return (
     <tr className="border-t transition hover:bg-gray-50">
 
-      {/* Checkbox */}
+      {/* ================================================== */}
+      {/* CHECKBOX */}
+      {/* ================================================== */}
 
       <td className="px-4 py-3">
-
         <input
           type="checkbox"
           checked={selected}
           onChange={onToggleSelection}
         />
-
       </td>
 
-      {/* Élève */}
+      {/* ================================================== */}
+      {/* ÉLÈVE */}
+      {/* ================================================== */}
 
       <td className="px-4 py-3">
 
         <div className="flex items-center gap-3">
 
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-violet-100 font-semibold text-violet-700">
+          {/* PHOTO */}
+
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-violet-100 font-semibold text-violet-700">
 
             {student.photo ? (
               <img
                 src={student.photo}
                 alt={student.first_name}
-                className="h-full w-full rounded-full object-cover"
+                className="h-full w-full object-cover"
               />
             ) : (
               initials
@@ -67,17 +66,37 @@ export default function StudentRow({
 
           </div>
 
-          <div>
+          {/* INFORMATIONS */}
+
+          <div className="min-w-0">
 
             <div className="font-semibold text-gray-900">
               {student.display_name}
             </div>
 
-            {student.date_of_birth && (
-              <div className="text-sm text-gray-500">
-                {student.date_of_birth}
-              </div>
-            )}
+            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
+
+              {student.date_of_birth && (
+                <span>
+                  Né(e) le {student.date_of_birth}
+                </span>
+              )}
+
+              {student.birth_place && (
+                <>
+                  {student.date_of_birth && (
+                    <span className="text-gray-300">
+                      •
+                    </span>
+                  )}
+
+                  <span>
+                    {student.birth_place}
+                  </span>
+                </>
+              )}
+
+            </div>
 
           </div>
 
@@ -85,34 +104,51 @@ export default function StudentRow({
 
       </td>
 
-      {/* Matricule */}
+      {/* ================================================== */}
+      {/* MATRICULE */}
+      {/* ================================================== */}
 
       <td className="px-4 py-3">
-        <span className="font-medium">
+
+        <span className="font-medium text-gray-700">
           {student.student_number}
         </span>
+
       </td>
 
-      {/* Classe */}
+      {/* ================================================== */}
+      {/* CLASSE */}
+      {/* ================================================== */}
 
       <td className="px-4 py-3">
 
-        <StatusBadge
-          label={student.classroom_name}
-          color="purple"
-        />
+        {student.classroom_name ? (
+          <StatusBadge
+            label={student.classroom_name}
+            color="purple"
+          />
+        ) : (
+          <span className="text-sm text-gray-400">
+            Non affectée
+          </span>
+        )}
 
       </td>
 
-      {/* Parent */}
+      {/* ================================================== */}
+      {/* PARENT */}
+      {/* ================================================== */}
 
       <td className="px-4 py-3">
 
         <div className="flex items-center gap-2">
 
-          <User size={16} />
+          <User
+            size={16}
+            className="shrink-0 text-gray-500"
+          />
 
-          <span>
+          <span className="text-gray-700">
             {student.parent_phone || "-"}
           </span>
 
@@ -120,7 +156,9 @@ export default function StudentRow({
 
       </td>
 
-      {/* Sexe */}
+      {/* ================================================== */}
+      {/* SEXE */}
+      {/* ================================================== */}
 
       <td className="px-4 py-3">
 
@@ -139,23 +177,73 @@ export default function StudentRow({
 
       </td>
 
-      {/* Actions */}
+      {/* ================================================== */}
+      {/* AFFECTATION */}
+      {/* ================================================== */}
+
+      <td className="px-4 py-3">
+
+        <StatusBadge
+          label={
+            student.is_assigned
+              ? "Affecté"
+              : "Non affecté"
+          }
+          color={
+            student.is_assigned
+              ? "green"
+              : "gray"
+          }
+        />
+
+      </td>
+
+      {/* ================================================== */}
+      {/* REDOUBLANT */}
+      {/* ================================================== */}
+
+      <td className="px-4 py-3">
+
+        <StatusBadge
+          label={
+            student.is_repeating
+              ? "Redoublant"
+              : "Non redoublant"
+          }
+          color={
+            student.is_repeating
+              ? "orange"
+              : "gray"
+          }
+        />
+
+      </td>
+
+      {/* ================================================== */}
+      {/* ACTIONS */}
+      {/* ================================================== */}
 
       <td className="px-4 py-3">
 
         <div className="flex justify-center gap-2">
 
+          {/* VOIR */}
+
           <button
+            type="button"
             onClick={onView}
-            className="rounded-lg cursor-pointer p-2 text-blue-600 transition hover:bg-blue-50"
+            className="cursor-pointer rounded-lg p-2 text-blue-600 transition hover:bg-blue-50"
             title="Voir"
           >
             <Eye size={18} />
           </button>
 
+          {/* MODIFIER */}
+
           <button
-           onClick={() => onEdit(student)}
-            className="rounded-lg cursor-pointer p-2 text-amber-600 transition hover:bg-amber-50"
+            type="button"
+            onClick={() => onEdit(student)}
+            className="cursor-pointer rounded-lg p-2 text-amber-600 transition hover:bg-amber-50"
             title="Modifier"
           >
             <Pencil size={18} />

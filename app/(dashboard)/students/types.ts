@@ -13,7 +13,7 @@ export interface Student {
   
     gender: "M" | "F";
   
-    date_of_birth?: string;
+    date_of_birth?: string | null;
 
     is_assigned: boolean;
     is_repeating: boolean;
