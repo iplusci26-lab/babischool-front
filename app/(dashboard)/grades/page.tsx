@@ -86,7 +86,7 @@ export default function GradesPage() {
         "/academics/assessments/"
       );
 
-      console.log("------------------- ",res.data.results)
+      console.log("------------------- ",res.data)
       setAssessments(
         res.data.results || res.data
       );
