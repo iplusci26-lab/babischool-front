@@ -26,7 +26,7 @@ export default function StudentRow({
   onEdit,
 }: StudentRowProps) {
   const initials = `${student.first_name?.charAt(0) ?? ""}${student.last_name?.charAt(0) ?? ""}`;
-
+  console.log("----------------- ",student);
   return (
     <tr className="border-t transition hover:bg-gray-50">
 
