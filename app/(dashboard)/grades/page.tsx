@@ -533,6 +533,16 @@ export default function GradesPage() {
     return "text-red-600";
   };
 
+  function formatDate(date: string) {
+    return new Intl.DateTimeFormat("fr-FR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(date));
+  }
+
   // ==========================================================
   // RENDER
   // ==========================================================
@@ -807,6 +817,7 @@ export default function GradesPage() {
                 {item.term_name}
                 {" • "}
                 {item.created_at}
+                {formatDate(item.created_at)}
               </option>
             )
           )}
@@ -850,7 +861,7 @@ export default function GradesPage() {
                   <div className="flex flex-wrap items-center gap-3">
 
                     <h2 className="text-2xl font-semibold text-gray-900">
-                      {assessment.created_at}
+                      {formatDate(assessment.created_at)}
                     </h2>
 
                     {assessment.is_locked && (
