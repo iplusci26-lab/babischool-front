@@ -103,41 +103,96 @@ export default function GradesPage() {
   // CHARGER LES NOTES
   // ==========================================================
 
-  const loadGrades = async (
-    assessmentId: string
-  ) => {
+  const loadGrades = async (assessmentId: string) => {
     if (!assessmentId) {
       setAssessment(null);
       setStatistics(null);
       setGrades([]);
       return;
     }
-
+  
     try {
       setLoading(true);
-
-      const res = await api.get(
-        `/academics/assessments/${assessmentId}/grades/`
+  
+      console.log(
+        "========== CHARGEMENT ÉVALUATION =========="
       );
-
+  
+      console.log(
+        "Assessment ID :",
+        assessmentId
+      );
+  
+      const url =
+        `/academics/assessments/${assessmentId}/grades/`;
+  
+      console.log(
+        "URL :",
+        url
+      );
+  
+      const res = await api.get(url);
+  
+      console.log(
+        "STATUS :",
+        res.status
+      );
+  
+      console.log(
+        "DATA COMPLÈTE :",
+        res.data
+      );
+  
+      console.log(
+        "ASSESSMENT :",
+        res.data?.assessment
+      );
+  
+      console.log(
+        "STATISTICS :",
+        res.data?.statistics
+      );
+  
+      console.log(
+        "STUDENTS :",
+        res.data?.students
+      );
+  
       setAssessment(
-        res.data.assessment
+        res.data?.assessment ?? null
       );
-
+  
       setStatistics(
-        res.data.statistics
+        res.data?.statistics ?? null
       );
-
+  
       setGrades(
-        res.data.students || []
+        res.data?.students ?? []
       );
+  
     } catch (error: any) {
+  
+      console.error(
+        "========== ERREUR CHARGEMENT =========="
+      );
+  
       console.error(error);
-
+  
+      console.error(
+        "STATUS :",
+        error?.response?.status
+      );
+  
+      console.error(
+        "DATA ERREUR :",
+        error?.response?.data
+      );
+  
       toast.error(
         error?.response?.data?.detail ||
-          "Impossible de charger les notes."
+        "Impossible de charger les notes."
       );
+  
     } finally {
       setLoading(false);
     }
@@ -790,10 +845,11 @@ export default function GradesPage() {
           value={selected}
           onChange={(e) => {
 
-            console.log("---*** ", e.target.value)
+           
             const value =
               e.target.value;
-
+            console.log("ÉVALUATION SÉLECTIONNÉE :",
+                value);
             setSelected(value);
 
             loadGrades(value);
