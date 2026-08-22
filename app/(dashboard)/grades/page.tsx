@@ -816,7 +816,6 @@ export default function GradesPage() {
                 {" • "}
                 {item.term_name}
                 {" • "}
-                {item.created_at}
                 {formatDate(item.created_at)}
               </option>
             )
