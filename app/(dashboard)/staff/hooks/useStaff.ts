@@ -1,6 +1,14 @@
 import { api } from "@/lib/api";
 
-import { StaffFormData } from "../types";
+import {
+    StaffFormData,
+    StaffResponsibilityFormData,
+} from "../types";
+
+
+/* ==========================================================
+ * STAFF
+ * ========================================================== */
 
 export async function getStaff() {
 
@@ -11,6 +19,7 @@ export async function getStaff() {
 
 }
 
+
 export async function getRoles() {
 
     const res =
@@ -19,6 +28,7 @@ export async function getRoles() {
     return res.data.results || res.data;
 
 }
+
 
 export async function createStaff(
     data: StaffFormData
@@ -34,6 +44,7 @@ export async function createStaff(
 
 }
 
+
 export async function updateStaff(
     id: string,
     data: any,
@@ -46,6 +57,7 @@ export async function updateStaff(
 
 }
 
+
 export async function deleteStaff(
     id: string
 ) {
@@ -53,5 +65,96 @@ export async function deleteStaff(
     await api.delete(
         `/auth/staff/${id}/`
     );
+
+}
+
+
+/* ==========================================================
+ * RESPONSABILITÉS DU PERSONNEL
+ * ========================================================== */
+
+export async function getStaffResponsibilities(
+    staffId: string
+) {
+
+    const res =
+        await api.get(
+            `/auth/staff/${staffId}/responsibilities/`
+        );
+
+    return res.data.results || res.data;
+
+}
+
+
+export async function createStaffResponsibility(
+    staffId: string,
+    data: StaffResponsibilityFormData
+) {
+
+    const res =
+        await api.post(
+            `/auth/staff/${staffId}/responsibilities/`,
+            data
+        );
+
+    return res.data;
+
+}
+
+
+export async function updateStaffResponsibility(
+    staffId: string,
+    responsibilityId: string,
+    data: StaffResponsibilityFormData
+) {
+
+    const res =
+        await api.patch(
+            `/auth/staff/${staffId}/responsibilities/${responsibilityId}/`,
+            data
+        );
+
+    return res.data;
+
+}
+
+
+export async function deleteStaffResponsibility(
+    staffId: string,
+    responsibilityId: string
+) {
+
+    await api.delete(
+        `/auth/staff/${staffId}/responsibilities/${responsibilityId}/`
+    );
+
+}
+
+
+/* ==========================================================
+ * STRUCTURE ACADÉMIQUE
+ * ========================================================== */
+
+export async function getClassroomLevels() {
+
+    const res =
+        await api.get(
+            "/students/classroom-levels/"
+        );
+
+    return res.data.results || res.data;
+
+}
+
+
+export async function getClassrooms() {
+
+    const res =
+        await api.get(
+            "/students/classrooms/"
+        );
+
+    return res.data.results || res.data;
 
 }
