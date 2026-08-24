@@ -8,7 +8,8 @@ interface StatusBadgeProps {
     | "yellow"
     | "blue"
     | "gray"
-    | "purple";
+    | "purple"
+    | "orange";
 }
 
 const colors = {
@@ -29,6 +30,9 @@ const colors = {
 
   gray:
     "bg-gray-100 text-gray-700 border border-gray-200",
+
+  orange:
+    "bg-orange-100 text-orange-700 border border-orange-200",
 };
 
 export default function StatusBadge({

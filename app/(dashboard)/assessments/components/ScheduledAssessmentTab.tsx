@@ -262,6 +262,7 @@ export default function ScheduledAssessmentTab() {
               rounded-xl
               border
               px-5
+              cursor-pointer
               py-2
             "
 
@@ -284,6 +285,7 @@ export default function ScheduledAssessmentTab() {
               py-2
               font-medium
               text-white
+              cursor-pointer
               transition
               hover:bg-[#4F10A0]
               disabled:opacity-50

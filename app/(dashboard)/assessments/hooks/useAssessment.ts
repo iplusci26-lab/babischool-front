@@ -29,7 +29,7 @@ const INITIAL_FORM: AssessmentFormData = {
 
   term: "",
 
-  title: "",
+  //title: "",
 
   assessment_type: "test",
 
@@ -185,7 +185,7 @@ export function useAssessment(
         );
 
       } catch (error) {
-        console.log("---------------------- ,",error)
+       
         console.error(
           "Erreur chargement évaluations :",
           error
@@ -255,8 +255,8 @@ export function useAssessment(
       term:
         assessment.term,
 
-      title:
-        assessment.title,
+      /*title:
+        assessment.title,*/
 
       assessment_type:
         assessment.assessment_type,
@@ -303,8 +303,7 @@ export function useAssessment(
       term:
         form.term,
 
-      title:
-        form.title,
+      /*title:form.title,*/
 
       assessment_type:
         form.assessment_type,
@@ -545,7 +544,7 @@ export function useAssessment(
 
             return (
 
-              (
+              /**(
                 !search ||
 
                 assessment.title
@@ -553,7 +552,7 @@ export function useAssessment(
                   .includes(search)
               )
 
-              &&
+              &&*/
 
               (
                 !filters.classroom ||

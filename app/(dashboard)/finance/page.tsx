@@ -5,37 +5,33 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import {
-
   CreditCard,
-
   Wallet,
-
-  TrendingUp,
-
   AlertCircle,
-
   Search,
-
   Plus,
-
   BookOpen,
-
   Users,
-
 } from "lucide-react";
 
 import { api } from "@/lib/api";
 
+/* ============================================================
+ * FINANCE PAGE
+ * ============================================================ */
 
 export default function FinancePage() {
 
-  const [tab, setTab] = useState("dashboard");
+  const [tab, setTab] =
+    useState("dashboard");
 
   return (
 
     <div className="space-y-6">
 
-      {/* HEADER */}
+      {/* ======================================================
+       * HEADER
+       * ====================================================== */}
 
       <div className="flex items-center justify-between">
 
@@ -45,7 +41,7 @@ export default function FinancePage() {
             Comptabilité
           </h1>
 
-          <p className="text-gray-500 mt-1">
+          <p className="mt-1 text-gray-500">
             Bilan synthétisé de la comptabilité de l'établissement
           </p>
 
@@ -53,9 +49,12 @@ export default function FinancePage() {
 
       </div>
 
-      {/* NAV */}
 
-      <div className="flex gap-3 border-b overflow-x-auto">
+      {/* ======================================================
+       * NAVIGATION
+       * ====================================================== */}
+
+      <div className="flex gap-3 overflow-x-auto border-b">
 
         <Tab
           label="Tableau de bord"
@@ -78,11 +77,12 @@ export default function FinancePage() {
           setTab={setTab}
         />
 
-        
-
       </div>
 
-      {/* CONTENT */}
+
+      {/* ======================================================
+       * CONTENT
+       * ====================================================== */}
 
       {tab === "dashboard" && (
         <FinanceDashboard />
@@ -96,34 +96,32 @@ export default function FinancePage() {
         <PaymentsPage />
       )}
 
-      {tab === "ledger" && (
-        <LedgerPage />
-      )}
-
     </div>
   );
 }
 
 
+/* ============================================================
+ * TAB
+ * ============================================================ */
+
 function Tab({
-
   label,
-
   value,
-
   tab,
-
-  setTab
-
+  setTab,
 }: any) {
 
   return (
 
     <button
-      onClick={() => setTab(value)}
-      className={`pb-3 px-1 whitespace-nowrap transition-all ${
+      type="button"
+      onClick={() =>
+        setTab(value)
+      }
+      className={`whitespace-nowrap px-1 pb-3 transition-all ${
         tab === value
-          ? "border-b-2 border-indigo-600 text-indigo-600 font-semibold"
+          ? "border-b-2 border-indigo-600 font-semibold text-indigo-600"
           : "text-gray-500 hover:text-gray-900"
       }`}
     >
@@ -135,24 +133,42 @@ function Tab({
 }
 
 
+/* ============================================================
+ * FINANCE DASHBOARD
+ * ============================================================ */
 
 function FinanceDashboard() {
 
-  const [data, setData] = useState<any>(null);
+  const [data, setData] =
+    useState<any>(null);
 
   const loadDashboard = async () => {
 
-    const res = await api.get(
-      "/finance/dashboard/"
-    );
+    try {
 
-    setData(res.data);
-    console.log("-------------------- data ", res.data)
+      const res =
+        await api.get(
+          "/finance/dashboard/"
+        );
+
+      setData(res.data);
+
+    } catch (error) {
+
+      console.error(
+        "Erreur chargement dashboard finance :",
+        error
+      );
+
+    }
   };
 
   useEffect(() => {
+
     loadDashboard();
+
   }, []);
+
 
   if (!data) {
 
@@ -161,22 +177,28 @@ function FinanceDashboard() {
         Chargement...
       </div>
     );
+
   }
+
 
   return (
 
     <div className="space-y-6">
 
-      {/* KPI */}
+      {/* ====================================================
+       * KPI
+       * ==================================================== */}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
 
         <KpiCard
           title="Montant attendu"
           value={`${Number(
             data.total_expected
           ).toLocaleString()} FCFA`}
-          icon={<Wallet size={20} />}
+          icon={
+            <Wallet size={20} />
+          }
         />
 
         <KpiCard
@@ -184,7 +206,9 @@ function FinanceDashboard() {
           value={`${Number(
             data.total_paid
           ).toLocaleString()} FCFA`}
-          icon={<CreditCard size={20} />}
+          icon={
+            <CreditCard size={20} />
+          }
         />
 
         <KpiCard
@@ -192,66 +216,89 @@ function FinanceDashboard() {
           value={`${Number(
             data.total_balance
           ).toLocaleString()} FCFA`}
-          icon={<AlertCircle size={20} />}
+          icon={
+            <AlertCircle size={20} />
+          }
         />
 
         <KpiCard
           title="Élèves non solvables"
-          value={data.unpaid_students}
-          icon={<Users size={20} />}
+          value={
+            data.unpaid_students
+          }
+          icon={
+            <Users size={20} />
+          }
         />
 
       </div>
 
-      {/* PAYMENTS */}
 
-      <div className="bg-white rounded-3xl border shadow-sm">
+      {/* ====================================================
+       * DERNIERS PAIEMENTS
+       * ==================================================== */}
 
-        <div className="p-5 border-b">
+      <div className="rounded-3xl border bg-white shadow-sm">
 
-          <h2 className="font-semibold text-lg">
+        <div className="border-b p-5">
+
+          <h2 className="text-lg font-semibold">
             Derniers paiements
           </h2>
 
         </div>
 
+
         <div className="divide-y">
 
-          {data.latest_payments.map((p: any) => (
+          {data.latest_payments?.map(
+            (payment: any) => (
 
-            <div
-              key={p.id}
-              className="p-5 flex items-center justify-between"
-            >
+              <div
+                key={payment.id}
+                className="flex items-center justify-between p-5"
+              >
 
-              <div>
+                <div>
 
-                <p className="font-medium">
-                  {p.student_name}
-                </p>
+                  <p className="font-medium">
+                    {payment.student_name}
+                  </p>
 
-                <p className="text-sm text-gray-500">
-                  {p.classroom_name}
-                </p>
+                  <p className="text-sm text-gray-500">
+                    {payment.classroom_name}
+                  </p>
+
+                  <p className="mt-1 text-sm font-medium text-indigo-600">
+                    {getPaymentMethodLabel(
+                      payment.payment_method,
+                      payment.reference
+                    )}
+                  </p>
+
+                </div>
+
+
+                <div className="text-right">
+
+                  <p className="font-semibold text-green-600">
+                    +{" "}
+                    {Number(
+                      payment.amount
+                    ).toLocaleString()}{" "}
+                    FCFA
+                  </p>
+
+                  <p className="text-sm text-gray-500">
+                    {payment.payment_date}
+                  </p>
+
+                </div>
 
               </div>
 
-              <div className="text-right">
-
-                <p className="font-semibold text-green-600">
-                  + {Number(
-                    p.amount
-                  ).toLocaleString()} FCFA
-                </p>
-
-                <p className="text-sm text-gray-500">
-                  {p.payment_date}
-                </p>
-
-              </div>
-
-            </div>
-          ))}
+            )
+          )}
 
         </div>
 
@@ -262,20 +309,19 @@ function FinanceDashboard() {
 }
 
 
+/* ============================================================
+ * KPI CARD
+ * ============================================================ */
 
 function KpiCard({
-
   title,
-
   value,
-
-  icon
-
+  icon,
 }: any) {
 
   return (
 
-    <div className="bg-white rounded-3xl border p-5 shadow-sm">
+    <div className="rounded-3xl border bg-white p-5 shadow-sm">
 
       <div className="flex items-center justify-between">
 
@@ -285,13 +331,14 @@ function KpiCard({
             {title}
           </p>
 
-          <h3 className="text-2xl font-bold mt-2">
+          <h3 className="mt-2 text-2xl font-bold">
             {value}
           </h3>
 
         </div>
 
-        <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
 
           {icon}
 
@@ -304,6 +351,9 @@ function KpiCard({
 }
 
 
+/* ============================================================
+ * FINANCE STUDENTS
+ * ============================================================ */
 
 function FinanceStudents() {
 
@@ -319,67 +369,101 @@ function FinanceStudents() {
   const [openPayment, setOpenPayment] =
     useState(false);
 
+
   const loadStudents = async () => {
 
-    const res = await api.get(
-      "/finance/students/"
-    );
+    try {
 
-    setStudents(res.data);
-    console.log("--------------- studebt",res.data)
+      const res =
+        await api.get(
+          "/finance/students/"
+        );
+
+      setStudents(
+        Array.isArray(res.data)
+          ? res.data
+          : []
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Erreur chargement élèves :",
+        error
+      );
+
+    }
   };
 
+
   useEffect(() => {
+
     loadStudents();
+
   }, []);
+
 
   const filtered = useMemo(() => {
 
-    return students.filter((s) =>
-
-      s.student_name
-        .toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
+    return students.filter(
+      (student) =>
+        student.student_name
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
+          )
     );
 
-  }, [students, search]);
-  console.log("--------------- paiement", filtered)
+  }, [
+    students,
+    search,
+  ]);
+
+
   const openPaymentModal = (
     student: any
   ) => {
 
-    setSelectedStudent(student);
+    setSelectedStudent(
+      student
+    );
 
     setOpenPayment(true);
   };
+
 
   return (
 
     <div className="space-y-5">
 
-      {/* SEARCH */}
+      {/* ====================================================
+       * SEARCH
+       * ==================================================== */}
 
-      <div className="bg-white rounded-2xl border p-4 flex items-center gap-3">
+      <div className="flex items-center gap-3 rounded-2xl border bg-white p-4">
 
         <Search size={18} />
 
         <input
           type="text"
           placeholder="Rechercher un élève..."
-          className="outline-none flex-1"
+          className="flex-1 outline-none"
           value={search}
           onChange={(e) =>
-            setSearch(e.target.value)
+            setSearch(
+              e.target.value
+            )
           }
         />
 
       </div>
 
-      {/* TABLE */}
 
-      <div className="bg-white rounded-3xl border overflow-hidden shadow-sm">
+      {/* ====================================================
+       * TABLE
+       * ==================================================== */}
+
+      <div className="overflow-hidden rounded-3xl border bg-white shadow-sm">
 
         <div className="overflow-x-auto">
 
@@ -389,27 +473,27 @@ function FinanceStudents() {
 
               <tr>
 
-                <th className="text-left p-4">
+                <th className="p-4 text-left">
                   Élève
                 </th>
 
-                <th className="text-left p-4">
+                <th className="p-4 text-left">
                   Classe
                 </th>
 
-                <th className="text-left p-4">
+                <th className="p-4 text-left">
                   Frais
                 </th>
 
-                <th className="text-left p-4">
+                <th className="p-4 text-left">
                   Payé
                 </th>
 
-                <th className="text-left p-4">
+                <th className="p-4 text-left">
                   Solde
                 </th>
 
-                <th className="text-center p-4">
+                <th className="p-4 text-center">
                   Action
                 </th>
 
@@ -417,83 +501,97 @@ function FinanceStudents() {
 
             </thead>
 
+
             <tbody>
 
-              {filtered.map((s) => (
-                
-                <tr
-                  key={s.id}
-                  className="border-t"
-                >
+              {filtered.map(
+                (student) => (
 
-                  <td className="p-4 font-medium">
-                    {s.student_name}
-                  </td>
+                  <tr
+                    key={student.id}
+                    className="border-t"
+                  >
 
-                  <td className="p-4">
-                    {s.classroom_name}
-                  </td>
+                    <td className="p-4 font-medium">
+                      {student.student_name}
+                    </td>
 
-                  <td className="p-4">
-                    {Number(
-                      s.tuition_fee
-                    ).toLocaleString()} FCFA
-                  </td>
+                    <td className="p-4">
+                      {student.classroom_name}
+                    </td>
 
-                  <td className="p-4 text-green-600 font-medium">
-                    {Number(
-                      s.amount_paid
-                    ).toLocaleString()} FCFA
-                  </td>
-
-                  <td className="p-4">
-
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        Number(s.balance) > 0
-                          ? "bg-red-100 text-red-700"
-                          : "bg-green-100 text-green-700"
-                      }`}
-                    >
-
+                    <td className="p-4">
                       {Number(
-                        s.balance
-                      ).toLocaleString()} FCFA
+                        student.tuition_fee
+                      ).toLocaleString()}{" "}
+                      FCFA
+                    </td>
 
-                    </span>
+                    <td className="p-4 font-medium text-green-600">
+                      {Number(
+                        student.amount_paid
+                      ).toLocaleString()}{" "}
+                      FCFA
+                    </td>
 
-                  </td>
+                    <td className="p-4">
 
-                  <td className="p-4 items-center grid grid-cols-2 flex gap-2">
-                    
-                  <Link
-                      href={`/finance/students/${s.id}`}
-                      className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm transition"
-                    >
+                      <span
+                        className={`rounded-full px-3 py-1 text-sm font-medium ${
+                          Number(
+                            student.balance
+                          ) > 0
+                            ? "bg-red-100 text-red-700"
+                            : "bg-green-100 text-green-700"
+                        }`}
+                      >
 
-                      <BookOpen size={16} />
+                        {Number(
+                          student.balance
+                        ).toLocaleString()}{" "}
+                        FCFA
 
-                      Détails
+                      </span>
 
-                    </Link>
+                    </td>
 
-                    <button
-                      onClick={() =>
-                        openPaymentModal(s)
-                      }
-                      className="flex items-center gap-2 bg-cyan-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm transition"
-                    >
 
-                      <Plus size={16} />
+                    <td className="grid grid-cols-2 gap-2 p-4">
 
-                      Paiement
+                      <Link
+                        href={`/finance/students/${student.id}`}
+                        className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm text-white transition hover:bg-indigo-700"
+                      >
 
-                    </button>
+                        <BookOpen size={16} />
 
-                  </td>
+                        Détails
 
-                </tr>
-              ))}
+                      </Link>
+
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openPaymentModal(
+                            student
+                          )
+                        }
+                        className="flex items-center justify-center gap-2 rounded-xl bg-cyan-600 px-4 py-2 text-sm text-white transition hover:bg-cyan-700"
+                      >
+
+                        <Plus size={16} />
+
+                        Paiement
+
+                      </button>
+
+                    </td>
+
+                  </tr>
+
+                )
+              )}
 
             </tbody>
 
@@ -503,105 +601,159 @@ function FinanceStudents() {
 
       </div>
 
-      {/* PAYMENT MODAL */}
 
-      {openPayment && selectedStudent && (
+      {/* ====================================================
+       * PAYMENT MODAL
+       * ==================================================== */}
 
-        <PaymentModal
+      {openPayment &&
+        selectedStudent && (
 
-          student={selectedStudent}
+          <PaymentModal
+            student={
+              selectedStudent
+            }
 
-          onClose={() => {
+            onClose={() => {
 
-            setOpenPayment(false);
+              setOpenPayment(
+                false
+              );
 
-            setSelectedStudent(null);
-          }}
+              setSelectedStudent(
+                null
+              );
 
-          onSuccess={() => {
+            }}
 
-            loadStudents();
+            onSuccess={() => {
 
-            setOpenPayment(false);
+              loadStudents();
 
-            setSelectedStudent(null);
-          }}
-        />
-      )}
+              setOpenPayment(
+                false
+              );
+
+              setSelectedStudent(
+                null
+              );
+
+            }}
+          />
+
+        )}
 
     </div>
   );
 }
 
 
+/* ============================================================
+ * PAYMENTS PAGE
+ * ============================================================ */
 
 function PaymentsPage() {
 
   const [payments, setPayments] =
     useState<any[]>([]);
 
+
   const loadPayments = async () => {
 
-    const res = await api.get(
-      "/finance/payments/"
-    );
+    try {
 
-    setPayments(res.data);
+      const res =
+        await api.get(
+          "/finance/payments/"
+        );
+
+      setPayments(
+        Array.isArray(res.data)
+          ? res.data
+          : []
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Erreur chargement paiements :",
+        error
+      );
+
+    }
   };
 
+
   useEffect(() => {
+
     loadPayments();
+
   }, []);
+
 
   return (
 
-    <div className="bg-white rounded-3xl border overflow-hidden shadow-sm">
+    <div className="overflow-hidden rounded-3xl border bg-white shadow-sm">
 
-      <div className="p-5 border-b flex items-center justify-between">
+      <div className="flex items-center justify-between border-b p-5">
 
-        <h2 className="font-semibold text-lg">
+        <h2 className="text-lg font-semibold">
           Historique des paiements
         </h2>
 
       </div>
 
+
       <div className="divide-y">
 
-        {payments.map((p) => (
+        {payments.map(
+          (payment) => (
 
-          <div
-            key={p.id}
-            className="p-5 flex items-center justify-between"
-          >
+            <div
+              key={payment.id}
+              className="flex items-center justify-between p-5"
+            >
 
-            <div>
+              <div>
 
-              <p className="font-medium">
-                {p.student_name}
-              </p>
+                <p className="font-medium">
+                  {payment.student_name}
+                </p>
 
-              <p className="text-sm text-gray-500">
-                {p.classroom_name}
-              </p>
+                <p className="text-sm text-gray-500">
+                  {payment.classroom_name}
+                </p>
+
+                <p className="mt-1 text-sm font-medium text-indigo-600">
+                  {getPaymentMethodLabel(
+                    payment.payment_method,
+                    payment.reference
+                  )}
+                </p>
+
+              </div>
+
+
+              <div className="text-right">
+
+                <p className="font-semibold text-green-600">
+                  +{" "}
+                  {Number(
+                    payment.amount
+                  ).toLocaleString()}{" "}
+                  FCFA
+                </p>
+
+                <p className="text-sm text-gray-500">
+                  {payment.payment_date}
+                </p>
+
+              </div>
 
             </div>
 
-            <div className="text-right">
-
-              <p className="font-semibold text-green-600">
-                + {Number(
-                  p.amount
-                ).toLocaleString()} FCFA
-              </p>
-
-              <p className="text-sm text-gray-500">
-                {p.payment_date}
-              </p>
-
-            </div>
-
-          </div>
-        ))}
+          )
+        )}
 
       </div>
 
@@ -610,107 +762,57 @@ function PaymentsPage() {
 }
 
 
+/* ============================================================
+ * PAYMENT METHOD LABEL
+ * ============================================================ */
 
-function LedgerPage() {
+function getPaymentMethodLabel(
+  paymentMethod: string | null | undefined,
+  reference: string | null | undefined
+) {
 
-  const [entries, setEntries] =
-    useState<any[]>([]);
+  switch (paymentMethod) {
 
-  const loadEntries = async () => {
+    case "wave":
+      return "Wave";
 
-    const res = await api.get(
-      "/finance/ledger/"
-    );
+    case "omoney":
+      return "Orange Money";
 
-    setEntries(res.data);
-  };
+    case "momo":
+      return "MoMo";
 
-  useEffect(() => {
-    loadEntries();
-  }, []);
+    case "cheque":
+      return "Chèque";
 
-  return (
+    case "espece":
+      return "Espèce";
 
-    <div className="bg-white rounded-3xl border overflow-hidden shadow-sm">
+    default:
 
-      <div className="p-5 border-b">
-
-        <h2 className="font-semibold text-lg">
-          Journal comptable
-        </h2>
-
-      </div>
-
-      <div className="divide-y">
-
-        {entries.map((e) => (
-
-          <div
-            key={e.id}
-            className="p-5 flex items-center justify-between"
-          >
-
-            <div>
-
-              <p className="font-medium">
-                {e.student_name}
-              </p>
-
-              <p className="text-sm text-gray-500">
-                {e.description}
-              </p>
-
-            </div>
-
-            <div className="text-right">
-
-              <p
-                className={`font-semibold ${
-                  e.entry_type === "credit"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
-              >
-
-                {e.entry_type === "credit"
-                  ? "+"
-                  : "-"}
-
-                {" "}
-
-                {Number(
-                  e.amount
-                ).toLocaleString()} FCFA
-
-              </p>
-
-              <p className="text-sm text-gray-500">
-                {new Date(
-                  e.created_at
-                ).toLocaleDateString()}
-              </p>
-
-            </div>
-
-          </div>
-        ))}
-
-      </div>
-
-    </div>
-  );
+      /*
+       * Compatibilité avec les anciens paiements
+       * enregistrés avant l'ajout de payment_method.
+       */
+      return reference || "Moyen non renseigné";
+  }
 }
 
+
+/* ============================================================
+ * PAYMENT MODAL
+ * ============================================================ */
 
 function PaymentModal({
   student,
   onClose,
   onSuccess,
 }: any) {
+
   const [amount, setAmount] =
     useState("");
 
-  const [reference, setReference] =
+  const [paymentMethod, setPaymentMethod] =
     useState("");
 
   const [notes, setNotes] =
@@ -719,9 +821,37 @@ function PaymentModal({
   const [loading, setLoading] =
     useState(false);
 
+
+  /* ==========================================================
+   * SUBMIT
+   * ========================================================== */
+
   const submit = async () => {
+
+    if (!amount) {
+
+      alert(
+        "Veuillez saisir le montant."
+      );
+
+      return;
+    }
+
+
+    if (!paymentMethod) {
+
+      alert(
+        "Veuillez sélectionner un moyen de paiement."
+      );
+
+      return;
+    }
+
+
     try {
+
       setLoading(true);
+
 
       await api.post(
         "/finance/payments/",
@@ -736,31 +866,46 @@ function PaymentModal({
               .toISOString()
               .split("T")[0],
 
-          reference,
+          payment_method:
+            paymentMethod,
 
           notes,
         }
       );
 
+
       alert(
         "Paiement enregistré"
       );
 
+
       onSuccess();
 
     } catch (error) {
-      console.error(error);
+
+      console.error(
+        "Erreur paiement :",
+        error
+      );
 
       alert(
-        "Erreur paiement"
+        "Erreur lors de l'enregistrement du paiement."
       );
 
     } finally {
+
       setLoading(false);
+
     }
   };
 
+
+  /* ==========================================================
+   * UI
+   * ========================================================== */
+
   return (
+
     <div
       className="
         fixed
@@ -778,29 +923,29 @@ function PaymentModal({
       "
     >
 
-      {/* ================================================== */}
-      {/* MODAL */}
-      {/* ================================================== */}
+      {/* ====================================================
+       * MODAL
+       * ==================================================== */}
 
       <div
         className="
           flex
           w-full
           max-w-lg
+          max-h-[calc(100vh-1.5rem)]
           flex-col
           overflow-hidden
           rounded-2xl
           bg-white
           shadow-2xl
-          sm:rounded-3xl
-          max-h-[calc(100vh-1.5rem)]
           sm:max-h-[90vh]
+          sm:rounded-3xl
         "
       >
 
-        {/* ================================================== */}
-        {/* HEADER */}
-        {/* ================================================== */}
+        {/* ==================================================
+         * HEADER
+         * ================================================== */}
 
         <div
           className="
@@ -844,6 +989,7 @@ function PaymentModal({
 
           </div>
 
+
           <button
             type="button"
             onClick={onClose}
@@ -867,14 +1013,17 @@ function PaymentModal({
               sm:w-10
             "
           >
+
             <X size={20} />
+
           </button>
 
         </div>
 
-        {/* ================================================== */}
-        {/* BODY SCROLLABLE */}
-        {/* ================================================== */}
+
+        {/* ==================================================
+         * BODY
+         * ================================================== */}
 
         <div
           className="
@@ -888,9 +1037,9 @@ function PaymentModal({
 
           <div className="space-y-5">
 
-            {/* ================================================= */}
-            {/* INFORMATIONS FINANCIÈRES */}
-            {/* ================================================= */}
+            {/* ==============================================
+             * INFORMATIONS FINANCIÈRES
+             * ============================================== */}
 
             <div
               className="
@@ -931,6 +1080,7 @@ function PaymentModal({
 
               </div>
 
+
               {/* SOLDE */}
 
               <div
@@ -963,9 +1113,10 @@ function PaymentModal({
 
             </div>
 
-            {/* ================================================= */}
-            {/* MONTANT */}
-            {/* ================================================= */}
+
+            {/* ==============================================
+             * MONTANT
+             * ============================================== */}
 
             <div>
 
@@ -1008,9 +1159,10 @@ function PaymentModal({
 
             </div>
 
-            {/* ================================================= */}
-            {/* REFERENCE */}
-            {/* ================================================= */}
+
+            {/* ==============================================
+             * MOYEN DE PAIEMENT
+             * ============================================== */}
 
             <div>
 
@@ -1022,14 +1174,13 @@ function PaymentModal({
                   font-medium
                 "
               >
-                Référence
+                Moyen de paiement
               </label>
 
-              <input
-                type="text"
-                value={reference}
+              <select
+                value={paymentMethod}
                 onChange={(e) =>
-                  setReference(
+                  setPaymentMethod(
                     e.target.value
                   )
                 }
@@ -1039,6 +1190,7 @@ function PaymentModal({
                   rounded-2xl
                   border
                   border-gray-200
+                  bg-white
                   px-4
                   outline-none
                   transition
@@ -1047,14 +1199,40 @@ function PaymentModal({
                   focus:ring-indigo-500/20
                   sm:h-14
                 "
-                placeholder="Ex : Wave, Orange Money etc..."
-              />
+              >
+
+                <option value="">
+                  Sélectionner un moyen de paiement
+                </option>
+
+                <option value="wave">
+                  Wave
+                </option>
+
+                <option value="omoney">
+                  Orange Money
+                </option>
+
+                <option value="momo">
+                  MoMo
+                </option>
+
+                <option value="cheque">
+                  Chèque
+                </option>
+
+                <option value="espece">
+                  Espèce
+                </option>
+
+              </select>
 
             </div>
 
-            {/* ================================================= */}
-            {/* NOTES */}
-            {/* ================================================= */}
+
+            {/* ==============================================
+             * NOTES
+             * ============================================== */}
 
             <div>
 
@@ -1100,9 +1278,10 @@ function PaymentModal({
 
         </div>
 
-        {/* ================================================== */}
-        {/* FOOTER */}
-        {/* ================================================== */}
+
+        {/* ==================================================
+         * FOOTER
+         * ================================================== */}
 
         <div
           className="
@@ -1141,6 +1320,7 @@ function PaymentModal({
             Annuler
           </button>
 
+
           {/* VALIDER */}
 
           <button
@@ -1148,7 +1328,8 @@ function PaymentModal({
             onClick={submit}
             disabled={
               loading ||
-              !amount
+              !amount ||
+              !paymentMethod
             }
             className="
               w-full
@@ -1165,9 +1346,11 @@ function PaymentModal({
               sm:w-auto
             "
           >
+
             {loading
               ? "Enregistrement..."
               : "Valider paiement"}
+
           </button>
 
         </div>

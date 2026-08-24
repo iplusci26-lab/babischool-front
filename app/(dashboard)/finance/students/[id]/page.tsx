@@ -14,7 +14,7 @@ import {
   Plus,
   X,
 } from "lucide-react";
-
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useParams } from "next/navigation";
 
@@ -662,7 +662,7 @@ function PaymentModal({
   const [amount, setAmount] =
     useState("");
 
-  const [reference, setReference] =
+    const [paymentMethod, setPaymentMethod] =
     useState("");
 
   const [notes, setNotes] =
@@ -676,6 +676,16 @@ function PaymentModal({
   // ==========================================================
 
   const submit = async () => {
+
+    if (!amount) {
+      toast.error("Veuillez saisir le montant.");
+      return;
+    }
+    
+    if (!paymentMethod) {
+      toast.error("Veuillez sélectionner un moyen de paiement.");
+      return;
+    }
 
     try {
 
@@ -694,7 +704,7 @@ function PaymentModal({
               .toISOString()
               .split("T")[0],
 
-          reference,
+              payment_method: paymentMethod,
 
           notes,
         }
@@ -935,46 +945,69 @@ function PaymentModal({
             </div>
 
             {/* ============================================ */}
-            {/* REFERENCE */}
+            {/* MOYEN DE PAIEMENT */}
             {/* ============================================ */}
 
             <div>
 
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                "
-              >
-                Référence
-              </label>
+            <label
+              className="
+                mb-2
+                block
+                text-sm
+                font-medium
+              "
+            >
+              Moyen de paiement
+            </label>
 
-              <input
-                type="text"
-                value={reference}
-                onChange={(e) =>
-                  setReference(
-                    e.target.value
-                  )
-                }
-                className="
-                  h-12
-                  w-full
-                  rounded-2xl
-                  border
-                  border-gray-200
-                  px-4
-                  outline-none
-                  transition
-                  focus:border-indigo-500
-                  focus:ring-2
-                  focus:ring-indigo-500/20
-                  sm:h-14
-                "
-                placeholder="Ex : Wave, Orange Money..."
-              />
+            <select
+              value={paymentMethod}
+              onChange={(e) =>
+                setPaymentMethod(e.target.value)
+              }
+              className="
+                h-12
+                w-full
+                rounded-2xl
+                border
+                border-gray-200
+                bg-white
+                px-4
+                outline-none
+                transition
+                focus:border-indigo-500
+                focus:ring-2
+                focus:ring-indigo-500/20
+                sm:h-14
+              "
+            >
+
+              <option value="">
+                Sélectionner un moyen de paiement
+              </option>
+
+              <option value="wave">
+                Wave
+              </option>
+
+              <option value="omoney">
+                Orange Money
+              </option>
+
+              <option value="momo">
+                MoMo
+              </option>
+
+              <option value="cheque">
+                Chèque
+              </option>
+
+              <option value="espece">
+                Espèce
+              </option>
+
+            </select>
 
             </div>
 
@@ -1068,7 +1101,7 @@ function PaymentModal({
           <button
             type="button"
             onClick={submit}
-            disabled={loading}
+            disabled={loading || !amount || !paymentMethod}
             className="
               w-full
               rounded-2xl

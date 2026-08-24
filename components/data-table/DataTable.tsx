@@ -40,7 +40,7 @@ export default function DataTable<T extends Record<string, any>>({
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 ${column.className ?? ""}`}
+                  className={`px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-600 ${column.className ?? ""}`}
                 >
                   {column.title}
                 </th>
@@ -62,7 +62,7 @@ export default function DataTable<T extends Record<string, any>>({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="p-6"
+                  className="p-6 text-center"
                 >
                   {emptyComponent ?? (
                     <EmptyState
@@ -84,7 +84,7 @@ export default function DataTable<T extends Record<string, any>>({
                   {columns.map((column) => (
                     <td
                       key={column.key}
-                      className={`px-6 py-4 text-sm text-gray-700 ${column.className ?? ""}`}
+                      className={`px-6 py-4 text-center text-sm text-gray-700 ${column.className ?? ""}`}
                     >
                       {column.render
                         ? column.render(row)

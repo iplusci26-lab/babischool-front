@@ -2,11 +2,19 @@
 
 import { useState } from "react";
 
+import {
+  CalendarDays,
+  History,
+} from "lucide-react";
+
 import StaffAttendanceFilters from "./components/StaffAttendanceFilters";
 import StaffAttendanceSummary from "./components/StaffAttendanceSummary";
 import StaffAttendanceTable from "./components/StaffAttendanceTable";
-import { CalendarDays } from "lucide-react";
+import StaffAttendanceHistory from "./components/StaffAttendanceHistory";
+
 import { useStaffAttendance } from "./hooks/useStaffAttendance";
+
+type ActiveTab = "today" | "history";
 
 export default function StaffAttendancePage() {
 
@@ -25,9 +33,8 @@ export default function StaffAttendancePage() {
     submit,
   } = useStaffAttendance();
 
-  const [activeTab] = useState<
-    "attendance"
-  >("attendance");
+  const [activeTab, setActiveTab] =
+    useState<ActiveTab>("today");
 
   if (loading) {
     return (
@@ -50,9 +57,9 @@ export default function StaffAttendancePage() {
   return (
     <div className="space-y-6">
 
-      {/* ==========================
-              HEADER
-      ========================== */}
+      {/* ======================================================
+       * HEADER
+       * ====================================================== */}
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
@@ -62,69 +69,154 @@ export default function StaffAttendancePage() {
             Présence du personnel administratif
           </h1>
 
-         
-
           <p className="mt-1 text-sm text-gray-500">
-            Gérez les présences quotidiennes du personnel administratif.
+            Gérez les présences quotidiennes et consultez
+            l'historique des absences du personnel.
           </p>
 
         </div>
 
+        {/* Le bouton Enregistrer est uniquement
+            nécessaire sur la présence du jour */}
+
+        {activeTab === "today" && (
+          <button
+            type="button"
+            onClick={submit}
+            disabled={submitting}
+            className="rounded-xl bg-[#6214BE] px-5 py-3 font-medium text-white transition hover:bg-[#4d0fa0] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {submitting
+              ? "Enregistrement..."
+              : "Enregistrer"}
+          </button>
+        )}
+
+      </div>
+
+
+      {/* ======================================================
+       * TABS
+       * ====================================================== */}
+
+      <div className="flex w-fit rounded-xl bg-gray-100 p-1">
+
+        {/* ==========================
+         * PRÉSENCE DU JOUR
+         * ========================== */}
+
         <button
-          onClick={submit}
-          disabled={submitting}
-          className="rounded-xl bg-[#6214BE] px-5 py-3 font-medium text-white transition hover:bg-[#4d0fa0] disabled:cursor-not-allowed disabled:opacity-60"
+          type="button"
+          onClick={() =>
+            setActiveTab("today")
+          }
+          className={`flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium transition ${
+            activeTab === "today"
+              ? "bg-[#6214BE] text-white shadow"
+              : "text-gray-600 hover:text-[#6214BE]"
+          }`}
         >
-          Enregistrer
+          <CalendarDays size={16} />
+
+          Présence du jour
+        </button>
+
+
+        {/* ==========================
+         * HISTORIQUE
+         * ========================== */}
+
+        <button
+          type="button"
+          onClick={() =>
+            setActiveTab("history")
+          }
+          className={`flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium transition ${
+            activeTab === "history"
+              ? "bg-[#6214BE] text-white shadow"
+              : "text-gray-600 hover:text-[#6214BE]"
+          }`}
+        >
+          <History size={16} />
+
+          Historique des absences
         </button>
 
       </div>
 
-      <div className="mt-2 flex items-center gap-2 text-md font-bold text-[#6214BE]">
 
-        <CalendarDays size={16} />
+      {/* ======================================================
+       * PRÉSENCE DU JOUR
+       * ====================================================== */}
 
-        <span>
-          Présence du jour :{" "}
-          {new Date().toLocaleDateString("fr-FR", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
-        </span>
+      {activeTab === "today" && (
+        <>
 
-        </div>
+          {/* ==========================
+           * DATE
+           * ========================== */}
 
-      {/* ==========================
-            RECHERCHE
-      ========================== */}
+          <div className="mt-2 flex items-center gap-2 text-md font-bold text-[#6214BE]">
 
-      <StaffAttendanceFilters
-        search={search}
-        onSearchChange={setSearch}
-        employeeCount={records.length}
-      />
+            <CalendarDays size={16} />
 
-     
+            <span>
+              Présence du jour :{" "}
+              {new Date().toLocaleDateString(
+                "fr-FR",
+                {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                }
+              )}
+            </span>
 
-      {/* ==========================
-            STATISTIQUES
-      ========================== */}
+          </div>
 
-      <StaffAttendanceSummary
-        stats={stats}
-      />
 
-      {/* ==========================
-              TABLEAU
-      ========================== */}
+          {/* ==========================
+           * RECHERCHE
+           * ========================== */}
 
-      <StaffAttendanceTable
-        records={records}
-        loading={submitting}
-        onStatusChange={updateStatus}
-      />
+          <StaffAttendanceFilters
+            search={search}
+            onSearchChange={setSearch}
+            employeeCount={records.length}
+          />
+
+
+          {/* ==========================
+           * STATISTIQUES
+           * ========================== */}
+
+          <StaffAttendanceSummary
+            stats={stats}
+          />
+
+
+          {/* ==========================
+           * TABLEAU
+           * ========================== */}
+
+          <StaffAttendanceTable
+            records={records}
+            loading={submitting}
+            onStatusChange={updateStatus}
+          />
+
+        </>
+      )}
+
+
+      {/* ======================================================
+       * HISTORIQUE DES ABSENCES
+       * ====================================================== */}
+
+      {activeTab === "history" && (
+        <StaffAttendanceHistory />
+      )}
 
     </div>
   );

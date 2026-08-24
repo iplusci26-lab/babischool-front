@@ -360,6 +360,7 @@ console.log("-------------- ",error)
             className="
               rounded-xl
               border
+              cursor-pointer
               px-5
               py-2
               hover:bg-gray-50
@@ -384,6 +385,7 @@ console.log("-------------- ",error)
               py-2
               font-medium
               text-white
+              cursor-pointer
               transition
               hover:bg-[#4F10A0]
               disabled:cursor-not-allowed

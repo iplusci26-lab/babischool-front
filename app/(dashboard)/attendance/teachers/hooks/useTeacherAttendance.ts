@@ -37,25 +37,29 @@ export function useTeacherAttendance() {
     try {
       setLoading(true);
       setError(null);
-
+  
       const data = await getTodayAttendance();
+  
       const normalizedData = {
         ...data,
-        courses: data.courses.map((course: any) => ({
-          ...course,
-          attendance_status:
-            course.attendance_status ?? "present",
-        })),
+        courses: Array.isArray(data?.courses)
+          ? data.courses.map((course: any) => ({
+              ...course,
+              attendance_status:
+                course.attendance_status ?? "present",
+            }))
+          : [],
       };
-      
-      console.log(normalizedData);
-      
+  
       setDashboard(normalizedData);
-
-    } catch (err) {
+  
+    } catch (err: any) {
       console.error(err);
-      setError("Impossible de charger les présences.");
-      toast.error(
+  
+      setError(
+        err?.response?.data?.detail ??
+        err?.response?.data?.message ??
+        err?.message ??
         "Impossible de charger les présences."
       );
     } finally {

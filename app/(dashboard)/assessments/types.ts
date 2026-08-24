@@ -68,7 +68,7 @@ export interface Assessment {
 
   term_name: string;
 
-  title: string;
+  //title: string;
 
   assessment_type: AssessmentType;
 
@@ -161,7 +161,7 @@ export interface AssessmentFormData {
 
   term: string;
 
-  title: string;
+  //title: string;
 
   assessment_type: AssessmentType;
 

@@ -44,6 +44,28 @@ interface AssessmentTableProps {
 
 }
 
+ /* ==========================================================
+   * FORMAT DATE
+   * ========================================================== */
+
+ function formatDate(date?: string | null) {
+  if (!date) {
+    return "-";
+  }
+
+  const parsedDate = new Date(date);
+
+  if (isNaN(parsedDate.getTime())) {
+    return "-";
+  }
+
+  return parsedDate.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
 export default function AssessmentTable({
 
   assessments,
@@ -70,14 +92,8 @@ export default function AssessmentTable({
       render: (assessment) => (
 
         <div>
-
-          <p className="font-semibold">
-
-            {assessment.title}
-
-          </p>
-
-          <p className="text-xs text-gray-500">
+          
+          <h2 className="font-semibold text-black">
 
             {
               ASSESSMENT_TYPE_LABELS[
@@ -85,7 +101,16 @@ export default function AssessmentTable({
               ]
             }
 
+          </h2>
+
+
+          <p className="font-gray-400">
+
+            Enregistré le {formatDate(assessment.created_at)}
+
           </p>
+
+          
 
         </div>
 
@@ -123,17 +148,14 @@ export default function AssessmentTable({
     {
       key: "date_assessment",
 
-      title: "Date",
+      title: "Date evaluation ",
 
       render: (assessment) => (
 
-        new Date(
-          assessment.date_assessment
-        ).toLocaleDateString(
-          "fr-FR"
+          formatDate(assessment.date_assessment)
         )
-
-      ),
+        
+    
     },
 
     {

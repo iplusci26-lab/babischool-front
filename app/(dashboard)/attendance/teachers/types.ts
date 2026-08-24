@@ -59,6 +59,7 @@ export interface TeacherAttendanceDashboard {
   courses: TeacherAttendanceCourse[];
   pending_justifications: PendingTeacherJustification[];
   validated_justifications: PendingTeacherJustification[];
+  message: string;
 }
 
 export interface MarkAttendancePayload {

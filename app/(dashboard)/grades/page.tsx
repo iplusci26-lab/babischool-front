@@ -21,18 +21,31 @@ export default function GradesPage() {
   // ÉVALUATIONS
   // ==========================================================
 
-  const [assessments, setAssessments] = useState<any[]>([]);
+  const [assessments, setAssessments] =
+    useState<any[]>([]);
 
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] =
+    useState("");
 
   const [assessment, setAssessment] =
     useState<any | null>(null);
 
   // ==========================================================
+  // PÉRIODES
+  // ==========================================================
+
+  const [terms, setTerms] =
+    useState<any[]>([]);
+
+  const [termFilter, setTermFilter] =
+    useState("");
+
+  // ==========================================================
   // NOTES
   // ==========================================================
 
-  const [grades, setGrades] = useState<any[]>([]);
+  const [grades, setGrades] =
+    useState<any[]>([]);
 
   const [statistics, setStatistics] =
     useState<any | null>(null);
@@ -41,19 +54,21 @@ export default function GradesPage() {
   // LOADING
   // ==========================================================
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] =
+    useState(false);
 
-  const [publishing, setPublishing] = useState(false);
+  const [publishing, setPublishing] =
+    useState(false);
 
   // ==========================================================
   // FILTRES
   // ==========================================================
 
-  const [search, setSearch] = useState("");
-
-  const [termFilter, setTermFilter] = useState("");
+  const [search, setSearch] =
+    useState("");
 
   const [classroomFilter, setClassroomFilter] =
     useState("");
@@ -75,14 +90,6 @@ export default function GradesPage() {
   // FORMATAGE DATE
   // ==========================================================
 
-  /**
-   * Formate une date provenant de l'API.
-   *
-   * IMPORTANT :
-   * On protège le composant contre les dates invalides.
-   * Une mauvaise date ne doit jamais empêcher le select
-   * des évaluations de fonctionner.
-   */
   function formatDate(
     date: string | null | undefined
   ) {
@@ -92,55 +99,102 @@ export default function GradesPage() {
 
     const parsedDate = new Date(date);
 
-    if (Number.isNaN(parsedDate.getTime())) {
+    if (
+      Number.isNaN(
+        parsedDate.getTime()
+      )
+    ) {
       return "Date inconnue";
     }
 
-    return new Intl.DateTimeFormat("fr-FR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(parsedDate);
+    return new Intl.DateTimeFormat(
+      "fr-FR",
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }
+    ).format(parsedDate);
   }
+
+  // ==========================================================
+  // CHARGER LES PÉRIODES
+  // ==========================================================
+
+  const loadTerms = async () => {
+    try {
+      const res = await api.get("/academics/terms/");
+  
+      const data =
+        res.data?.results || res.data || [];
+  
+      setTerms(
+        Array.isArray(data) ? data : []
+      );
+    } catch (error) {
+      console.error(
+        "Erreur chargement des périodes :",
+        error
+      );
+  
+      toast.error(
+        "Impossible de charger les périodes."
+      );
+    }
+  };
 
   // ==========================================================
   // CHARGER LES ÉVALUATIONS
   // ==========================================================
 
-  const loadAssessments = async () => {
-    try {
-      const res = await api.get(
-        "/academics/assessments/"
-      );
+  const loadAssessments =
+    async () => {
+      try {
+        const res = await api.get(
+          "/academics/assessments/"
+        );
 
-      console.log(
-        "========== ÉVALUATIONS =========="
-      );
+        console.log(
+          "========== ÉVALUATIONS =========="
+        );
 
-      console.log(
-        "DATA :",
-        res.data
-      );
+        console.log(
+          "DATA :",
+          res.data
+        );
 
-      const data =
-        res.data?.results || res.data || [];
+        const data =
+          res.data?.results ||
+          res.data ||
+          [];
 
-      setAssessments(
-        Array.isArray(data) ? data : []
-      );
-    } catch (error) {
-      console.error(
-        "Erreur chargement évaluations :",
-        error
-      );
+        const normalizedData =
+          Array.isArray(data)
+            ? data
+            : [];
 
-      toast.error(
-        "Impossible de charger les évaluations."
-      );
-    }
-  };
+        console.log(
+          "ÉVALUATIONS :",
+          normalizedData
+        );
+
+        setAssessments(
+          normalizedData
+        );
+
+      } catch (error) {
+        console.error(
+          "Erreur chargement évaluations :",
+          error
+        );
+
+        toast.error(
+          "Impossible de charger les évaluations."
+        );
+      }
+    };
 
   // ==========================================================
   // CHARGER LES NOTES
@@ -153,6 +207,7 @@ export default function GradesPage() {
       setAssessment(null);
       setStatistics(null);
       setGrades([]);
+
       return;
     }
 
@@ -176,7 +231,8 @@ export default function GradesPage() {
         url
       );
 
-      const res = await api.get(url);
+      const res =
+        await api.get(url);
 
       console.log(
         "STATUS :",
@@ -204,11 +260,13 @@ export default function GradesPage() {
       );
 
       setAssessment(
-        res.data?.assessment ?? null
+        res.data?.assessment ??
+          null
       );
 
       setStatistics(
-        res.data?.statistics ?? null
+        res.data?.statistics ??
+          null
       );
 
       setGrades(
@@ -218,12 +276,15 @@ export default function GradesPage() {
           ? res.data.students
           : []
       );
+
     } catch (error: any) {
       console.error(
         "========== ERREUR CHARGEMENT =========="
       );
 
-      console.error(error);
+      console.error(
+        error
+      );
 
       console.error(
         "STATUS :",
@@ -239,6 +300,7 @@ export default function GradesPage() {
         error?.response?.data?.detail ||
           "Impossible de charger les notes."
       );
+
     } finally {
       setLoading(false);
     }
@@ -250,50 +312,40 @@ export default function GradesPage() {
 
   useEffect(() => {
     loadAssessments();
+    loadTerms();
   }, []);
 
   // ==========================================================
   // FILTRES DISPONIBLES
   // ==========================================================
 
-  const terms = useMemo(() => {
-    return Array.from(
-      new Set(
-        assessments
-          .map(
-            (item) =>
-              item.term_name
-          )
-          .filter(Boolean)
-      )
-    );
-  }, [assessments]);
+  const classrooms =
+    useMemo(() => {
+      return Array.from(
+        new Set(
+          assessments
+            .map(
+              (item) =>
+                item.classroom_name
+            )
+            .filter(Boolean)
+        )
+      );
+    }, [assessments]);
 
-  const classrooms = useMemo(() => {
-    return Array.from(
-      new Set(
-        assessments
-          .map(
-            (item) =>
-              item.classroom_name
-          )
-          .filter(Boolean)
-      )
-    );
-  }, [assessments]);
-
-  const subjects = useMemo(() => {
-    return Array.from(
-      new Set(
-        assessments
-          .map(
-            (item) =>
-              item.subject_name
-          )
-          .filter(Boolean)
-      )
-    );
-  }, [assessments]);
+  const subjects =
+    useMemo(() => {
+      return Array.from(
+        new Set(
+          assessments
+            .map(
+              (item) =>
+                item.subject_name
+            )
+            .filter(Boolean)
+        )
+      );
+    }, [assessments]);
 
   // ==========================================================
   // ÉVALUATIONS FILTRÉES
@@ -307,6 +359,10 @@ export default function GradesPage() {
             search
               .trim()
               .toLowerCase();
+
+          // --------------------------------------------------
+          // RECHERCHE
+          // --------------------------------------------------
 
           const matchesSearch =
             !normalizedSearch ||
@@ -326,20 +382,39 @@ export default function GradesPage() {
                 normalizedSearch
               );
 
+          // --------------------------------------------------
+          // PÉRIODE
+          // --------------------------------------------------
+
           const matchesTerm =
             !termFilter ||
-            item.term_name ===
-              termFilter;
+            String(
+              item.term
+            ) === String(
+              termFilter
+            );
+
+          // --------------------------------------------------
+          // CLASSE
+          // --------------------------------------------------
 
           const matchesClassroom =
             !classroomFilter ||
             item.classroom_name ===
               classroomFilter;
 
+          // --------------------------------------------------
+          // MATIÈRE
+          // --------------------------------------------------
+
           const matchesSubject =
             !subjectFilter ||
             item.subject_name ===
               subjectFilter;
+
+          // --------------------------------------------------
+          // STATUT
+          // --------------------------------------------------
 
           const matchesStatus =
             !statusFilter ||
@@ -391,10 +466,6 @@ export default function GradesPage() {
     enrollmentId: string,
     score: string
   ) => {
-    // --------------------------------------------------------
-    // PROTECTION FRONTEND
-    // --------------------------------------------------------
-
     if (
       assessment?.is_locked ||
       assessment?.can_edit === false
@@ -406,16 +477,18 @@ export default function GradesPage() {
       return;
     }
 
-    setGrades((prev) =>
-      prev.map((grade) =>
-        grade.enrollment_id ===
-        enrollmentId
-          ? {
-              ...grade,
-              score,
-            }
-          : grade
-      )
+    setGrades(
+      (prev) =>
+        prev.map(
+          (grade) =>
+            grade.enrollment_id ===
+            enrollmentId
+              ? {
+                  ...grade,
+                  score,
+                }
+              : grade
+        )
     );
   };
 
@@ -431,10 +504,6 @@ export default function GradesPage() {
 
       return;
     }
-
-    // --------------------------------------------------------
-    // VERROUILLAGE
-    // --------------------------------------------------------
 
     if (
       assessment?.is_locked ||
@@ -457,15 +526,20 @@ export default function GradesPage() {
         }
       );
 
-      await loadGrades(selected);
+      await loadGrades(
+        selected
+      );
 
       await loadAssessments();
 
       toast.success(
         "Notes enregistrées avec succès."
       );
+
     } catch (error: any) {
-      console.error(error);
+      console.error(
+        error
+      );
 
       const detail =
         error?.response?.data?.detail;
@@ -479,7 +553,9 @@ export default function GradesPage() {
             "Cette évaluation est publiée. Les notes ne sont plus modifiables."
         );
 
-        await loadGrades(selected);
+        await loadGrades(
+          selected
+        );
 
         return;
       }
@@ -488,6 +564,7 @@ export default function GradesPage() {
         detail ||
           "Une erreur est survenue lors de l'enregistrement."
       );
+
     } finally {
       setSaving(false);
     }
@@ -524,20 +601,26 @@ export default function GradesPage() {
         `/academics/assessments/${selected}/publish/`
       );
 
-      await loadGrades(selected);
+      await loadGrades(
+        selected
+      );
 
       await loadAssessments();
 
       toast.success(
         "Évaluation publiée avec succès. Les notes sont maintenant verrouillées."
       );
+
     } catch (error: any) {
-      console.error(error);
+      console.error(
+        error
+      );
 
       toast.error(
         error?.response?.data?.detail ||
           "Impossible de publier cette évaluation."
       );
+
     } finally {
       setPublishing(false);
     }
@@ -645,6 +728,7 @@ export default function GradesPage() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
         <div>
+
           <h1 className="text-3xl font-bold text-gray-900">
             Gestion des notes
           </h1>
@@ -653,6 +737,7 @@ export default function GradesPage() {
             Saisissez les notes puis publiez
             les résultats aux parents.
           </p>
+
         </div>
 
       </div>
@@ -666,20 +751,24 @@ export default function GradesPage() {
         <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 
           <div>
+
             <h2 className="text-lg font-semibold text-gray-900">
               Rechercher une évaluation
             </h2>
 
             <p className="mt-1 text-sm text-gray-500">
               Filtrez les évaluations par
-              trimestre, classe, matière ou statut.
+              période, classe, matière ou statut.
             </p>
+
           </div>
 
           {hasFilters && (
             <button
               type="button"
-              onClick={resetFilters}
+              onClick={
+                resetFilters
+              }
               className="flex items-center gap-2 self-start rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
             >
               <X size={16} />
@@ -715,10 +804,12 @@ export default function GradesPage() {
 
           </div>
 
-          {/* TRIMESTRE */}
+          {/* PÉRIODE */}
 
           <select
-            value={termFilter}
+            value={
+              termFilter
+            }
             onChange={(e) =>
               setTermFilter(
                 e.target.value
@@ -728,16 +819,16 @@ export default function GradesPage() {
           >
 
             <option value="">
-              Tous les trimestres
+              Toutes les périodes
             </option>
 
             {terms.map(
               (term) => (
                 <option
-                  key={term}
-                  value={term}
+                  key={term.id}
+                  value={term.id}
                 >
-                  {term}
+                  {term.name}
                 </option>
               )
             )}
@@ -747,7 +838,9 @@ export default function GradesPage() {
           {/* CLASSE */}
 
           <select
-            value={classroomFilter}
+            value={
+              classroomFilter
+            }
             onChange={(e) =>
               setClassroomFilter(
                 e.target.value
@@ -776,7 +869,9 @@ export default function GradesPage() {
           {/* MATIÈRE */}
 
           <select
-            value={subjectFilter}
+            value={
+              subjectFilter
+            }
             onChange={(e) =>
               setSubjectFilter(
                 e.target.value
@@ -809,7 +904,9 @@ export default function GradesPage() {
         <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
           <select
-            value={statusFilter}
+            value={
+              statusFilter
+            }
             onChange={(e) =>
               setStatusFilter(
                 e.target.value
@@ -847,10 +944,13 @@ export default function GradesPage() {
           <p className="text-sm text-gray-500">
 
             <span className="font-semibold text-gray-900">
-              {filteredAssessments.length}
+              {
+                filteredAssessments.length
+              }
             </span>
 
             {" "}
+
             évaluation
             {filteredAssessments.length !==
               1
@@ -875,8 +975,11 @@ export default function GradesPage() {
 
         <select
           className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-[#6214BE] focus:ring-2 focus:ring-[#6214BE]/20"
-          value={selected}
+          value={
+            selected
+          }
           onChange={(e) => {
+
             const value =
               e.target.value;
 
@@ -885,9 +988,14 @@ export default function GradesPage() {
               value
             );
 
-            setSelected(value);
+            setSelected(
+              value
+            );
 
-            loadGrades(value);
+            loadGrades(
+              value
+            );
+
           }}
         >
 
@@ -901,15 +1009,23 @@ export default function GradesPage() {
                 key={item.id}
                 value={item.id}
               >
+
                 {item.subject_name}
+
                 {" • "}
+
                 {item.classroom_name}
+
                 {" • "}
+
                 {item.term_name}
+
                 {" • "}
+
                 {formatDate(
-                  item.created_at
+                  item.date_assessment
                 )}
+
               </option>
             )
           )}
@@ -953,14 +1069,18 @@ export default function GradesPage() {
                   <div className="flex flex-wrap items-center gap-3">
 
                     <h2 className="text-2xl font-semibold text-gray-900">
-                      {assessment.title}
+                      {
+                        assessment.title
+                      }
                     </h2>
 
                     {assessment.is_locked && (
                       <span className="flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+
                         <Lock size={14} />
 
                         Notes verrouillées
+
                       </span>
                     )}
 
@@ -968,23 +1088,29 @@ export default function GradesPage() {
 
                   <p className="mt-2 text-gray-500">
 
-                    {assessment.subject_name}
+                    {
+                      assessment.subject_name
+                    }
 
                     {" • "}
 
-                    {assessment.classroom_name}
+                    {
+                      assessment.classroom_name
+                    }
 
                     {assessment.term_name && (
                       <>
                         {" • "}
-                        {assessment.term_name}
+                        {
+                          assessment.term_name
+                        }
                       </>
                     )}
 
                     {" • "}
 
                     {formatDate(
-                      assessment.created_at
+                      assessment.date_assessment
                     )}
 
                   </p>
@@ -1008,9 +1134,7 @@ export default function GradesPage() {
 
               </div>
 
-              {/* ------------------------------------------------ */}
               {/* MESSAGE DE VERROUILLAGE */}
-              {/* ------------------------------------------------ */}
 
               {assessment.is_locked && (
                 <div className="mt-6 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800">
@@ -1038,9 +1162,7 @@ export default function GradesPage() {
                 </div>
               )}
 
-              {/* ------------------------------------------------ */}
               {/* PROGRESSION */}
-              {/* ------------------------------------------------ */}
 
               <div className="mt-8">
 
@@ -1078,8 +1200,6 @@ export default function GradesPage() {
             {statistics && (
               <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
 
-                {/* ÉLÈVES */}
-
                 <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
 
                   <div className="flex items-center gap-4">
@@ -1104,8 +1224,6 @@ export default function GradesPage() {
 
                 </div>
 
-                {/* NOTES SAISIES */}
-
                 <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
 
                   <div className="flex items-center gap-4">
@@ -1129,8 +1247,6 @@ export default function GradesPage() {
                   </div>
 
                 </div>
-
-                {/* NOTES RESTANTES */}
 
                 <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
 
@@ -1387,13 +1503,11 @@ export default function GradesPage() {
             {grades.length > 0 && (
               <div className="flex flex-col justify-end gap-3 sm:flex-row">
 
-                {/* ---------------------------------------------- */}
-                {/* ENREGISTRER */}
-                {/* ---------------------------------------------- */}
-
                 {!assessment.is_locked && (
                   <button
-                    onClick={save}
+                    onClick={
+                      save
+                    }
                     disabled={
                       saving ||
                       assessment.can_edit ===
@@ -1411,14 +1525,12 @@ export default function GradesPage() {
                   </button>
                 )}
 
-                {/* ---------------------------------------------- */}
-                {/* PUBLIER */}
-                {/* ---------------------------------------------- */}
-
                 {!assessment.is_locked &&
                   assessment.can_publish && (
                     <button
-                      onClick={publish}
+                      onClick={
+                        publish
+                      }
                       disabled={
                         publishing
                       }
@@ -1436,10 +1548,6 @@ export default function GradesPage() {
 
                     </button>
                   )}
-
-                {/* ---------------------------------------------- */}
-                {/* ÉVALUATION PUBLIÉE */}
-                {/* ---------------------------------------------- */}
 
                 {assessment.is_locked && (
                   <div className="flex items-center justify-center gap-2 rounded-xl border border-green-200 bg-green-50 px-6 py-3 font-medium text-green-700">

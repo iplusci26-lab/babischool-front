@@ -306,7 +306,7 @@ export default function AssessmentForm({
       {/* TITRE */}
       {/* ====================================================== */}
 
-      <div>
+      {/*<div>
 
         <label className="
           mb-2
@@ -361,7 +361,7 @@ export default function AssessmentForm({
 
         />
 
-      </div>
+      </div>*/}
 
       {/* ====================================================== */}
       {/* NOTE / POIDS / DATE */}
