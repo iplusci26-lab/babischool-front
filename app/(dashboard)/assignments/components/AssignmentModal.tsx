@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { getSubjects } from "@/lib/api/subjects";
 import { getTeachers } from "@/lib/api/teachers";
 import { getCourseGroups } from "@/lib/api/courseGroups";
+import { ClassroomGroup } from "@/types/classroomGroup";
+import { getClassroomGroups } from "@/lib/api/classroomGroups";
 
 import {
     createTeachingAssignment,
@@ -51,6 +53,12 @@ export default function AssignmentModal({
     const [courseGroups, setCourseGroups] =
         useState<CourseGroup[]>([]);
 
+    const [classroomGroups, setClassroomGroups] =
+        useState<ClassroomGroup[]>([]);
+
+    const [loadingClassroomGroups, setLoadingClassroomGroups] =
+        useState(false);
+
 
     // ==========================================================
     // STATE
@@ -67,6 +75,8 @@ export default function AssignmentModal({
         subject_id: "",
 
         teacher_id: "",
+
+        classroom_group_id: "",
 
         course_group_id: "",
 
@@ -139,7 +149,7 @@ export default function AssignmentModal({
     const loadCourseGroups = async (
         subjectId?: string
     ) => {
-
+           
         if (!academicYearId) {
 
             setCourseGroups([]);
@@ -182,6 +192,50 @@ export default function AssignmentModal({
     };
 
 
+    const loadClassroomGroups = async () => {
+
+        if (!classroomId) {
+    
+            setClassroomGroups([]);
+    
+            return;
+        }
+    
+        try {
+    
+            setLoadingClassroomGroups(true);
+    
+            const data =
+                await getClassroomGroups(
+                    classroomId
+                );
+                console.log(
+                    "CLASSROOM GROUPS RESPONSE:",
+                    data
+                );
+                
+                console.log(
+                    "CLASSROOM GROUPS TYPE:",
+                    Array.isArray(data.results),
+                    typeof data
+                );
+            setClassroomGroups(data.results);
+    
+        } catch (error) {
+    
+            console.error(
+                "Erreur lors du chargement des groupes de classe :",
+                error
+            );
+    
+            setClassroomGroups([]);
+    
+        } finally {
+    
+            setLoadingClassroomGroups(false);
+    
+        }
+    };
     // ==========================================================
     // INITIAL LOAD
     // ==========================================================
@@ -195,7 +249,11 @@ export default function AssignmentModal({
 
         loadTeachers();
 
-    }, [open]);
+        loadClassroomGroups();
+
+    }, [open,
+        classroomId,
+    ]);
 
 
     // ==========================================================
@@ -259,6 +317,8 @@ export default function AssignmentModal({
 
                 teacher_id: "",
 
+                classroom_group_id: "",
+
                 course_group_id: "",
 
                 assignment_type: "SUBJECT",
@@ -287,6 +347,9 @@ export default function AssignmentModal({
 
             teacher_id:
                 assignment.teacher_id ?? "",
+
+            classroom_group_id:
+                assignment.classroom_group_id ?? "",
 
             course_group_id:
                 assignment.course_group_id ?? "",
@@ -433,6 +496,12 @@ export default function AssignmentModal({
                 course_group_id:
                     form.assignment_type === "SUBJECT"
                         ? form.course_group_id || null
+                        : null,
+
+                    
+                classroom_group_id:
+                    form.assignment_type === "SUBJECT"
+                        ? form.classroom_group_id || null
                         : null,
 
                 is_homeroom_teacher:
@@ -736,6 +805,94 @@ export default function AssignmentModal({
 
                     )}
 
+                    {/* ==================================================
+                            GROUPE DE CLASSE
+                        ================================================== */}
+
+                        {form.assignment_type === "SUBJECT" && (
+
+                        <div>
+
+                            <label className="mb-2 block text-sm font-medium">
+
+                                Groupe
+
+                            </label>
+
+                            <select
+                                value={form.classroom_group_id}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        classroom_group_id:
+                                            e.target.value,
+                                    })
+                                }
+                                disabled={
+                                    loadingClassroomGroups
+                                }
+                                className="w-full rounded-lg border p-3 disabled:cursor-not-allowed disabled:bg-gray-100"
+                            >
+
+                                <option value="">
+                                    Classe entière
+                                </option>
+
+                                {classroomGroups.map(
+                                    (group) => (
+
+                                        <option
+                                            key={group.id}
+                                            value={group.id}
+                                        >
+
+                                            {group.name}
+
+                                            {group.code
+                                                ? ` (${group.code})`
+                                                : ""}
+
+                                        </option>
+
+                                    )
+                                )}
+
+                            </select>
+
+                            {loadingClassroomGroups && (
+
+                                <p className="mt-2 text-xs text-gray-500">
+
+                                    Chargement des groupes...
+
+                                </p>
+
+                            )}
+
+                            {!loadingClassroomGroups &&
+                                classroomGroups.length === 0 && (
+
+                                    <p className="mt-2 text-xs text-gray-500">
+
+                                        Aucun groupe dans cette classe.
+                                        L'affectation concerne toute la classe.
+
+                                    </p>
+
+                                )}
+
+                            {errors.classroom_group && (
+
+                                <p className="mt-2 text-sm text-red-600">
+
+                                    {errors.classroom_group[0]}
+
+                                </p>
+
+                            )}
+
+                        </div>
+                        )}
 
                     {/* ==================================================
                         ENSEIGNANT
