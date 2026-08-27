@@ -1,4 +1,5 @@
 "use client";
+
 import axios from "axios";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
@@ -28,6 +29,9 @@ import {
 } from "@/types/classSchedule";
 
 export default function ClassSchedulesPage() {
+    // ======================================================
+    // EMPLOI DU TEMPS
+    // ======================================================
 
     const [weeklySchedule, setWeeklySchedule] =
         useState<WeeklyScheduleResponse | null>(null);
@@ -35,8 +39,16 @@ export default function ClassSchedulesPage() {
     const [loading, setLoading] =
         useState(true);
 
+    // ======================================================
+    // FILTRES
+    // ======================================================
+
     const [filters, setFilters] =
         useState<ScheduleFiltersType>({});
+
+    // ======================================================
+    // MODAL
+    // ======================================================
 
     const [modalOpen, setModalOpen] =
         useState(false);
@@ -50,49 +62,103 @@ export default function ClassSchedulesPage() {
     const [selectedTimeSlot, setSelectedTimeSlot] =
         useState("");
 
+    // ======================================================
+    // DONNÉES DES FILTRES
+    // ======================================================
+
     const [scheduleFilters, setScheduleFilters] =
         useState<ScheduleFiltersResponse>({
             classrooms: [],
             teachers: [],
         });
-    
+
+    // ======================================================
+    // DONNÉES DU FORMULAIRE
+    // ======================================================
+
     const [formData, setFormData] =
         useState<ScheduleFormDataResponse>({
             assignments: [],
             subjects: [],
         });
 
-    async function loadSchedule() {
+    // ======================================================
+    // CHARGEMENT DE L'EMPLOI DU TEMPS
+    // ======================================================
 
+    async function loadSchedule() {
         setLoading(true);
 
         try {
-
-            const data =
-                await getWeeklySchedule(filters);
+            const data = await getWeeklySchedule(filters);
 
             setWeeklySchedule(data);
+        } catch (error) {
+            console.error(
+                "Erreur lors du chargement de l'emploi du temps :",
+                error
+            );
 
+            toast.error(
+                "Impossible de charger l'emploi du temps."
+            );
         } finally {
-
             setLoading(false);
-
         }
-
     }
 
+    // ======================================================
+    // CHARGEMENT DES DONNÉES DU FORMULAIRE
+    // ======================================================
+
+    async function loadFormData() {
+        try {
+            const [
+                filtersData,
+                formDataResponse,
+            ] = await Promise.all([
+                getScheduleFilters(),
+                getScheduleFormData(),
+            ]);
+
+            setScheduleFilters(filtersData);
+            setFormData(formDataResponse);
+        } catch (error) {
+            console.error(
+                "Erreur lors du chargement des données du formulaire :",
+                error
+            );
+
+            toast.error(
+                "Impossible de charger les données du formulaire."
+            );
+        }
+    }
+
+    // ======================================================
+    // CHARGEMENT INITIAL
+    // ======================================================
+
     useEffect(() => {
-
-        loadSchedule();
         loadFormData();
+    }, []);
 
+    // ======================================================
+    // RECHARGEMENT DE LA GRILLE
+    // ======================================================
+
+    useEffect(() => {
+        loadSchedule();
     }, [filters]);
+
+    // ======================================================
+    // CRÉATION D'UNE SÉANCE
+    // ======================================================
 
     function handleCreate(
         weekday: Weekday,
         slot: WeeklyTimeSlot
     ) {
-
         setSelectedSchedule(null);
 
         setSelectedWeekday(weekday);
@@ -100,188 +166,272 @@ export default function ClassSchedulesPage() {
         setSelectedTimeSlot(slot.id);
 
         setModalOpen(true);
-
     }
+
+    // ======================================================
+    // MODIFICATION D'UNE SÉANCE
+    // ======================================================
 
     function handleEdit(
         schedule: ClassSchedule
     ) {
-
         setSelectedSchedule(schedule);
 
         setModalOpen(true);
-
     }
 
-    
+    // ======================================================
+    // ENREGISTREMENT
+    // ======================================================
 
-      async function handleSubmit(payload: ClassSchedulePayload) {
-          try {
-              if (selectedSchedule) {
-                  await updateSchedule(selectedSchedule.id, payload);
-              } else {
-                  await createSchedule(payload);
-              }
+    async function handleSubmit(
+        payload: ClassSchedulePayload
+    ) {
+        console.log(
+            "PAYLOAD EMPLOI DU TEMPS :",
+            JSON.stringify(payload, null, 2)
+        );
+        try {
+            if (selectedSchedule) {
+                // --------------------------------------------------
+                // MODIFICATION
+                // --------------------------------------------------
 
-              setModalOpen(false);
-              loadSchedule();
+                await updateSchedule(
+                    selectedSchedule.id,
+                    payload
+                );
 
-          } catch (error) {
-              if (axios.isAxiosError(error)) {
-                  const data = error.response?.data;
-               
-                  // Message renvoyé par DRF
-                  if (typeof data === "string") {
-                      return;
-                  }
+                toast.success(
+                    "La séance a été modifiée."
+                );
+            } else {
+                // --------------------------------------------------
+                // CRÉATION
+                // --------------------------------------------------
 
-                  // Erreurs de validation
-                  if (typeof data === "object") {
-                      const message = Object.values(data)
-                          .flat()
-                          .join("\n");
+                await createSchedule(payload);
 
-                          toast.error(message);
-                      return;
-                  }
-              }
+                toast.success(
+                    "La séance a été créée."
+                );
+            }
 
-              toast.error("Une erreur est survenue.");
-          }
-      }
+            setModalOpen(false);
+
+            setSelectedSchedule(null);
+
+            await loadSchedule();
+
+        } catch (error) {
+            console.error(
+                "Erreur lors de l'enregistrement :",
+                error
+            );
+
+            if (axios.isAxiosError(error)) {
+                const data = error.response?.data;
+
+                // --------------------------------------------------
+                // Message texte
+                // --------------------------------------------------
+
+                if (typeof data === "string") {
+                    toast.error(data);
+                    return;
+                }
+
+                // --------------------------------------------------
+                // Erreurs DRF
+                // --------------------------------------------------
+
+                if (
+                    data &&
+                    typeof data === "object"
+                ) {
+                    const messages = Object.values(data)
+                        .flatMap((value) => {
+                            if (Array.isArray(value)) {
+                                return value;
+                            }
+
+                            return [value];
+                        })
+                        .filter(
+                            (value) =>
+                                typeof value === "string"
+                        )
+                        .join("\n");
+
+                    if (messages) {
+                        toast.error(messages);
+                        return;
+                    }
+                }
+            }
+
+            toast.error(
+                "Une erreur est survenue."
+            );
+        }
+    }
+
+    // ======================================================
+    // SUPPRESSION
+    // ======================================================
 
     async function handleDelete() {
-
-        if (!selectedSchedule)
+        if (!selectedSchedule) {
             return;
+        }
 
-        await deleteSchedule(
-            selectedSchedule.id
-        );
+        try {
+            await deleteSchedule(
+                selectedSchedule.id
+            );
 
-        setModalOpen(false);
+            toast.success(
+                "La séance a été supprimée."
+            );
 
-        loadSchedule();
+            setModalOpen(false);
 
+            setSelectedSchedule(null);
+
+            await loadSchedule();
+
+        } catch (error) {
+            console.error(
+                "Erreur lors de la suppression :",
+                error
+            );
+
+            if (axios.isAxiosError(error)) {
+                const data = error.response?.data;
+
+                if (typeof data === "string") {
+                    toast.error(data);
+                    return;
+                }
+
+                if (
+                    data &&
+                    typeof data === "object"
+                ) {
+                    const messages = Object.values(data)
+                        .flatMap((value) => {
+                            if (Array.isArray(value)) {
+                                return value;
+                            }
+
+                            return [value];
+                        })
+                        .filter(
+                            (value) =>
+                                typeof value === "string"
+                        )
+                        .join("\n");
+
+                    if (messages) {
+                        toast.error(messages);
+                        return;
+                    }
+                }
+            }
+
+            toast.error(
+                "Impossible de supprimer la séance."
+            );
+        }
     }
 
-    async function loadFormData() {
-      
-     
-
-      const [filtersData, formDataResponse] = await Promise.all([
-  
-          getScheduleFilters(),
-  
-          getScheduleFormData(),
-  
-      ]);
-  
-      setScheduleFilters(filtersData);
-  
-      setFormData(formDataResponse);
-  
-  }
+    // ======================================================
+    // CHARGEMENT
+    // ======================================================
 
     if (loading) {
-
         return (
-
             <div className="p-6">
-
                 Chargement...
-
             </div>
-
         );
-
     }
+
+    // ======================================================
+    // ERREUR DE CHARGEMENT
+    // ======================================================
 
     if (!weeklySchedule) {
-
         return (
-
             <div className="p-6">
-
                 Impossible de charger l'emploi du temps.
-
             </div>
-
         );
-
     }
 
-    return (
+    // ======================================================
+    // RENDER
+    // ======================================================
 
+    return (
         <div className="space-y-6 p-6">
 
+            {/* ==================================================
+                EN-TÊTE
+            ================================================== */}
+
             <div>
-
                 <h1 className="text-2xl font-bold">
-
                     Emploi du temps
-
                 </h1>
 
                 <p className="text-sm text-gray-500">
-
                     Gestion des heures de cours
-
                 </p>
-
             </div>
 
+            {/* ==================================================
+                FILTRES
+            ================================================== */}
+
             <ScheduleFilter
-
                 filters={filters}
-
                 onChange={setFilters}
-
                 classrooms={scheduleFilters.classrooms}
                 teachers={scheduleFilters.teachers}
-
             />
+
+            {/* ==================================================
+                GRILLE
+            ================================================== */}
 
             <WeeklyScheduleGrid
-
                 weekdays={weeklySchedule.weekdays}
-
                 timeSlots={weeklySchedule.time_slots}
-
                 grid={weeklySchedule.grid}
-
                 onCellClick={handleCreate}
-
                 onScheduleClick={handleEdit}
-
             />
+
+            {/* ==================================================
+                MODAL
+            ================================================== */}
 
             <ClassScheduleModal
-
                 open={modalOpen}
-
                 schedule={selectedSchedule}
-
                 weekdays={weeklySchedule.weekdays}
-
                 timeSlots={weeklySchedule.time_slots}
-
                 assignments={formData.assignments}
-
                 subjects={formData.subjects}
-
                 initialWeekday={selectedWeekday}
-
                 initialTimeSlot={selectedTimeSlot}
-
-                onClose={() => setModalOpen(false)}
-
+                onClose={() => {
+                    setModalOpen(false);
+                    setSelectedSchedule(null);
+                }}
                 onSubmit={handleSubmit}
-
             />
-
         </div>
-
     );
-
 }

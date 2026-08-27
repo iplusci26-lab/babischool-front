@@ -132,7 +132,7 @@ export default function AnnouncementFormModal({
 
         levelRes,
 
-        cycleRes,
+      
 
       ] = await Promise.all([
 
@@ -140,9 +140,9 @@ export default function AnnouncementFormModal({
 
         api.get("/students/classrooms/"),
 
-        api.get("/students/classlevel/"),
+        api.get("/students/classroom-levels/"),
 
-        api.get("/students/cycles/"),
+       
 
       ]);
 
@@ -161,11 +161,8 @@ export default function AnnouncementFormModal({
         levelRes.data
       );
 
-      setCycles(
-        cycleRes.data.results ||
-        cycleRes.data
-      );
-
+      console.log(levelRes)
+      
     } catch (error) {
 
       console.error(error);
@@ -233,8 +230,7 @@ export default function AnnouncementFormModal({
             classroom_level:
               form.classroom_level || null,
 
-            cycle:
-              form.cycle || null,
+            
           },
         ])
       );
@@ -384,7 +380,7 @@ export default function AnnouncementFormModal({
             >
 
               <option value="general">
-                Générale
+                Général
               </option>
 
               <option value="finance">
@@ -549,20 +545,12 @@ export default function AnnouncementFormModal({
                 Parents
               </option>
 
-              <option value="role">
-                Rôle
-              </option>
-
               <option value="classroom">
                 Classe
               </option>
 
               <option value="classroom_level">
                 Niveau
-              </option>
-
-              <option value="cycle">
-                Cycle
               </option>
 
             </select>
@@ -617,7 +605,7 @@ export default function AnnouncementFormModal({
 
             <label className="block mb-2">
 
-                Sélectionner une classe
+                Sélectionner un niveau
 
             </label>
 
@@ -634,10 +622,10 @@ export default function AnnouncementFormModal({
             >
 
                 <option value="">
-                Choisir une classe
+                Choisir un niveau
                 </option>
 
-                {classrooms.map((item) => (
+                {levels.map((item) => (
 
                 <option
                     key={item.id}

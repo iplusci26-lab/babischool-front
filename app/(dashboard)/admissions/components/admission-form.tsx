@@ -374,6 +374,34 @@ Mot de passe : ${successModal.password}`
 
               <div className="grid md:grid-cols-2 gap-5">
 
+              <div>
+
+                  <label className="text-sm font-medium">
+
+                    Nom
+
+                  </label>
+
+                  <div className="relative mt-2">
+
+                    <User
+                      size={18}
+                      className="absolute left-3 top-3.5 text-gray-400"
+                    />
+
+                    <input
+                      name="student_last_name"
+                      value={form.student_last_name}
+                      onChange={handleChange}
+                      placeholder="Nom"
+                      className="w-full rounded-xl border pl-10 pr-4 py-3 focus:ring-2 focus:ring-[#6214BE] outline-none"
+                    />
+
+                  </div>
+
+                </div>
+
+
                 <div>
 
                   <label className="text-sm font-medium">
@@ -401,33 +429,7 @@ Mot de passe : ${successModal.password}`
 
                 </div>
 
-                <div>
-
-                  <label className="text-sm font-medium">
-
-                    Nom
-
-                  </label>
-
-                  <div className="relative mt-2">
-
-                    <User
-                      size={18}
-                      className="absolute left-3 top-3.5 text-gray-400"
-                    />
-
-                    <input
-                      name="student_last_name"
-                      value={form.student_last_name}
-                      onChange={handleChange}
-                      placeholder="Nom"
-                      className="w-full rounded-xl border pl-10 pr-4 py-3 focus:ring-2 focus:ring-[#6214BE] outline-none"
-                    />
-
-                  </div>
-
-                </div>
-
+                
                 <div>
 
                   <label className="text-sm font-medium">
@@ -679,7 +681,36 @@ Mot de passe : ${successModal.password}`
               <div className="grid md:grid-cols-2 gap-5">
 
                 {/* Les 4 champs Parent + le bouton seront dans la Partie 3 */}
-		                <div>
+		              
+                <div>
+
+                    <label className="text-sm font-medium">
+
+                      Nom du parent
+
+                    </label>
+
+                    <div className="relative mt-2">
+
+                      <User
+                        size={18}
+                        className="absolute left-3 top-3.5 text-gray-400"
+                      />
+
+                      <input
+                        name="parent_last_name"
+                        value={form.parent_last_name}
+                        onChange={handleChange}
+                        placeholder="Nom"
+                        className="w-full rounded-xl border pl-10 pr-4 py-3 focus:ring-2 focus:ring-[#6214BE] outline-none"
+                      />
+
+                    </div>
+
+                  </div>
+
+
+                  <div>
 
                   <label className="text-sm font-medium">
 
@@ -706,32 +737,7 @@ Mot de passe : ${successModal.password}`
 
                 </div>
 
-                <div>
-
-                  <label className="text-sm font-medium">
-
-                    Nom du parent
-
-                  </label>
-
-                  <div className="relative mt-2">
-
-                    <User
-                      size={18}
-                      className="absolute left-3 top-3.5 text-gray-400"
-                    />
-
-                    <input
-                      name="parent_last_name"
-                      value={form.parent_last_name}
-                      onChange={handleChange}
-                      placeholder="Nom"
-                      className="w-full rounded-xl border pl-10 pr-4 py-3 focus:ring-2 focus:ring-[#6214BE] outline-none"
-                    />
-
-                  </div>
-
-                </div>
+               
 
                 <div>
 

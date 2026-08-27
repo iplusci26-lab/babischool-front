@@ -6,7 +6,8 @@ import {
   Trash2,
   Calendar,
   User,
-  Paperclip
+  Paperclip,
+  Clock,
 } from "lucide-react";
 
 export default function AnnouncementCard({
@@ -21,46 +22,137 @@ export default function AnnouncementCard({
 
 }: any) {
 
+  // =====================================================
+  // EXPIRATION
+  // =====================================================
 
+  const isExpired = (() => {
+    if (!announcement.expire_at) {
+      return false;
+    }
+  
+    const expirationDate = new Date(
+      announcement.expire_at
+    );
+  
+    // L'annonce reste valide jusqu'à 23:59:59
+    // du jour d'expiration.
+    expirationDate.setHours(
+      23,
+      59,
+      59,
+      999
+    );
+  
+    return expirationDate.getTime() < Date.now();
+  })();
+  // =====================================================
+  // PRIORITÉ
+  // =====================================================
 
+  const getPriorityColor = (
+    priority: string
+  ) => {
 
- const getPriorityColor = (
-  priority: string
-) => {
+    switch (priority) {
 
-  switch (priority) {
+      case "important":
 
-    case "important":
+        return (
+          "bg-orange-100 text-orange-700"
+        );
 
-      return (
-        "bg-orange-100 text-orange-700"
-      );
+      case "urgent":
 
-    case "urgent":
+        return (
+          "bg-red-100 text-red-700"
+        );
 
-      return (
-        "bg-red-100 text-red-700"
-      );
+      default:
 
-    default:
+        return (
+          "bg-gray-100 text-gray-700"
+        );
+    }
+  };
 
-      return (
-        "bg-gray-100 text-gray-700"
-      );
-  }
-};
 
   return (
 
-    <div className="bg-white border rounded-3xl p-5 shadow-sm hover:shadow-md transition">
+    <div
+      className={`
+        relative
+        border
+        rounded-3xl
+        p-5
+        shadow-sm
+        transition
+        ${
+          isExpired
+            ? "bg-gray-100 border-gray-300 opacity-75"
+            : "bg-white border-gray-200 hover:shadow-md"
+        }
+      `}
+    >
 
+      {/* ================================================= */}
+      {/* BADGE EXPIRÉ */}
+      {/* ================================================= */}
+
+      {isExpired && (
+
+        <div
+          className="
+            absolute
+            top-4
+            right-4
+            flex
+            items-center
+            gap-1.5
+            px-3
+            py-1
+            rounded-full
+            bg-gray-700
+            text-white
+            text-xs
+            font-semibold
+          "
+        >
+
+          <Clock size={13} />
+
+          Expiré
+
+        </div>
+
+      )}
+
+
+      {/* ================================================= */}
       {/* HEADER */}
+      {/* ================================================= */}
 
       <div className="flex items-start justify-between">
 
-        <div>
+        <div
+          className={
+            isExpired
+              ? "pr-20"
+              : ""
+          }
+        >
 
-          <h3 className="font-bold text-lg">
+          <h3
+            className={`
+              font-bold
+              text-lg
+              ${
+                isExpired
+                  ? "text-gray-500"
+                  : "text-gray-900"
+              }
+            `}
+          >
 
             {announcement.title}
 
@@ -74,29 +166,55 @@ export default function AnnouncementCard({
 
         </div>
 
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-medium ${
-            getPriorityColor(
+
+        {!isExpired && (
+
+          <span
+            className={`
+              px-3
+              py-1
+              rounded-full
+              text-xs
+              font-medium
+              ${getPriorityColor(
                 announcement.priority
-              )
-          }`}
-        >
+              )}
+            `}
+          >
 
-          {announcement.priority}
+            {announcement.priority}
 
-        </span>
+          </span>
+
+        )}
 
       </div>
 
-      {/* CONTENT */}
 
-      <p className="text-gray-600 mt-4 line-clamp-3">
+      {/* ================================================= */}
+      {/* CONTENT */}
+      {/* ================================================= */}
+
+      <p
+        className={`
+          mt-4
+          line-clamp-3
+          ${
+            isExpired
+              ? "text-gray-500"
+              : "text-gray-600"
+          }
+        `}
+      >
 
         {announcement.content}
 
       </p>
 
+
+      {/* ================================================= */}
       {/* META */}
+      {/* ================================================= */}
 
       <div className="mt-5 space-y-2 text-sm text-gray-500">
 
@@ -108,6 +226,7 @@ export default function AnnouncementCard({
 
         </div>
 
+
         <div className="flex items-center gap-2">
 
           <Calendar size={14} />
@@ -115,7 +234,42 @@ export default function AnnouncementCard({
           {new Date(
             announcement.publish_at
           ).toLocaleDateString()}
+
         </div>
+
+
+        {/* DATE D'EXPIRATION */}
+
+        {announcement.expire_at && (
+
+          <div
+            className={`
+              flex
+              items-center
+              gap-2
+              ${
+                isExpired
+                  ? "text-red-600 font-medium"
+                  : ""
+              }
+            `}
+          >
+
+            <Clock size={14} />
+
+            {isExpired
+              ? "Expiré le "
+              : "Expire le "
+            }
+
+            {new Date(
+              announcement.expire_at
+            ).toLocaleDateString()}
+
+          </div>
+
+        )}
+
 
         {announcement.attachment && (
 
@@ -126,22 +280,36 @@ export default function AnnouncementCard({
             Pièce jointe
 
           </div>
+
         )}
 
       </div>
 
+
+      {/* ================================================= */}
       {/* ACTIONS */}
+      {/* ================================================= */}
 
       <div className="mt-6 flex items-center justify-end gap-2">
 
         <button
           onClick={onView}
-          className="h-10 w-10 rounded-xl border flex items-center justify-center hover:bg-gray-50"
+          className="
+            h-10
+            w-10
+            rounded-xl
+            border
+            flex
+            items-center
+            justify-center
+            hover:bg-gray-50
+          "
         >
 
           <Eye size={18} />
 
         </button>
+
 
         <button
           onClick={() =>
@@ -149,12 +317,23 @@ export default function AnnouncementCard({
               announcement
             )
           }
-          className="h-10 w-10 rounded-xl border flex items-center justify-center hover:bg-blue-50 text-blue-600"
+          className="
+            h-10
+            w-10
+            rounded-xl
+            border
+            flex
+            items-center
+            justify-center
+            hover:bg-blue-50
+            text-blue-600
+          "
         >
 
           <Pencil size={18} />
 
         </button>
+
 
         <button
           onClick={() =>
@@ -162,7 +341,17 @@ export default function AnnouncementCard({
               announcement
             )
           }
-          className="h-10 w-10 rounded-xl border flex items-center justify-center hover:bg-red-50 text-red-600"
+          className="
+            h-10
+            w-10
+            rounded-xl
+            border
+            flex
+            items-center
+            justify-center
+            hover:bg-red-50
+            text-red-600
+          "
         >
 
           <Trash2 size={18} />

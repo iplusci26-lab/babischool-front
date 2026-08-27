@@ -59,22 +59,18 @@ export default function WeeklyScheduleGrid({
 
                         </th>
 
-                        {
+                        {weekdays.map((day) => (
 
-                            weekdays.map((day) => (
+                            <th
+                                key={day.value}
+                                className="border px-4 py-3 text-center text-sm font-semibold"
+                            >
 
-                                <th
-                                    key={day.value}
-                                    className="border px-4 py-3 text-center text-sm font-semibold"
-                                >
+                                {day.label}
 
-                                    {day.label}
+                            </th>
 
-                                </th>
-
-                            ))
-
-                        }
+                        ))}
 
                     </tr>
 
@@ -82,71 +78,71 @@ export default function WeeklyScheduleGrid({
 
                 <tbody>
 
-                    {
+                    {timeSlots.map((slot) => (
 
-                        timeSlots.map((slot) => (
+                        <tr
+                            key={slot.id}
+                            className="hover:bg-gray-50"
+                        >
 
-                            <tr
-                                key={slot.id}
-                                className="hover:bg-gray-50"
-                            >
+                            {/* ==================================================
+                                CRÉNEAU HORAIRE
+                            ================================================== */}
 
-                                <td className="border bg-gray-50 px-3 py-3 align-top">
+                            <td className="border bg-gray-50 px-3 py-3 align-top">
 
-                                    <div className="font-medium">
+                                <div className="font-medium">
 
-                                        {slot.name}
+                                    {slot.name}
 
-                                    </div>
+                                </div>
 
-                                    <div className="text-xs text-gray-500">
+                                <div className="text-xs text-gray-500">
 
-                                        {slot.start_time_display}
+                                    {slot.start_time_display}
 
-                                        {" - "}
+                                    {" - "}
 
-                                        {slot.end_time_display}
+                                    {slot.end_time_display}
 
-                                    </div>
+                                </div>
 
-                                </td>
+                            </td>
 
-                                {
+                            {/* ==================================================
+                                JOURS
+                            ================================================== */}
 
-                                    weekdays.map((day) => {
+                            {weekdays.map((day) => {
 
-                                        const schedule =
-                                            grid[day.value]?.[slot.id] ?? null;
+                                const schedules =
+                                    grid[day.value]?.[slot.id] ?? [];
 
-                                        return (
+                                return (
 
-                                            <ScheduleCell
+                                    <ScheduleCell
 
-                                                key={`${day.value}-${slot.id}`}
+                                        key={`${day.value}-${slot.id}`}
 
-                                                weekday={day.value}
+                                        weekday={day.value}
 
-                                                timeSlot={slot}
+                                        timeSlot={slot}
 
-                                                schedule={schedule}
+                                        schedules={schedules}
 
-                                                onCellClick={onCellClick}
+                                        onCellClick={onCellClick}
 
-                                                onScheduleClick={onScheduleClick}
+                                        onScheduleClick={onScheduleClick}
 
-                                            />
+                                    />
 
-                                        );
+                                );
 
-                                    })
+                            })}
 
-                                }
+                        </tr>
 
-                            </tr>
-
-                        ))
-
-                    }
+                    ))}
 
                 </tbody>
 

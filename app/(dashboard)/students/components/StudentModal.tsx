@@ -141,6 +141,8 @@ export default function StudentModal({
             <Input
               label="Matricule"
               value={form.student_number}
+              placeholder="12345678M"
+              maxLength={9}
               onChange={(e) =>
                 handleChange(
                   "student_number",

@@ -1,50 +1,57 @@
 import { api } from "../api";
-import { TeachingAssignment } from "@/types/teachingAssignment";
+
+import {
+    TeachingAssignment,
+    CreateTeachingAssignmentPayload,
+    UpdateTeachingAssignmentPayload,
+} from "@/types/teachingAssignment";
 
 export async function getTeachingAssignments(
-  classroomId: string
+    classroomId: string
 ): Promise<TeachingAssignment[]> {
 
-  const response = await api.get(
-    "/academics/teaching-assignments/",
-    {
-      params: {
-        classroom_id: classroomId,
-      },
-    }
-  );
+    const response = await api.get(
+        "/academics/teaching-assignments/",
+        {
+            params: {
+                classroom_id: classroomId,
+            },
+        }
+    );
 
-  return response.data;
+    return response.data;
 }
 
-export async function createTeachingAssignment(data: any) {
+export async function createTeachingAssignment(
+    data: CreateTeachingAssignmentPayload
+): Promise<TeachingAssignment> {
 
-  const response = await api.post(
-    "/academics/teaching-assignments/",
-    data
-  );
+    const response = await api.post(
+        "/academics/teaching-assignments/",
+        data
+    );
 
-  return response.data;
+    return response.data;
 }
 
 export async function updateTeachingAssignment(
-  id: string,
-  data: any
-) {
+    id: string,
+    data: UpdateTeachingAssignmentPayload
+): Promise<TeachingAssignment> {
 
-  const response = await api.put(
-    `/academics/teaching-assignments/${id}/`,
-    data
-  );
+    const response = await api.put(
+        `/academics/teaching-assignments/${id}/`,
+        data
+    );
 
-  return response.data;
+    return response.data;
 }
 
 export async function deleteTeachingAssignment(
-  id: string
-) {
+    id: string
+): Promise<void> {
 
-  await api.delete(
-    `/academics/teaching-assignments/${id}/`
-  );
+    await api.delete(
+        `/academics/teaching-assignments/${id}/`
+    );
 }

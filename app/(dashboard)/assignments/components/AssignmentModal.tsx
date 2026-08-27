@@ -5,16 +5,19 @@ import { useEffect, useState } from "react";
 import { TeachingAssignment } from "@/types/teachingAssignment";
 import { Subject } from "@/types/subject";
 import { Teacher } from "@/types/teachers";
-import { ClassroomGroup } from "@/types/classroomGroup";
+import { CourseGroup } from "@/types/courseGroup";
+
 import { toast } from "sonner";
+
 import { getSubjects } from "@/lib/api/subjects";
 import { getTeachers } from "@/lib/api/teachers";
-import { getClassroomGroups } from "@/lib/api/classroomGroups";
+import { getCourseGroups } from "@/lib/api/courseGroups";
 
 import {
     createTeachingAssignment,
     updateTeachingAssignment,
 } from "@/lib/api/teachingAssignments";
+
 
 type AssignmentModalProps = {
     open: boolean;
@@ -25,6 +28,7 @@ type AssignmentModalProps = {
     onSaved: () => void;
 };
 
+
 export default function AssignmentModal({
     open,
     assignment,
@@ -34,16 +38,28 @@ export default function AssignmentModal({
     onSaved,
 }: AssignmentModalProps) {
 
+    // ==========================================================
+    // DATA
+    // ==========================================================
+
     const [subjects, setSubjects] =
         useState<Subject[]>([]);
 
     const [teachers, setTeachers] =
         useState<Teacher[]>([]);
 
-    const [groups, setGroups] =
-        useState<ClassroomGroup[]>([]);
+    const [courseGroups, setCourseGroups] =
+        useState<CourseGroup[]>([]);
+
+
+    // ==========================================================
+    // STATE
+    // ==========================================================
 
     const [saving, setSaving] =
+        useState(false);
+
+    const [loadingCourseGroups, setLoadingCourseGroups] =
         useState(false);
 
     const [form, setForm] = useState({
@@ -52,11 +68,9 @@ export default function AssignmentModal({
 
         teacher_id: "",
 
-        classroom_group_id: "",
+        course_group_id: "",
 
         assignment_type: "SUBJECT",
-
-        is_homeroom_teacher: false,
 
         start_date: "",
 
@@ -64,65 +78,115 @@ export default function AssignmentModal({
 
     });
 
-    const [errors, setErrors] = useState<Record<string, string[]>>({});
+    const [errors, setErrors] =
+        useState<Record<string, string[]>>({});
+
+
+    // ==========================================================
+    // LOAD SUBJECTS
+    // ==========================================================
 
     const loadSubjects = async () => {
 
         try {
-           
+
             const data =
                 await getSubjects();
-               
+
             setSubjects(data.results);
 
-        } catch (error:any) {
-           
-                console.error(error);
+        } catch (error) {
 
+            console.error(
+                "Erreur lors du chargement des matières :",
+                error
+            );
 
         }
 
     };
+
+
+    // ==========================================================
+    // LOAD TEACHERS
+    // ==========================================================
 
     const loadTeachers = async () => {
 
         try {
-            
+
             const data =
                 await getTeachers();
-           
+
             setTeachers(data);
 
         } catch (error) {
 
-            console.error(error);
+            console.error(
+                "Erreur lors du chargement des enseignants :",
+                error
+            );
 
         }
 
     };
 
-    const loadGroups = async () => {
 
-        if (!classroomId)
+    // ==========================================================
+    // LOAD COURSE GROUPS
+    // ==========================================================
+
+    const loadCourseGroups = async (
+        subjectId?: string
+    ) => {
+
+        if (!academicYearId) {
+
+            setCourseGroups([]);
+
             return;
+
+        }
 
         try {
 
+            setLoadingCourseGroups(true);
+
             const data =
-                await getClassroomGroups(
-                    classroomId
-                );
-                
-            setGroups(data.results);
+                await getCourseGroups({
+
+                    academicYearId,
+
+                    subjectId:
+                        subjectId || undefined,
+
+                });
+
+            setCourseGroups(data);
 
         } catch (error) {
 
-            console.error(error);
+            console.error(
+                "Erreur lors du chargement des cours communs :",
+                error
+            );
+
+            setCourseGroups([]);
+
+        } finally {
+
+            setLoadingCourseGroups(false);
 
         }
 
     };
-        useEffect(() => {
+
+
+    // ==========================================================
+    // INITIAL LOAD
+    // ==========================================================
+
+    useEffect(() => {
 
         if (!open)
             return;
@@ -131,11 +195,61 @@ export default function AssignmentModal({
 
         loadTeachers();
 
-        loadGroups();
-
     }, [open]);
 
+
+    // ==========================================================
+    // LOAD COURSE GROUPS WHEN SUBJECT CHANGES
+    // ==========================================================
+
     useEffect(() => {
+
+        if (!open)
+            return;
+
+        if (
+            form.assignment_type !== "SUBJECT"
+        ) {
+
+            setCourseGroups([]);
+
+            return;
+
+        }
+
+        if (!form.subject_id) {
+
+            setCourseGroups([]);
+
+            return;
+
+        }
+
+        loadCourseGroups(
+            form.subject_id
+        );
+
+    }, [
+        open,
+        academicYearId,
+        form.subject_id,
+        form.assignment_type,
+    ]);
+
+
+    // ==========================================================
+    // INITIALISE FORM
+    // ==========================================================
+
+    useEffect(() => {
+
+        if (!open)
+            return;
+
+
+        // ------------------------------------------------------
+        // Nouvelle affectation
+        // ------------------------------------------------------
 
         if (!assignment) {
 
@@ -145,11 +259,9 @@ export default function AssignmentModal({
 
                 teacher_id: "",
 
-                classroom_group_id: "",
+                course_group_id: "",
 
                 assignment_type: "SUBJECT",
-
-                is_homeroom_teacher: false,
 
                 start_date: "",
 
@@ -157,24 +269,30 @@ export default function AssignmentModal({
 
             });
 
+            setErrors({});
+
             return;
 
         }
 
+
+        // ------------------------------------------------------
+        // Modification
+        // ------------------------------------------------------
+
         setForm({
 
-            subject_id: assignment.subject_id ?? "",
+            subject_id:
+                assignment.subject_id ?? "",
 
-            teacher_id: assignment.teacher_id,
+            teacher_id:
+                assignment.teacher_id ?? "",
 
-            classroom_group_id:
-                assignment.classroom_group_id ?? "",
+            course_group_id:
+                assignment.course_group_id ?? "",
 
             assignment_type:
                 assignment.assignment_type,
-
-            is_homeroom_teacher:
-                assignment.is_homeroom_teacher,
 
             start_date:
                 assignment.start_date ?? "",
@@ -184,118 +302,277 @@ export default function AssignmentModal({
 
         });
 
-    }, [assignment]);
+        setErrors({});
+
+    }, [
+        open,
+        assignment,
+    ]);
+
+
+    // ==========================================================
+    // TYPE CHANGE
+    // ==========================================================
 
     useEffect(() => {
 
-        if (form.assignment_type === "PRIMARY") {
-    
+        if (
+            form.assignment_type === "PRIMARY"
+        ) {
+
             setForm((prev) => ({
-    
+
                 ...prev,
-    
+
                 subject_id: "",
-    
-                classroom_group_id: "",
-    
+
+                course_group_id: "",
+
             }));
-    
+
+            setCourseGroups([]);
+
         }
-    
-    }, [form.assignment_type]);
+
+    }, [
+        form.assignment_type,
+    ]);
+
+
+    // ==========================================================
+    // SUBJECT CHANGE
+    // ==========================================================
+
+    const handleSubjectChange = (
+        subjectId: string
+    ) => {
+
+        setForm((prev) => ({
+
+            ...prev,
+
+            subject_id: subjectId,
+
+            // Un ancien cours commun ne doit pas
+            // rester sélectionné lorsqu'on change
+            // de matière.
+
+            course_group_id: "",
+
+        }));
+
+    };
+
+
+    // ==========================================================
+    // COURSE GROUP CHANGE
+    // ==========================================================
+
+    const handleCourseGroupChange = (
+        courseGroupId: string
+    ) => {
+
+        setForm((prev) => ({
+
+            ...prev,
+
+            course_group_id:
+                courseGroupId,
+
+        }));
+
+    };
+
+
+    // ==========================================================
+    // SUBMIT
+    // ==========================================================
 
     const handleSubmit = async (
         e: React.FormEvent
     ) => {
-    
+
         e.preventDefault();
-    
+
         try {
+
             setErrors({});
+
             setSaving(true);
-            
+
+
+            // --------------------------------------------------
+            // PAYLOAD
+            // --------------------------------------------------
+
             const payload = {
-    
-                academic_year_id: academicYearId,
 
-                classroom_id: classroomId,
+                academic_year_id:
+                    academicYearId,
 
-                teacher_id: form.teacher_id,
+                classroom_id:
+                    classroomId,
 
-                assignment_type: form.assignment_type,
+                teacher_id:
+                    form.teacher_id,
 
-                start_date: form.start_date || null,
+                assignment_type:
+                    form.assignment_type,
 
-                end_date: form.end_date || null,
+                start_date:
+                    form.start_date || null,
 
-                is_homeroom_teacher:
-                    form.assignment_type === "PRIMARY",
+                end_date:
+                    form.end_date || null,
 
                 subject_id:
                     form.assignment_type === "SUBJECT"
                         ? form.subject_id || null
                         : null,
 
-                classroom_group_id:
+                course_group_id:
                     form.assignment_type === "SUBJECT"
-                        ? form.classroom_group_id || null
+                        ? form.course_group_id || null
                         : null,
-    
+
+                is_homeroom_teacher:
+                    form.assignment_type === "PRIMARY",
+
             };
-    
-            if (assignment) {
-    
+
+
+            // --------------------------------------------------
+            // CREATE
+            // --------------------------------------------------
+
+            if (!assignment) {
+
+                await createTeachingAssignment(
+                    payload
+                );
+
+            }
+
+
+            // --------------------------------------------------
+            // UPDATE
+            // --------------------------------------------------
+
+            else {
+
                 await updateTeachingAssignment(
                     assignment.id,
                     payload
                 );
-    
-            } else {
-    
-                await createTeachingAssignment(
-                    payload
-                );
-    
+
             }
-    
+
+
+            // --------------------------------------------------
+            // SUCCESS
+            // --------------------------------------------------
+
+            toast.success(
+                assignment
+                    ? "Affectation mise à jour."
+                    : "Affectation créée."
+            );
+
             onSaved();
-    
+
             onClose();
-    
-        } catch (error:any) {
-            
-            if (error.response?.data) {
-                
-                setErrors(error.response?.data);
-                console.log("----------------------",error.response?.data)
+
+        } catch (error: any) {
+
+            console.error(error);
+
+
+            // --------------------------------------------------
+            // BACKEND VALIDATION ERRORS
+            // --------------------------------------------------
+
+            if (
+                error.response?.data
+            ) {
+
+                const backendErrors =
+                    error.response.data;
+
+                setErrors(
+                    backendErrors
+                );
+
+
+                // Afficher la première erreur disponible
+
+                const firstError =
+                    Object.values(
+                        backendErrors
+                    )[0];
+
+                if (
+                    Array.isArray(firstError)
+                    && firstError.length > 0
+                ) {
+
+                    toast.error(
+                        String(firstError[0])
+                    );
+
+                } else if (
+                    typeof firstError === "string"
+                ) {
+
+                    toast.error(
+                        firstError
+                    );
+
+                } else {
+
+                    toast.error(
+                        "Impossible d'enregistrer l'affectation."
+                    );
+
+                }
+
             } else {
-        
-                console.error(error);
-                console.log("----------------------",error)
-        
+
+                toast.error(
+                    "Une erreur est survenue."
+                );
+
             }
 
-
-            toast.error(error.response?.data);
-    
-          
-            
-          
-    
         } finally {
-    
+
             setSaving(false);
-    
+
         }
-    
+
     };
+
+
+    // ==========================================================
+    // VALIDATION
+    // ==========================================================
+
     const isFormValid =
-    form.teacher_id &&
-    (
-        form.assignment_type === "PRIMARY" ||
-        form.subject_id
-    );
-    if (!open) return null;
+        Boolean(form.teacher_id)
+        &&
+        (
+            form.assignment_type === "PRIMARY"
+            ||
+            Boolean(form.subject_id)
+        );
+
+
+    // ==========================================================
+    // RENDER
+    // ==========================================================
+
+    if (!open)
+        return null;
+
 
     return (
 
@@ -303,9 +580,10 @@ export default function AssignmentModal({
 
             <div className="w-full max-w-2xl rounded-xl bg-white shadow-xl">
 
-                {/* ==========================
-                    Header
-                ========================== */}
+
+                {/* ==================================================
+                    HEADER
+                ================================================== */}
 
                 <div className="border-b px-6 py-4">
 
@@ -317,32 +595,45 @@ export default function AssignmentModal({
 
                     </h2>
 
+                    <p className="mt-1 text-sm text-gray-500">
+
+                        Affectez un enseignant à cette classe.
+
+                    </p>
+
                 </div>
 
-                {/* ==========================
-                    Body
-                ========================== */}
 
-                    <form
-                        onSubmit={handleSubmit}
-                        className="space-y-5 p-6"
-                    >
+                {/* ==================================================
+                    BODY
+                ================================================== */}
 
-                        {/* Type */}
+                <form
+                    onSubmit={handleSubmit}
+                    className="space-y-5 p-6"
+                >
+
+
+                    {/* ==================================================
+                        TYPE
+                    ================================================== */}
 
                     <div>
 
                         <label className="mb-2 block text-sm font-medium">
 
-                            Type enseignant
+                            Type d'affectation
 
                         </label>
 
                         <select
-                            value={form.assignment_type}
+                            value={
+                                form.assignment_type
+                            }
                             onChange={(e) =>
                                 setForm({
                                     ...form,
+
                                     assignment_type:
                                         e.target.value,
                                 })
@@ -352,33 +643,40 @@ export default function AssignmentModal({
 
                             <option value="PRIMARY">
 
-                                Enseignant primaire
+                                Enseignant titulaire
 
                             </option>
 
                             <option value="SUBJECT">
 
-                                Professeur secondaire
+                                Enseignant de matière
 
                             </option>
 
                         </select>
+
+
                         {form.assignment_type === "PRIMARY" && (
 
-                        <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700">
+                            <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700">
 
-                            ℹ️ Un enseignant titulaire est responsable de toute la classe.
-                            Aucune matière ni aucun groupe ne sont nécessaires.
+                                ℹ️ L'enseignant titulaire est
+                                responsable de toute la classe.
+                                Aucune matière ni aucun cours
+                                commun ne sont nécessaires.
 
-                        </div>
+                            </div>
 
                         )}
 
-                        </div>
+                    </div>
 
-                    {/* Matière */}
 
-                        {form.assignment_type === "SUBJECT" && (
+                    {/* ==================================================
+                        MATIÈRE
+                    ================================================== */}
+
+                    {form.assignment_type === "SUBJECT" && (
 
                         <div>
 
@@ -389,12 +687,13 @@ export default function AssignmentModal({
                             </label>
 
                             <select
-                                value={form.subject_id}
+                                value={
+                                    form.subject_id
+                                }
                                 onChange={(e) =>
-                                    setForm({
-                                        ...form,
-                                        subject_id: e.target.value,
-                                    })
+                                    handleSubjectChange(
+                                        e.target.value
+                                    )
                                 }
                                 className="w-full rounded-lg border p-3"
                             >
@@ -405,20 +704,23 @@ export default function AssignmentModal({
 
                                 </option>
 
-                                {subjects.map((subject) => (
+                                {subjects.map(
+                                    (subject) => (
 
-                                    <option
-                                        key={subject.id}
-                                        value={subject.id}
-                                    >
+                                        <option
+                                            key={subject.id}
+                                            value={subject.id}
+                                        >
 
-                                        {subject.name}
+                                            {subject.name}
 
-                                    </option>
+                                        </option>
 
-                                ))}
+                                    )
+                                )}
 
                             </select>
+
 
                             {errors.subject && (
 
@@ -432,9 +734,12 @@ export default function AssignmentModal({
 
                         </div>
 
-                        )}
+                    )}
 
-                    {/* Enseignant */}
+
+                    {/* ==================================================
+                        ENSEIGNANT
+                    ================================================== */}
 
                     <div>
 
@@ -445,11 +750,15 @@ export default function AssignmentModal({
                         </label>
 
                         <select
-                            value={form.teacher_id}
+                            value={
+                                form.teacher_id
+                            }
                             onChange={(e) =>
                                 setForm({
                                     ...form,
-                                    teacher_id: e.target.value,
+
+                                    teacher_id:
+                                        e.target.value,
                                 })
                             }
                             className="w-full rounded-lg border p-3"
@@ -461,52 +770,86 @@ export default function AssignmentModal({
 
                             </option>
 
-                            {teachers.map((teacher) => (
+                            {teachers.map(
+                                (teacher) => (
 
-                                <option
-                                    key={teacher.id}
-                                    value={teacher.id}
-                                >
+                                    <option
+                                        key={teacher.id}
+                                        value={teacher.id}
+                                    >
 
-                                    {teacher.first_name}  {teacher.last_name}
+                                        {
+                                            teacher.first_name
+                                        }{" "}
+                                        {
+                                            teacher.last_name
+                                        }
 
-                                </option>
+                                    </option>
 
-                            ))}
+                                )
+                            )}
 
                         </select>
+
+
                         {errors.teacher && (
-                            
+
                             <p className="mt-2 text-sm text-red-600">
+
                                 {errors.teacher[0]}
+
                             </p>
+
                         )}
 
                     </div>
 
 
-                    {/* Groupe */}
+                    {/* ==================================================
+                        COURS COMMUN
+                    ================================================== */}
 
-                        {form.assignment_type === "SUBJECT" && (
+                    {form.assignment_type === "SUBJECT" && (
 
                         <div>
 
-                            <label className="mb-2 block text-sm font-medium">
+                            <div className="mb-2 flex items-center justify-between">
 
-                                Groupe
+                                <label className="block text-sm font-medium">
 
-                            </label>
+                                    Cours commun
+
+                                </label>
+
+                                {!form.subject_id && (
+
+                                    <span className="text-xs text-gray-400">
+
+                                        Sélectionnez d'abord une matière
+
+                                    </span>
+
+                                )}
+
+                            </div>
+
 
                             <select
-                                value={form.classroom_group_id}
-                                onChange={(e) =>
-                                    setForm({
-                                        ...form,
-                                        classroom_group_id:
-                                            e.target.value,
-                                    })
+                                value={
+                                    form.course_group_id
                                 }
-                                className="w-full rounded-lg border p-3"
+                                onChange={(e) =>
+                                    handleCourseGroupChange(
+                                        e.target.value
+                                    )
+                                }
+                                disabled={
+                                    !form.subject_id
+                                    ||
+                                    loadingCourseGroups
+                                }
+                                className="w-full rounded-lg border p-3 disabled:cursor-not-allowed disabled:bg-gray-100"
                             >
 
                                 <option value="">
@@ -515,27 +858,109 @@ export default function AssignmentModal({
 
                                 </option>
 
-                                {groups.map((group) => (
 
-                                    <option
-                                        key={group.id}
-                                        value={group.id}
-                                    >
+                                {courseGroups.map(
+                                    (courseGroup) => (
 
-                                        {group.name}
+                                        <option
+                                            key={
+                                                courseGroup.id
+                                            }
+                                            value={
+                                                courseGroup.id
+                                            }
+                                        >
 
-                                    </option>
+                                            {
+                                                courseGroup.name
+                                            }
 
-                                ))}
+                                            {courseGroup.code
+                                                ? ` (${courseGroup.code})`
+                                                : ""}
+
+                                        </option>
+
+                                    )
+                                )}
 
                             </select>
 
+
+                            {loadingCourseGroups && (
+
+                                <p className="mt-2 text-xs text-gray-500">
+
+                                    Chargement des cours communs...
+
+                                </p>
+
+                            )}
+
+
+                            {!loadingCourseGroups
+                                &&
+                                form.subject_id
+                                &&
+                                courseGroups.length === 0 && (
+
+                                    <p className="mt-2 text-xs text-gray-500">
+
+                                        Aucun cours commun pour
+                                        cette matière.
+
+                                    </p>
+
+                                )
+                            }
+
+
+                            {errors.course_group && (
+
+                                <p className="mt-2 text-sm text-red-600">
+
+                                    {errors.course_group[0]}
+
+                                </p>
+
+                            )}
+
                         </div>
 
-                        )}
+                    )}
 
-                    {/* Dates */}
 
+                    {/* ==================================================
+                        INFORMATION COURS COMMUN
+                    ================================================== */}
+
+                    {form.assignment_type === "SUBJECT"
+                        &&
+                        form.course_group_id
+                        && (
+
+                            <div className="rounded-lg border border-purple-200 bg-purple-50 p-3 text-sm text-purple-700">
+
+                                <strong>
+                                    Cours commun :
+                                </strong>{" "}
+
+                                Cette affectation sera liée au cours
+                                commun sélectionné. Les autres classes
+                                membres de ce cours pourront utiliser
+                                la même affectation pédagogique.
+
+                            </div>
+
+                        )
+                    }
+
+
+                    {/* ==================================================
+                        DATES
+                    ================================================== */}
+
+                    {/*
                     <div className="grid grid-cols-2 gap-4">
 
                         <div>
@@ -548,10 +973,13 @@ export default function AssignmentModal({
 
                             <input
                                 type="date"
-                                value={form.start_date}
+                                value={
+                                    form.start_date
+                                }
                                 onChange={(e) =>
                                     setForm({
                                         ...form,
+
                                         start_date:
                                             e.target.value,
                                     })
@@ -560,6 +988,7 @@ export default function AssignmentModal({
                             />
 
                         </div>
+
 
                         <div>
 
@@ -571,10 +1000,13 @@ export default function AssignmentModal({
 
                             <input
                                 type="date"
-                                value={form.end_date}
+                                value={
+                                    form.end_date
+                                }
                                 onChange={(e) =>
                                     setForm({
                                         ...form,
+
                                         end_date:
                                             e.target.value,
                                     })
@@ -585,40 +1017,54 @@ export default function AssignmentModal({
                         </div>
 
                     </div>
+                    */}
 
-               {/* ==========================Footer========================== */}
 
-                <div className="flex items-center justify-end gap-3 border-t pt-5">
+                    {/* ==================================================
+                        FOOTER
+                    ================================================== */}
 
-                <button
-                    type="button"
-                    onClick={onClose}
-                    disabled={saving}
-                    className="rounded-lg border px-4 py-2 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    Annuler
-                </button>
+                    <div className="flex items-center justify-end gap-3 border-t pt-5">
 
-                <button
-                    type="submit"
-                    disabled={saving || !isFormValid}
-                    className="rounded-lg bg-[#6214BE] px-5 py-2 text-white hover:bg-[#5310a0] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    {saving
-                        ? "Enregistrement..."
-                        : assignment
-                            ? "Mettre à jour"
-                            : "Enregistrer"}
-                </button>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            disabled={saving}
+                            className="cursor-pointer rounded-lg border px-4 py-2 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
 
-                </div>
+                            Annuler
+
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            disabled={
+                                saving
+                                ||
+                                !isFormValid
+                            }
+                            className="cursor-pointer rounded-lg bg-[#6214BE] px-5 py-2 text-white hover:bg-[#5310a0] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+
+                            {saving
+                                ? "Enregistrement..."
+                                : assignment
+                                    ? "Mettre à jour"
+                                    : "Enregistrer"
+                            }
+
+                        </button>
+
+                    </div>
 
                 </form>
 
-                </div>
+            </div>
 
-                </div>
+        </div>
 
-                );
+    );
 
-                }
+}

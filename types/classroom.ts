@@ -3,4 +3,5 @@ export interface Classroom {
     name: string;
     capacity: number;
     annual_tuition_fee: number;
+    
   }

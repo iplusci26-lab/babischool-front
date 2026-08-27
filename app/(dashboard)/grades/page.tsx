@@ -1513,7 +1513,7 @@ export default function GradesPage() {
                       assessment.can_edit ===
                         false
                     }
-                    className="flex items-center justify-center gap-2 rounded-xl bg-[#6214BE] px-6 py-3 text-white transition-colors hover:bg-[#4e10a0] disabled:cursor-not-allowed disabled:bg-gray-400"
+                    className="flex items-center cursor-pointer justify-center gap-2 rounded-xl bg-[#6214BE] px-6 py-3 text-white transition-colors hover:bg-[#4e10a0] disabled:cursor-not-allowed disabled:bg-gray-400"
                   >
 
                     <Save className="h-5 w-5" />
@@ -1534,7 +1534,7 @@ export default function GradesPage() {
                       disabled={
                         publishing
                       }
-                      className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-3 text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+                      className="flex items-center cursor-pointer justify-center gap-2 rounded-xl bg-green-600 px-6 py-3 text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-400"
                     >
 
                       <Send className="h-5 w-5" />

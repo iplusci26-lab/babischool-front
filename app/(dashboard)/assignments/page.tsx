@@ -10,6 +10,13 @@ import { getTeachingAssignments } from "@/lib/api/teachingAssignments";
 import { AcademicYear } from "@/types/academicYear";
 import { Classroom } from "@/types/classroom";
 import { TeachingAssignment } from "@/types/teachingAssignment";
+import CourseGroupModal from "./components/CourseGroupModal";
+import {
+    getCourseGroups,
+    deleteCourseGroup,
+} from "@/lib/api/courseGroups";
+
+import { CourseGroup } from "@/types/courseGroup";
 
 export default function AssignmentsPage() {
 
@@ -32,6 +39,16 @@ export default function AssignmentsPage() {
 
     const [modalOpen, setModalOpen] =
         useState(false);
+
+    
+    const [courseGroups, setCourseGroups] =
+        useState<CourseGroup[]>([]);
+    
+    const [courseGroupModalOpen, setCourseGroupModalOpen] =
+        useState(false);
+    
+    const [editingCourseGroup, setEditingCourseGroup] =
+        useState<CourseGroup | null>(null);
 
     const [editingAssignment, setEditingAssignment] =
         useState<TeachingAssignment | null>(null);
@@ -57,6 +74,27 @@ export default function AssignmentsPage() {
 
         }
 
+    };
+
+    const loadCourseGroups = async (
+        academicYearId: string
+    ) => {
+    
+        try {
+    
+            const data =
+                await getCourseGroups({
+                    academicYearId,
+                });
+    
+            setCourseGroups(data);
+    
+        } catch (error) {
+    
+            console.error(error);
+    
+        }
+    
     };
 
     const loadClassrooms = async (
@@ -135,6 +173,10 @@ export default function AssignmentsPage() {
             selectedAcademicYear
         );
 
+        loadCourseGroups(
+            selectedAcademicYear
+        );
+
     }, [selectedAcademicYear]);
 
     useEffect(() => {
@@ -165,33 +207,38 @@ export default function AssignmentsPage() {
               HEADER
           ============================ */}
 
-          <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
 
-              <div>
+                <button
+                    onClick={() => {
+                        setEditingCourseGroup(null);
+                        setCourseGroupModalOpen(true);
+                    }}
+                    className="flex items-center cursor-pointer gap-2 rounded-lg border border-[#6214BE] px-4 py-2 text-[#6214BE] hover:bg-purple-50"
+                >
 
-                  <h1 className="text-3xl font-bold">
-                      Attribution classe
-                  </h1>
+                    <Plus size={18} />
 
-                  <p className="text-sm text-gray-500 mt-1">
-                      Gérez les affectations des enseignants par classe.
-                  </p>
+                    Nouveau cours commun
 
-              </div>
+                </button>
 
-              <button
-                  onClick={() => {
-                      setEditingAssignment(null);
-                      setModalOpen(true);
-                  }}
-                  className="flex items-center gap-2 rounded-lg bg-[#6214BE] px-4 py-2 text-white hover:bg-[#5310a0]"
-              >
-                  <Plus size={18} />
 
-                  Ajouer
-              </button>
+                <button
+                    onClick={() => {
+                        setEditingAssignment(null);
+                        setModalOpen(true);
+                    }}
+                    className="flex items-center cursor-pointer gap-2 rounded-lg bg-[#6214BE] px-4 py-2 text-white hover:bg-[#5310a0]"
+                >
 
-          </div>
+                    <Plus size={18} />
+
+                    Ajouter une affectation
+
+                </button>
+
+                </div>
 
           {/* ===========================
               FILTRES
@@ -280,7 +327,6 @@ export default function AssignmentsPage() {
               <table className="min-w-full">
 
               <thead className="bg-gray-100">
-
                     <tr>
 
                         <th className="px-6 py-3 text-left">
@@ -288,15 +334,23 @@ export default function AssignmentsPage() {
                         </th>
 
                         <th className="px-6 py-3 text-left">
+                            Matière
+                        </th>
+
+                        <th className="px-6 py-3 text-left">
                             Enseignant
                         </th>
 
                         <th className="px-6 py-3 text-left">
-                            Attribution
+                            Cours commun
                         </th>
 
                         <th className="px-6 py-3 text-left">
                             Groupe
+                        </th>
+
+                        <th className="px-6 py-3 text-left">
+                            Type
                         </th>
 
                         <th className="px-6 py-3 text-left">
@@ -308,8 +362,7 @@ export default function AssignmentsPage() {
                         </th>
 
                     </tr>
-
-                    </thead>
+                </thead>
 
                   <tbody>
 
@@ -318,7 +371,7 @@ export default function AssignmentsPage() {
                           <tr>
 
                               <td
-                                  colSpan={6}
+                                  colSpan={8}
                                   className="py-10 text-center"
                               >
 
@@ -333,7 +386,7 @@ export default function AssignmentsPage() {
                           <tr>
 
                               <td
-                                  colSpan={6}
+                                  colSpan={8}
                                   className="py-10 text-center text-gray-500"
                               >
 
@@ -345,120 +398,201 @@ export default function AssignmentsPage() {
 
                       ) : (
 
-                          assignments.map((assignment) => (
+                        assignments.map((assignment) => (
 
                             <tr
-                            key={assignment.id}
-                            className="border-t hover:bg-gray-50 transition-colors"
-                        >
+                                key={assignment.id}
+                                className="border-t hover:bg-gray-50 transition-colors"
+                            >
                         
-                            {/* Classe */}
+                                {/* =========================
+                                    CLASSE
+                                ========================== */}
                         
-                            <td className="px-6 py-4 font-medium">
+                                <td className="px-6 py-4 font-medium">
                         
-                                {assignment.classroom_name}
+                                    {assignment.classroom_name}
                         
-                            </td>
+                                </td>
                         
-                            {/* Enseignant */}
                         
-                            <td className="px-6 py-4">
+                                {/* =========================
+                                    MATIÈRE
+                                ========================== */}
                         
-                                {assignment.teacher_name}
+                                <td className="px-6 py-4">
                         
-                            </td>
+                                    {assignment.assignment_type === "PRIMARY" ? (
                         
-                            {/* Affectation */}
+                                        <span className="text-gray-400">
+                                            Toutes les matières
+                                        </span>
                         
-                            <td className="px-6 py-4">
+                                    ) : (
                         
-                                {assignment.assignment_type === "PRIMARY" ? (
+                                        assignment.subject_name ?? "—"
                         
-                                    <span className="font-medium text-blue-700">
+                                    )}
                         
-                                        🏫 Titulaire de la classe
+                                </td>
                         
-                                    </span>
                         
-                                ) : (
+                                {/* =========================
+                                    ENSEIGNANT
+                                ========================== */}
                         
-                                    <span>
+                                <td className="px-6 py-4">
                         
-                                        📘 {assignment.subject_name}
+                                    {assignment.teacher_name}
                         
-                                    </span>
+                                </td>
                         
-                                )}
                         
-                            </td>
+                                {/* =========================
+                                    COURS COMMUN
+                                ========================== */}
                         
-                            {/* Groupe */}
+                                <td className="px-6 py-4">
                         
-                            <td className="px-6 py-4">
+                                    {assignment.course_group_name ? (
                         
-                                {assignment.classroom_group_name ?? "Classe entière"}
+                                        <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700">
                         
-                            </td>
+                                            {assignment.course_group_name}
                         
-                            {/* Statut */}
+                                        </span>
                         
-                            <td className="px-6 py-4">
+                                    ) : (
                         
-                                {assignment.assignment_type === "PRIMARY" ? (
+                                        <span className="text-gray-400">
+                                            Aucun
+                                        </span>
                         
-                                    <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
+                                    )}
                         
-                                        Titulaire
+                                </td>
                         
-                                    </span>
                         
-                                ) : (
+                                {/* =========================
+                                    GROUPE
+                                ========================== */}
                         
-                                    <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                                <td className="px-6 py-4">
                         
-                                        Matière
+                                    {assignment.classroom_group_name ? (
                         
-                                    </span>
+                                        <span className="inline-flex items-center rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
                         
-                                )}
+                                            {assignment.classroom_group_name}
                         
-                            </td>
+                                        </span>
                         
-                            {/* Actions */}
+                                    ) : (
                         
-                            <td className="px-6 py-4">
+                                        <span className="text-gray-500">
+                                            Classe entière
+                                        </span>
                         
-                                <div className="flex items-center justify-center gap-2">
+                                    )}
                         
-                                    <button
-                                        onClick={() => {
-                                            setEditingAssignment(
-                                                assignment
-                                            );
-                                            setModalOpen(true);
-                                        }}
-                                        className="rounded-lg border p-2 hover:bg-gray-100"
-                                    >
+                                </td>
                         
-                                        <Pencil size={16} />
                         
-                                    </button>
+                                {/* =========================
+                                    TYPE
+                                ========================== */}
                         
-                                    <button
-                                        className="rounded-lg border p-2 text-red-600 hover:bg-red-50"
-                                    >
+                                <td className="px-6 py-4">
                         
-                                        <Trash2 size={16} />
+                                    {assignment.assignment_type === "PRIMARY" ? (
                         
-                                    </button>
+                                        <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
                         
-                                </div>
+                                            Titulaire
                         
-                            </td>
+                                        </span>
                         
-                        </tr>
-
-                          ))
+                                    ) : (
+                        
+                                        <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                        
+                                            Matière
+                        
+                                        </span>
+                        
+                                    )}
+                        
+                                </td>
+                        
+                        
+                                {/* =========================
+                                    STATUT
+                                ========================== */}
+                        
+                                <td className="px-6 py-4">
+                        
+                                    {assignment.is_active ? (
+                        
+                                        <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                        
+                                            Actif
+                        
+                                        </span>
+                        
+                                    ) : (
+                        
+                                        <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+                        
+                                            Inactif
+                        
+                                        </span>
+                        
+                                    )}
+                        
+                                </td>
+                        
+                        
+                                {/* =========================
+                                    ACTIONS
+                                ========================== */}
+                        
+                                <td className="px-6 py-4">
+                        
+                                    <div className="flex items-center justify-center gap-2">
+                        
+                                        <button
+                                            onClick={() => {
+                                                setEditingAssignment(
+                                                    assignment
+                                                );
+                        
+                                                setModalOpen(true);
+                                            }}
+                                            className="rounded-lg border cursor-pointer p-2 hover:bg-gray-100"
+                                            title="Modifier"
+                                        >
+                        
+                                            <Pencil size={16} />
+                        
+                                        </button>
+                        
+                        
+                                        <button
+                                            className="rounded-lg border p-2 text-red-600 cursor-pointer hover:bg-red-50"
+                                            title="Supprimer"
+                                        >
+                        
+                                            <Trash2 size={16} />
+                        
+                                        </button>
+                        
+                                    </div>
+                        
+                                </td>
+                        
+                            </tr>
+                        
+                        ))
 
                       )}
 
@@ -466,7 +600,265 @@ export default function AssignmentsPage() {
 
               </table>
 
-          </div>
+            </div>
+
+            {/* ===========================
+                COURS COMMUNS
+            ============================ */}
+
+            <div className="overflow-hidden rounded-xl border bg-white">
+
+            <div className="border-b px-6 py-4">
+
+                <div>
+                    <h2 className="text-lg font-semibold">
+                        Cours communs
+                    </h2>
+
+                    <p className="mt-1 text-sm text-gray-500">
+                        Les cours communs et les classes auxquelles ils sont associés.
+                    </p>
+                </div>
+
+            </div>
+
+            <table className="min-w-full">
+
+                <thead className="bg-gray-100">
+
+                    <tr>
+
+                        <th className="px-6 py-3 text-left">
+                            Cours commun
+                        </th>
+
+                        <th className="px-6 py-3 text-left">
+                            Matière
+                        </th>
+
+                        <th className="px-6 py-3 text-left">
+                            Enseignant
+                        </th>
+
+                        <th className="px-6 py-3 text-left">
+                            Classes concernées
+                        </th>
+
+                        <th className="px-6 py-3 text-left">
+                            Statut
+                        </th>
+
+                        <th className="px-6 py-3 text-center">
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {courseGroups.length === 0 ? (
+
+                        <tr>
+
+                            <td
+                                colSpan={6}
+                                className="py-10 text-center text-gray-500"
+                            >
+                                Aucun cours commun configuré.
+                            </td>
+
+                        </tr>
+
+                    ) : (
+
+                        courseGroups.map((courseGroup) => (
+
+                            <tr
+                                key={courseGroup.id}
+                                className="border-t transition-colors hover:bg-gray-50"
+                            >
+
+                                {/* =========================
+                                    NOM
+                                ========================== */}
+
+                                <td className="px-6 py-4">
+
+                                    <div className="font-medium">
+                                        {courseGroup.name}
+                                    </div>
+
+                                    {courseGroup.code && (
+
+                                        <div className="mt-1 text-xs text-gray-500">
+                                            Code : {courseGroup.code}
+                                        </div>
+
+                                    )}
+
+                                </td>
+
+
+                                {/* =========================
+                                    MATIÈRE
+                                ========================== */}
+
+                                <td className="px-6 py-4">
+
+                                    {courseGroup.subject_name || "—"}
+
+                                </td>
+
+
+                                {/* =========================
+                                    ENSEIGNANT
+                                ========================== */}
+
+                                <td className="px-6 py-4">
+
+                                    {courseGroup.teacher_name}
+
+                                </td>
+
+
+                                {/* =========================
+                                    CLASSES
+                                ========================== */}
+
+                                <td className="px-6 py-4">
+
+                                    <div className="flex flex-wrap gap-1.5">
+
+                                        {courseGroup.classrooms.length > 0 ? (
+
+                                            courseGroup.classrooms.map(
+                                                (classroom) => (
+
+                                                    <span
+                                                        key={classroom.id}
+                                                        className="inline-flex rounded-full bg-purple-100 px-2.5 py-1 text-xs font-medium text-purple-700"
+                                                    >
+                                                        {classroom.name}
+                                                    </span>
+
+                                                )
+                                            )
+
+                                        ) : (
+
+                                            <span className="text-gray-400">
+                                                Aucune classe
+                                            </span>
+
+                                        )}
+
+                                    </div>
+
+                                </td>
+
+
+                                {/* =========================
+                                    STATUT
+                                ========================== */}
+
+                                <td className="px-6 py-4">
+
+                                    {courseGroup.is_active ? (
+
+                                        <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                                            Actif
+                                        </span>
+
+                                    ) : (
+
+                                        <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+                                            Inactif
+                                        </span>
+
+                                    )}
+
+                                </td>
+
+
+                                {/* =========================
+                                    ACTIONS
+                                ========================== */}
+
+                                <td className="px-6 py-4">
+
+                                    <div className="flex items-center justify-center gap-2">
+
+                                        <button
+                                            onClick={() => {
+                                                setEditingCourseGroup(
+                                                    courseGroup
+                                                );
+
+                                                setCourseGroupModalOpen(
+                                                    true
+                                                );
+                                            }}
+                                            className="cursor-pointer rounded-lg border p-2 hover:bg-gray-100"
+                                            title="Modifier"
+                                        >
+
+                                            <Pencil size={16} />
+
+                                        </button>
+
+                                        <button
+                                            onClick={async () => {
+
+                                                if (
+                                                    !window.confirm(
+                                                        `Voulez-vous vraiment supprimer le cours commun « ${courseGroup.name} » ?`
+                                                    )
+                                                ) {
+                                                    return;
+                                                }
+
+                                                try {
+
+                                                    await deleteCourseGroup(
+                                                        courseGroup.id
+                                                    );
+
+                                                    await loadCourseGroups(
+                                                        selectedAcademicYear
+                                                    );
+
+                                                } catch (error) {
+
+                                                    console.error(error);
+
+                                                }
+
+                                            }}
+                                            className="cursor-pointer rounded-lg border p-2 text-red-600 hover:bg-red-50"
+                                            title="Supprimer"
+                                        >
+
+                                            <Trash2 size={16} />
+
+                                        </button>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        ))
+
+                    )}
+
+                </tbody>
+
+            </table>
+
+            </div>
 
           {/* =========================== MODALE ============================ */}
 
@@ -483,6 +875,26 @@ export default function AssignmentsPage() {
             }}
             onSaved={refreshAssignments}
           />
+
+        )}
+
+        {courseGroupModalOpen && (
+
+        <CourseGroupModal
+            open={courseGroupModalOpen}
+            courseGroup={editingCourseGroup}
+            academicYearId={selectedAcademicYear}
+            classrooms={classrooms}
+            onClose={() => {
+                setCourseGroupModalOpen(false);
+                setEditingCourseGroup(null);
+            }}
+            onSaved={() => {
+                loadCourseGroups(
+                    selectedAcademicYear
+                );
+            }}
+        />
 
         )}
 
