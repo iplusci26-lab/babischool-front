@@ -5,144 +5,163 @@ import {
     ClassSchedulePayload,
     ScheduleFilter,
     WeeklyScheduleResponse,
+    ScheduleFiltersResponse,
+    ScheduleFormDataResponse,
 } from "@/types/classSchedule";
 
+// ==========================================================
+// BASE URL
+// ==========================================================
+
 const BASE_URL = "/academics/schedules/";
+
+// ==========================================================
+// EMPLOI DU TEMPS HEBDOMADAIRE
+// ==========================================================
 
 export const getWeeklySchedule = async (
     filters?: ScheduleFilter
 ): Promise<WeeklyScheduleResponse> => {
-
-    const { data } = await api.get<WeeklyScheduleResponse>(
-        `${BASE_URL}weekly/`,
-        {
-            params: filters,
-        }
-    );
+    const { data } =
+        await api.get<WeeklyScheduleResponse>(
+            `${BASE_URL}weekly/`,
+            {
+                params: filters,
+            }
+        );
 
     return data;
 };
+
+// ==========================================================
+// LISTE DES SÉANCES
+// ==========================================================
 
 export const getSchedules = async (
-    filters?: ScheduleFilter & {
-        weekday?: string;
-        time_slot?: string;
-        is_active?: boolean;
-    }
+    filters?: ScheduleFilter
 ): Promise<ClassSchedule[]> => {
-
-    const { data } = await api.get<ClassSchedule[]>(
-        BASE_URL,
-        {
-            params: filters,
-        }
-    );
+    const { data } =
+        await api.get<ClassSchedule[]>(
+            BASE_URL,
+            {
+                params: filters,
+            }
+        );
 
     return data;
 };
+
+// ==========================================================
+// UNE SÉANCE
+// ==========================================================
 
 export const getSchedule = async (
     id: string
 ): Promise<ClassSchedule> => {
-
-    const { data } = await api.get<ClassSchedule>(
-        `${BASE_URL}${id}/`
-    );
+    const { data } =
+        await api.get<ClassSchedule>(
+            `${BASE_URL}${id}/`
+        );
 
     return data;
 };
+
+// ==========================================================
+// CRÉATION
+// ==========================================================
 
 export const createSchedule = async (
     payload: ClassSchedulePayload
 ): Promise<ClassSchedule> => {
-
-    const { data } = await api.post<ClassSchedule>(
-        BASE_URL,
-        payload
-    );
+    const { data } =
+        await api.post<ClassSchedule>(
+            BASE_URL,
+            payload
+        );
 
     return data;
 };
 
+// ==========================================================
+// MODIFICATION
+// ==========================================================
 
 export const updateSchedule = async (
     id: string,
     payload: ClassSchedulePayload
 ): Promise<ClassSchedule> => {
-
-    const { data } = await api.put<ClassSchedule>(
-        `${BASE_URL}${id}/`,
-        payload
-    );
+    const { data } =
+        await api.put<ClassSchedule>(
+            `${BASE_URL}${id}/`,
+            payload
+        );
 
     return data;
 };
+
+// ==========================================================
+// SUPPRESSION
+// ==========================================================
 
 export const deleteSchedule = async (
     id: string
 ): Promise<void> => {
-
     await api.delete(
         `${BASE_URL}${id}/`
     );
-
 };
 
-export interface ScheduleFiltersResponse {
-    classrooms: {
-        id: string;
-        name: string;
-    }[];
+// ==========================================================
+// OPTIONS DES FILTRES
+// ==========================================================
 
-    teachers: {
-        id: string;
-        full_name: string;
-    }[];
+export const getScheduleFilters =
+    async (): Promise<ScheduleFiltersResponse> => {
+        const { data } =
+            await api.get<ScheduleFiltersResponse>(
+                `${BASE_URL}filters/`
+            );
+
+        return data;
+    };
+
+// ==========================================================
+// DONNÉES DU FORMULAIRE
+// ==========================================================
+
+export const getScheduleFormData =
+    async (): Promise<ScheduleFormDataResponse> => {
+        const { data } =
+            await api.get<ScheduleFormDataResponse>(
+                `${BASE_URL}form-data/`
+            );
+
+        return data;
+    };
+
+// ==========================================================
+// DUPLICATION D'UNE SEMAINE
+// ==========================================================
+
+export interface DuplicateWeekScheduleResponse {
+    source_week: string;
+    destination_week: string;
+    created: number;
+    skipped?: number;
 }
 
-export interface ScheduleFormDataResponse {
-    assignments: {
-        id: string;
-        label: string;
-        assignment_type: "PRIMARY" | "SUBJECT";
-    }[];
-
-    subjects: {
-        id: string;
-        name: string;
-    }[];
-}
-
-export const getScheduleFilters = async (): Promise<ScheduleFiltersResponse> => {
-
-    const { data } = await api.get<ScheduleFiltersResponse>(
-        `${BASE_URL}filters/`
-    );
-
-    return data;
-};
-
-export const getScheduleFormData = async (): Promise<ScheduleFormDataResponse> => {
-
-    const { data } = await api.get<ScheduleFormDataResponse>(
-        `${BASE_URL}form-data/`
-    );
-
-    return data;
-};
-
-/*
 export const duplicateWeekSchedule = async (
     sourceWeek: string,
     destinationWeek: string
-) => {
+): Promise<DuplicateWeekScheduleResponse> => {
+    const { data } =
+        await api.post<DuplicateWeekScheduleResponse>(
+            `${BASE_URL}duplicate-week/`,
+            {
+                source_week: sourceWeek,
+                destination_week: destinationWeek,
+            }
+        );
 
-    return api.post(
-        `${BASE_URL}duplicate-week/`,
-        {
-            source_week: sourceWeek,
-            destination_week: destinationWeek,
-        }
-    );
-
-};*/
+    return data;
+};

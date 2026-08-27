@@ -105,9 +105,9 @@ export default function ScheduleCell({
                             className="cursor-pointer rounded-lg border border-violet-100 bg-violet-50 p-2 transition hover:border-violet-300 hover:bg-violet-100"
                         >
 
-                            {/* ================================================== */}
-                            {/* MATIÈRE */}
-                            {/* ================================================== */}
+                            {/* ==================================================
+                                MATIÈRE
+                            ================================================== */}
 
                             <div className="flex items-start gap-1.5">
                                 <BookOpen
@@ -120,9 +120,9 @@ export default function ScheduleCell({
                                 </span>
                             </div>
 
-                            {/* ================================================== */}
-                            {/* COURS COMMUN */}
-                            {/* ================================================== */}
+                            {/* ==================================================
+                                COURS COMMUN
+                            ================================================== */}
 
                             {schedule.course_group_name && (
                                 <div className="mt-1 text-xs font-medium text-violet-600">
@@ -131,9 +131,9 @@ export default function ScheduleCell({
                                 </div>
                             )}
 
-                            {/* ================================================== */}
-                            {/* CLASSES / GROUPES PARTICIPANTS */}
-                            {/* ================================================== */}
+                            {/* ==================================================
+                                CLASSES / GROUPES PARTICIPANTS
+                            ================================================== */}
 
                             {participants.length > 0 ? (
                                 <div className="mt-1 space-y-0.5 text-xs text-gray-600">
@@ -148,13 +148,15 @@ export default function ScheduleCell({
                                             >
                                                 <span className="font-medium">
                                                     {
-                                                        participant.classroom_name
+                                                        participant.classroom_name ??
+                                                        participant.classroom
                                                     }
                                                 </span>
 
                                                 {participant.classroom_group_name && (
                                                     <>
                                                         {" • "}
+
                                                         <span className="text-violet-600">
                                                             Groupe{" "}
                                                             {
@@ -169,18 +171,20 @@ export default function ScheduleCell({
 
                                 </div>
                             ) : (
-                                // Compatibilité avec une réponse API
-                                // ne contenant pas encore schedule_classes.
+                                /*
+                                 * Compatibilité avec une réponse API
+                                 * ne contenant pas encore schedule_classes.
+                                 */
+
                                 <div className="mt-1 text-xs text-gray-600">
                                     <span className="font-medium">
-                                        {
-                                            schedule.classroom_name
-                                        }
+                                        {schedule.classroom_name}
                                     </span>
 
                                     {schedule.classroom_group_name && (
                                         <>
                                             {" • "}
+
                                             <span className="text-violet-600">
                                                 Groupe{" "}
                                                 {
@@ -192,17 +196,17 @@ export default function ScheduleCell({
                                 </div>
                             )}
 
-                            {/* ================================================== */}
-                            {/* ENSEIGNANT */}
-                            {/* ================================================== */}
+                            {/* ==================================================
+                                ENSEIGNANT
+                            ================================================== */}
 
                             <div className="mt-1 text-xs text-gray-700">
                                 {schedule.teacher_name}
                             </div>
 
-                            {/* ================================================== */}
-                            {/* SALLE */}
-                            {/* ================================================== */}
+                            {/* ==================================================
+                                SALLE
+                            ================================================== */}
 
                             {schedule.room && (
                                 <div className="mt-1 text-[11px] text-gray-500">
@@ -214,9 +218,9 @@ export default function ScheduleCell({
                     );
                 })}
 
-                {/* ========================================================== */}
-                {/* AJOUTER UNE AUTRE SÉANCE */}
-                {/* ========================================================== */}
+                {/* ==========================================================
+                    AJOUTER UNE AUTRE SÉANCE
+                ========================================================== */}
 
                 <button
                     type="button"

@@ -1,3 +1,7 @@
+// ==========================================================
+// JOUR
+// ==========================================================
+
 export type Weekday =
     | "MONDAY"
     | "TUESDAY"
@@ -5,6 +9,10 @@ export type Weekday =
     | "THURSDAY"
     | "FRIDAY"
     | "SATURDAY";
+
+// ==========================================================
+// TYPE DE CRÉNEAU
+// ==========================================================
 
 export type TimeSlotType =
     | "LESSON"
@@ -70,6 +78,8 @@ export interface ScheduleClass {
 
     classroom_group?: string | null;
     classroom_group_name?: string | null;
+
+    display_name?: string;
 }
 
 // ==========================================================
@@ -78,88 +88,67 @@ export interface ScheduleClass {
 
 export interface ClassSchedule {
     id: string;
+    classroom: string;
+    classroom_name?: string;
 
     // ------------------------------------------------------
     // AFFECTATION
     // ------------------------------------------------------
 
     assignment: string;
-    assignment_id: string;
+    assignment_name: string;
 
-    assignment_type:
-        | "PRIMARY"
-        | "SUBJECT";
+    // ------------------------------------------------------
+    // ENSEIGNANT
+    // ------------------------------------------------------
 
-    assignment_type_label: string;
+    teacher_name: string | null;
+
+    // ------------------------------------------------------
+    // MATIÈRE
+    // ------------------------------------------------------
+
+    lesson_subject: string | null;
+    lesson_subject_id: string | null;
+    lesson_subject_name: string | null;
+    subject_name: string | null;
 
     // ------------------------------------------------------
     // JOUR
     // ------------------------------------------------------
 
     weekday: Weekday;
-    weekday_label: string;
-
-    // ------------------------------------------------------
-    // ENSEIGNANT
-    // ------------------------------------------------------
-
-    teacher_id: string;
-    teacher_name: string;
-
-    // ------------------------------------------------------
-    // CLASSE PRINCIPALE DE L'AFFECTATION
-    // ------------------------------------------------------
-
-    classroom_id: string;
-    classroom_name: string;
-
-    // ------------------------------------------------------
-    // GROUPE DE CLASSE
-    // ------------------------------------------------------
-
-    classroom_group_id?: string | null;
-    classroom_group_name?: string | null;
-
-    // ------------------------------------------------------
-    // COURS COMMUN
-    // ------------------------------------------------------
-
-    course_group_id?: string | null;
-    course_group_name?: string | null;
-
-    // ------------------------------------------------------
-    // MATIÈRE
-    // ------------------------------------------------------
-
-    subject_id: string | null;
-    subject_name: string | null;
-
-    // Matière utilisée pour une affectation PRIMARY
-    lesson_subject: string | null;
-    lesson_subject_id: string | null;
-    lesson_subject_name: string | null;
+    weekday_name: string;
 
     // ------------------------------------------------------
     // CRÉNEAU
     // ------------------------------------------------------
 
     time_slot: string;
+    time_slot_name: string;
     time_slot_id: string;
 
-    time_slot_name: string;
-
-    start_time: string;
-    end_time: string;
-
-    duration_minutes: number;
-
-    slot_type: TimeSlotType;
+    time_slot_start: string;
+    time_slot_end: string;
 
     // ------------------------------------------------------
     // SALLE
     // ------------------------------------------------------
 
-    room: string;
+    room: string | null;
+
+    // ------------------------------------------------------
+    // COURS COMMUN
+    // ------------------------------------------------------
+
+    course_group_id: string | null;
+    course_group_name: string | null;
+
+    // ------------------------------------------------------
+    // CLASSES / GROUPES PARTICIPANTS
+    // ------------------------------------------------------
+
+    schedule_classes: ScheduleClass[];
 
     // ------------------------------------------------------
     // ÉTAT
@@ -167,18 +156,13 @@ export interface ClassSchedule {
 
     is_active: boolean;
 
-    // ------------------------------------------------------
-    // CLASSES / GROUPES PARTICIPANTS
-    // ------------------------------------------------------
 
-    schedule_classes?: ScheduleClass[];
+    // ==========================================================
+    // GROUPE DE CLASSE
+    // ==========================================================
 
-    // ------------------------------------------------------
-    // DATES
-    // ------------------------------------------------------
-
-    created_at: string;
-    updated_at: string;
+    classroom_group_id?: string | null;
+    classroom_group_name?: string | null;
 }
 
 // ==========================================================
@@ -187,9 +171,7 @@ export interface ClassSchedule {
 
 export interface ClassSchedulePayload {
     assignment: string;
-
     weekday: Weekday;
-
     time_slot: string;
 
     lesson_subject?: string | null;
@@ -209,20 +191,12 @@ export interface ClassSchedulePayload {
 
 export interface ScheduleClassPayloadItem {
     classroom: string;
-
     classroom_group?: string | null;
 }
 
 // ==========================================================
 // GRILLE HEBDOMADAIRE
 // ==========================================================
-
-/*
-export type WeeklyScheduleGrids = Record<
-    Weekday,
-    Record<string, ClassSchedule | null>
->;
-*/
 
 export type WeeklyScheduleGrids = {
     [weekday: string]: {
@@ -236,9 +210,7 @@ export type WeeklyScheduleGrids = {
 
 export interface WeeklyScheduleResponse {
     weekdays: WeekdayItem[];
-
     time_slots: WeeklyTimeSlot[];
-
     grid: WeeklyScheduleGrids;
 }
 
@@ -289,7 +261,10 @@ export interface CourseGroupOption {
     teacher: string;
     teacher_name?: string;
 
+    // ------------------------------------------------------
     // Classes participant au cours commun
+    // ------------------------------------------------------
+
     classrooms: ClassroomOption[];
 
     is_active?: boolean;
@@ -301,7 +276,6 @@ export interface CourseGroupOption {
 
 export interface AssignmentOption {
     id: string;
-
     label: string;
 
     assignment_type:
@@ -329,7 +303,10 @@ export interface AssignmentOption {
     course_group?: string | null;
     course_group_name?: string | null;
 
+    // ------------------------------------------------------
     // Classes participantes au CourseGroup
+    // ------------------------------------------------------
+
     course_group_classrooms?: ClassroomOption[];
 }
 
@@ -348,13 +325,10 @@ export interface SubjectOption {
 
 export interface ScheduleFiltersResponse {
     classrooms: ClassroomOption[];
-
     teachers: TeacherOption[];
 
     classroom_groups?: ClassroomGroupOption[];
-
     course_groups?: CourseGroupOption[];
-
     subjects?: SubjectOption[];
 }
 
@@ -364,12 +338,9 @@ export interface ScheduleFiltersResponse {
 
 export interface ScheduleFormDataResponse {
     assignments: AssignmentOption[];
-
     subjects: SubjectOption[];
 
     classrooms?: ClassroomOption[];
-
     classroom_groups?: ClassroomGroupOption[];
-
     course_groups?: CourseGroupOption[];
 }
