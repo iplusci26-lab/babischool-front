@@ -848,9 +848,7 @@ export default function AssignmentModal({
 
                                             {group.name}
 
-                                            {group.code
-                                                ? ` (${group.code})`
-                                                : ""}
+                                            
 
                                         </option>
 

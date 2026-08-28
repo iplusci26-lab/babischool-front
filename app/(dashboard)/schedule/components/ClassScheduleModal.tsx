@@ -36,6 +36,8 @@ interface ClassScheduleModalProps {
     onSubmit: (
         payload: ClassSchedulePayload
     ) => Promise<void>;
+
+    onDelete?: () => Promise<void>;
 }
 
 export default function ClassScheduleModal({
@@ -49,6 +51,7 @@ export default function ClassScheduleModal({
     initialTimeSlot,
     onClose,
     onSubmit,
+    onDelete,
 }: ClassScheduleModalProps) {
     // ==========================================================
     // FORMULAIRE
@@ -57,8 +60,10 @@ export default function ClassScheduleModal({
     const [form, setForm] =
         useState<ClassSchedulePayload>({
             assignment: "",
-            weekday: initialWeekday ?? "MONDAY",
-            time_slot: initialTimeSlot ?? "",
+            weekday:
+                initialWeekday ?? "MONDAY",
+            time_slot:
+                initialTimeSlot ?? "",
             lesson_subject: null,
             room: "",
             schedule_classes: [],
@@ -69,14 +74,6 @@ export default function ClassScheduleModal({
 
     // ==========================================================
     // CLASSES PARTICIPANTES
-    // ==========================================================
-    //
-    // On garantit toujours un tableau.
-    //
-    // Cela évite :
-    //
-    // "form.schedule_classes is possibly undefined"
-    //
     // ==========================================================
 
     const scheduleClasses =
@@ -104,23 +101,6 @@ export default function ClassScheduleModal({
     // ==========================================================
     // CONSTRUCTION DES CLASSES PARTICIPANTES
     // ==========================================================
-    //
-    // CAS 1 :
-    //
-    // CourseGroup
-    //
-    //     course_group_classrooms
-    //          ↓
-    //     toutes les classes membres
-    //
-    // CAS 2 :
-    //
-    // Affectation normale
-    //
-    //     classroom
-    //     classroom_group
-    //
-    // ==========================================================
 
     function buildParticipants(
         selectedAssignment?: AssignmentOption
@@ -135,17 +115,17 @@ export default function ClassScheduleModal({
 
         if (
             selectedAssignment.course_group_classrooms &&
-            selectedAssignment.course_group_classrooms.length > 0
+            selectedAssignment.course_group_classrooms
+                .length > 0
         ) {
-            return selectedAssignment.course_group_classrooms.map(
-                (classroom) => ({
+            return selectedAssignment
+                .course_group_classrooms
+                .map((classroom) => ({
                     classroom:
                         String(classroom.id),
 
-                    classroom_group:
-                        null,
-                })
-            );
+                    classroom_group: null,
+                }));
         }
 
         // ======================================================
@@ -154,9 +134,9 @@ export default function ClassScheduleModal({
 
         if (
             selectedAssignment.classroom !==
-            undefined &&
+                undefined &&
             selectedAssignment.classroom !==
-            null
+                null
         ) {
             return [
                 {
@@ -166,35 +146,26 @@ export default function ClassScheduleModal({
                         ),
 
                     classroom_group:
-                        selectedAssignment.classroom_group !==
+                        selectedAssignment
+                                .classroom_group !==
                             undefined &&
-                        selectedAssignment.classroom_group !==
+                        selectedAssignment
+                                .classroom_group !==
                             null
                             ? String(
-                                  selectedAssignment.classroom_group
+                                  selectedAssignment
+                                      .classroom_group
                               )
                             : null,
                 },
             ];
         }
 
-        // ======================================================
-        // AUCUNE CLASSE
-        // ======================================================
-
         return [];
     }
 
     // ==========================================================
     // INFORMATIONS DES CLASSES PARTICIPANTES
-    // ==========================================================
-    //
-    // IMPORTANT :
-    //
-    // On part de scheduleClasses.
-    //
-    // C'est exactement ce qui sera envoyé au backend.
-    //
     // ==========================================================
 
     const participantClasses =
@@ -259,15 +230,18 @@ export default function ClassScheduleModal({
                                 classroomId,
 
                             classroom_name:
-                                assignment.classroom_name ??
+                                assignment
+                                    .classroom_name ??
                                 "Classe",
 
                             classroom_group:
-                                participant.classroom_group ??
+                                participant
+                                    .classroom_group ??
                                 null,
 
                             classroom_group_name:
-                                assignment.classroom_group_name ??
+                                assignment
+                                    .classroom_group_name ??
                                 null,
                         };
                     }
@@ -284,7 +258,8 @@ export default function ClassScheduleModal({
                             "Classe",
 
                         classroom_group:
-                            participant.classroom_group ??
+                            participant
+                                .classroom_group ??
                             null,
 
                         classroom_group_name:
@@ -302,49 +277,25 @@ export default function ClassScheduleModal({
     // ==========================================================
 
     const isFormValid = useMemo(() => {
-        // ------------------------------------------------------
-        // Affectation
-        // ------------------------------------------------------
-
         if (!form.assignment) {
             return false;
         }
-
-        // ------------------------------------------------------
-        // Jour
-        // ------------------------------------------------------
 
         if (!form.weekday) {
             return false;
         }
 
-        // ------------------------------------------------------
-        // Créneau
-        // ------------------------------------------------------
-
         if (!form.time_slot) {
             return false;
         }
-
-        // ------------------------------------------------------
-        // Affectation existante
-        // ------------------------------------------------------
 
         if (!assignment) {
             return false;
         }
 
-        // ------------------------------------------------------
-        // Classe participante
-        // ------------------------------------------------------
-
         if (scheduleClasses.length === 0) {
             return false;
         }
-
-        // ------------------------------------------------------
-        // PRIMARY → matière obligatoire
-        // ------------------------------------------------------
 
         if (
             assignment.assignment_type ===
@@ -491,10 +442,6 @@ export default function ClassScheduleModal({
     // ==========================================================
 
     async function handleSubmit() {
-        // ------------------------------------------------------
-        // Validation
-        // ------------------------------------------------------
-
         if (!isFormValid) {
             return;
         }
@@ -502,10 +449,6 @@ export default function ClassScheduleModal({
         if (!assignment) {
             return;
         }
-
-        // ------------------------------------------------------
-        // Payload
-        // ------------------------------------------------------
 
         const payload: ClassSchedulePayload = {
             assignment:
@@ -551,14 +494,30 @@ export default function ClassScheduleModal({
                 ),
         };
 
-        // ------------------------------------------------------
-        // Enregistrement
-        // ------------------------------------------------------
-
         setLoading(true);
 
         try {
             await onSubmit(payload);
+
+            onClose();
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // ==========================================================
+    // SUPPRESSION
+    // ==========================================================
+
+    async function handleDelete() {
+        if (!onDelete || loading) {
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            await onDelete();
 
             onClose();
         } finally {
@@ -580,58 +539,122 @@ export default function ClassScheduleModal({
             }
             onClose={onClose}
             footer={
-                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+                <div
+                    className="
+                        flex
+                        flex-col-reverse
+                        gap-2
+                        sm:flex-row
+                        sm:items-center
+                        sm:justify-between
+                        sm:gap-3
+                    "
+                >
                     {/* ==========================================
-                        ANNULER
+                        SUPPRIMER
                     ========================================== */}
 
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        disabled={loading}
-                        className="
-                            w-full
-                            rounded-lg
-                            border
-                            px-4
-                            py-2
-                            text-sm
-                            sm:w-auto
-                            disabled:cursor-not-allowed
-                            disabled:opacity-50
-                        "
-                    >
-                        Annuler
-                    </button>
+                    {schedule && onDelete ? (
+                        <button
+                            type="button"
+                            onClick={
+                                handleDelete
+                            }
+                            disabled={loading}
+                            className="
+                                w-full
+                                rounded-lg
+                                border
+                                border-red-200
+                                bg-red-50
+                                px-4
+                                py-2
+                                text-sm
+                                font-medium
+                                text-red-600
+                                hover:bg-red-100
+                                sm:w-auto
+                                disabled:cursor-not-allowed
+                                disabled:opacity-50
+                            "
+                        >
+                            {loading
+                                ? "Suppression..."
+                                : "Supprimer"}
+                        </button>
+                    ) : (
+                        <div />
+                    )}
 
                     {/* ==========================================
-                        ENREGISTRER
+                        ACTIONS DROITE
                     ========================================== */}
 
-                    <button
-                        type="button"
-                        onClick={handleSubmit}
-                        disabled={
-                            loading ||
-                            !isFormValid
-                        }
+                    <div
                         className="
-                            w-full
-                            rounded-lg
-                            bg-violet-700
-                            px-4
-                            py-2
-                            text-sm
-                            text-white
-                            sm:w-auto
-                            disabled:cursor-not-allowed
-                            disabled:opacity-50
+                            flex
+                            flex-col
+                            gap-2
+                            sm:flex-row
+                            sm:gap-3
                         "
                     >
-                        {loading
-                            ? "Enregistrement..."
-                            : "Enregistrer"}
-                    </button>
+                        {/* ======================================
+                            ANNULER
+                        ====================================== */}
+
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            disabled={loading}
+                            className="
+                                w-full
+                                rounded-lg
+                                border
+                                px-4
+                                py-2
+                                text-sm
+                                sm:w-auto
+                                disabled:cursor-not-allowed
+                                disabled:opacity-50
+                            "
+                        >
+                            Annuler
+                        </button>
+
+                        {/* ======================================
+                            ENREGISTRER
+                        ====================================== */}
+
+                        <button
+                            type="button"
+                            onClick={
+                                handleSubmit
+                            }
+                            disabled={
+                                loading ||
+                                !isFormValid
+                            }
+                            className="
+                                w-full
+                                rounded-lg
+                                bg-violet-700
+                                px-4
+                                py-2
+                                text-sm
+                                text-white
+                                sm:w-auto
+                                disabled:cursor-not-allowed
+                                disabled:opacity-50
+                            "
+                        >
+                            {loading
+                                ? "Enregistrement..."
+                                : schedule
+                                ? "Modifier"
+                                : "Enregistrer"}
+                        </button>
+                    </div>
                 </div>
             }
         >

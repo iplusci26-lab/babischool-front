@@ -688,7 +688,7 @@ export default function CourseGroupModal({
                             Description
 
                             <span className="ml-1 text-xs text-gray-400">
-                                (optionnelle)
+                                (optionnel)
                             </span>
 
                         </label>
