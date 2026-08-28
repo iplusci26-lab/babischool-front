@@ -14,7 +14,9 @@ import {
 
 interface ScheduleCellProps {
     weekday: Weekday;
+
     timeSlot: WeeklyTimeSlot;
+
     schedules: ClassSchedule[];
 
     onCellClick: (
@@ -34,7 +36,6 @@ export default function ScheduleCell({
     onCellClick,
     onScheduleClick,
 }: ScheduleCellProps) {
-
     // ==========================================================
     // PAUSE
     // ==========================================================
@@ -79,7 +80,7 @@ export default function ScheduleCell({
     }
 
     // ==========================================================
-    // CELLULE AVEC UNE OU PLUSIEURS SÉANCES
+    // CELLULE AVEC SÉANCES
     // ==========================================================
 
     return (
@@ -87,24 +88,84 @@ export default function ScheduleCell({
             <div className="flex min-h-28 flex-col gap-1">
 
                 {schedules.map((schedule) => {
+                    // ==================================================
+                    // MATIÈRE
+                    // ==================================================
 
                     const subjectName =
                         schedule.lesson_subject_name ??
                         schedule.subject_name ??
                         "Matière";
 
-                    const participants =
-                        schedule.schedule_classes ?? [];
+                    // ==================================================
+                    // PARTICIPANTS
+                    // ==================================================
+                    //
+                    // PRIORITÉ :
+                    //
+                    // 1. schedule_classes si réellement renseigné
+                    // 2. classroom_name de la réponse de la grille
+                    //
+                    // L'API de la grille renvoie actuellement :
+                    //
+                    // classroom_id
+                    // classroom_name
+                    // classroom_group_id
+                    // classroom_group_name
+                    //
+                    // et non nécessairement schedule_classes.
+                    // ==================================================
+
+                    const scheduleClasses =
+                        schedule.schedule_classes ??
+                        [];
+
+                    const hasScheduleClasses =
+                        scheduleClasses.length > 0;
+
+                    // ==================================================
+                    // CLASSE À AFFICHER
+                    // ==================================================
+
+                    const classroomName =
+                        schedule.classroom_name ??
+                        null;
+
+                    const classroomGroupName =
+                        schedule.classroom_group_name ??
+                        null;
+
+                    // ==================================================
+                    // COURS COMMUN
+                    // ==================================================
+                    //
+                    // Si schedule_classes existe, on les utilise.
+                    //
+                    // Sinon on utilise les informations aplaties
+                    // fournies par l'API de la grille.
+                    //
+                    // ==================================================
 
                     return (
                         <div
                             key={schedule.id}
                             onClick={() =>
-                                onScheduleClick(schedule)
+                                onScheduleClick(
+                                    schedule
+                                )
                             }
-                            className="cursor-pointer rounded-lg border border-violet-100 bg-violet-50 p-2 transition hover:border-violet-300 hover:bg-violet-100"
+                            className="
+                                cursor-pointer
+                                rounded-lg
+                                border
+                                border-violet-100
+                                bg-violet-50
+                                p-2
+                                transition
+                                hover:border-violet-300
+                                hover:bg-violet-100
+                            "
                         >
-
                             {/* ==================================================
                                 MATIÈRE
                             ================================================== */}
@@ -127,82 +188,104 @@ export default function ScheduleCell({
                             {schedule.course_group_name && (
                                 <div className="mt-1 text-xs font-medium text-violet-600">
                                     Cours commun :{" "}
-                                    {schedule.course_group_name}
+                                    {
+                                        schedule.course_group_name
+                                    }
                                 </div>
                             )}
 
                             {/* ==================================================
-                                CLASSES / GROUPES PARTICIPANTS
+                                CLASSES / GROUPES
                             ================================================== */}
 
-                            {participants.length > 0 ? (
-                                <div className="mt-1 space-y-0.5 text-xs text-gray-600">
+                            <div className="mt-1 text-xs text-gray-600">
 
-                                    {participants.map(
-                                        (participant) => (
-                                            <div
-                                                key={
-                                                    participant.id ??
-                                                    `${participant.classroom}-${participant.classroom_group ?? "all"}`
-                                                }
-                                            >
-                                                <span className="font-medium">
+                                {/* ------------------------------------------
+                                    CAS 1 :
+                                    schedule_classes fourni par l'API
+                                ------------------------------------------ */}
+
+                                {hasScheduleClasses ? (
+                                    <div className="space-y-0.5">
+                                        {scheduleClasses.map(
+                                            (
+                                                participant,
+                                                index
+                                            ) => (
+                                                <div
+                                                    key={
+                                                        participant.id ??
+                                                        `${participant.classroom}-${participant.classroom_group ?? "all"}-${index}`
+                                                    }
+                                                >
+                                                    <span className="font-medium">
+                                                        {
+                                                            participant.classroom_name ??
+                                                            participant.classroom
+                                                        }
+                                                    </span>
+
+                                                    {participant.classroom_group_name && (
+                                                        <>
+                                                            {" • "}
+
+                                                            <span className="text-violet-600">
+                                                                Groupe{" "}
+                                                                {
+                                                                    participant.classroom_group_name
+                                                                }
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )
+                                        )}
+                                    </div>
+                                ) : classroomName ? (
+                                    /* ------------------------------------------
+                                        CAS 2 :
+                                        API grille = classroom_name
+                                    ------------------------------------------ */
+
+                                    <div>
+                                        <span className="font-medium">
+                                            {classroomName}
+                                        </span>
+
+                                        {classroomGroupName && (
+                                            <>
+                                                {" • "}
+
+                                                <span className="text-violet-600">
+                                                    Groupe{" "}
                                                     {
-                                                        participant.classroom_name ??
-                                                        participant.classroom
+                                                        classroomGroupName
                                                     }
                                                 </span>
+                                            </>
+                                        )}
+                                    </div>
+                                ) : (
+                                    /* ------------------------------------------
+                                        CAS 3 :
+                                        aucune classe
+                                    ------------------------------------------ */
 
-                                                {participant.classroom_group_name && (
-                                                    <>
-                                                        {" • "}
-
-                                                        <span className="text-violet-600">
-                                                            Groupe{" "}
-                                                            {
-                                                                participant.classroom_group_name
-                                                            }
-                                                        </span>
-                                                    </>
-                                                )}
-                                            </div>
-                                        )
-                                    )}
-
-                                </div>
-                            ) : (
-                                /*
-                                 * Compatibilité avec une réponse API
-                                 * ne contenant pas encore schedule_classes.
-                                 */
-
-                                <div className="mt-1 text-xs text-gray-600">
-                                    <span className="font-medium">
-                                        {schedule.classroom_name}
-                                    </span>
-
-                                    {schedule.classroom_group_name && (
-                                        <>
-                                            {" • "}
-
-                                            <span className="text-violet-600">
-                                                Groupe{" "}
-                                                {
-                                                    schedule.classroom_group_name
-                                                }
-                                            </span>
-                                        </>
-                                    )}
-                                </div>
-                            )}
+                                    <div className="text-gray-400">
+                                        Classe non renseignée
+                                    </div>
+                                )}
+                            </div>
 
                             {/* ==================================================
                                 ENSEIGNANT
                             ================================================== */}
 
-                            <div className="mt-1 text-xs text-gray-700">
-                                {schedule.teacher_name}
-                            </div>
+                            {schedule.teacher_name && (
+                                <div className="mt-1 text-xs text-gray-700">
+                                    {schedule.teacher_name}
+                                </div>
+                            )}
 
                             {/* ==================================================
                                 SALLE
@@ -210,10 +293,10 @@ export default function ScheduleCell({
 
                             {schedule.room && (
                                 <div className="mt-1 text-[11px] text-gray-500">
-                                    Salle : {schedule.room}
+                                    Salle :{" "}
+                                    {schedule.room}
                                 </div>
                             )}
-
                         </div>
                     );
                 })}
@@ -230,12 +313,21 @@ export default function ScheduleCell({
                             timeSlot
                         )
                     }
-                    className="flex items-center justify-center rounded-md py-1 text-gray-400 transition hover:bg-gray-100 hover:text-violet-600"
+                    className="
+                        flex
+                        items-center
+                        justify-center
+                        rounded-md
+                        py-1
+                        text-gray-400
+                        transition
+                        hover:bg-gray-100
+                        hover:text-violet-600
+                    "
                     title="Ajouter un cours"
                 >
                     <Plus size={16} />
                 </button>
-
             </div>
         </td>
     );

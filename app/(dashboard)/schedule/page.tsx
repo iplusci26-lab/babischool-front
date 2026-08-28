@@ -92,10 +92,22 @@ export default function ClassSchedulesPage() {
 
     const loadSchedule = useCallback(async () => {
         setLoading(true);
-
+        
         try {
             const data = await getWeeklySchedule(filters);
-
+            console.log(
+                "===== EMPLOI DU TEMPS COMPLET =====",
+                JSON.stringify(data, null, 2)
+            );
+            
+            console.log(
+                "===== SEANCES DU VENDREDI =====",
+                JSON.stringify(
+                    data.grid.FRIDAY,
+                    null,
+                    2
+                )
+            );
             setWeeklySchedule(data);
         } catch (error) {
             console.error(
