@@ -29,11 +29,15 @@ const COLORS = [
   "border-l-cyan-500 bg-cyan-50",
 ];
 
+
 // ==========================================================
 // NORMALISATION DES JOURS
 // ==========================================================
 
-const normalizeDay = (value: any): string => {
+const normalizeDay = (
+  value: any
+): string => {
+
   if (!value) {
     return "";
   }
@@ -45,22 +49,22 @@ const normalizeDay = (value: any): string => {
     .replace(/[\u0300-\u036f]/g, "");
 };
 
+
 // ==========================================================
 // JOUR D'UNE SÉANCE
 // ==========================================================
 
-const getScheduleDay = (schedule: any): string => {
-  // On privilégie le label fourni par Django
-  if (schedule.weekday_label) {
-    return normalizeDay(
-      schedule.weekday_label
-    );
-  }
+const getScheduleDay = (
+  schedule: any
+): string => {
 
   return normalizeDay(
+    schedule.weekday_name ||
+    schedule.weekday_label ||
     schedule.weekday
   );
 };
+
 
 // ==========================================================
 // MATIÈRE / COURS À AFFICHER
@@ -70,24 +74,18 @@ const getScheduleTitle = (
   schedule: any
 ): string => {
 
-  // Primaire :
-  // la matière réellement enseignée peut être
-  // portée par lesson_subject
   if (
     schedule.lesson_subject_name
   ) {
     return schedule.lesson_subject_name;
   }
 
-  // Secondaire :
-  // matière portée par l'affectation
   if (
     schedule.subject_name
   ) {
     return schedule.subject_name;
   }
 
-  // Si aucune matière n'est disponible
   if (
     schedule.assignment_type_label
   ) {
@@ -97,6 +95,7 @@ const getScheduleTitle = (
   return "Cours";
 };
 
+
 // ==========================================================
 // CLASSE
 // ==========================================================
@@ -105,11 +104,24 @@ const getClassroomName = (
   schedule: any
 ): string => {
 
+  if (
+    Array.isArray(
+      schedule.classroom_names
+    )
+    &&
+    schedule.classroom_names.length > 0
+  ) {
+    return schedule.classroom_names.join(
+      ", "
+    );
+  }
+
   return (
     schedule.classroom_name ||
     "Classe non définie"
   );
 };
+
 
 // ==========================================================
 // COMPOSANT
@@ -120,7 +132,7 @@ export default function TeacherSchedule({
 }: TeacherScheduleProps) {
 
   // ========================================================
-  // COULEURS PAR COURS
+  // COULEURS PAR MATIÈRE
   // ========================================================
 
   const colorMap =
@@ -144,14 +156,17 @@ export default function TeacherSchedule({
           title,
           COLORS[
             colorIndex %
-              COLORS.length
+            COLORS.length
           ]
         );
 
         colorIndex++;
+
       }
+
     }
   );
+
 
   // ========================================================
   // SÉANCES PAR JOUR
@@ -174,24 +189,28 @@ export default function TeacherSchedule({
       .sort(
         (a, b) =>
           String(
-            a.start_time || ""
+            a.time_slot_start || ""
           ).localeCompare(
             String(
-              b.start_time || ""
+              b.time_slot_start || ""
             )
           )
       );
+
   };
+
 
   return (
 
-    <div className="
-      grid
-      gap-5
-      sm:grid-cols-2
-      lg:grid-cols-3
-      xl:grid-cols-5
-    ">
+    <div
+      className="
+        grid
+        gap-5
+        sm:grid-cols-2
+        lg:grid-cols-3
+        xl:grid-cols-5
+      "
+    >
 
       {DAYS.map(
         (day) => {
@@ -204,11 +223,11 @@ export default function TeacherSchedule({
             <div
               key={day}
               className="
+                overflow-hidden
                 rounded-2xl
                 border
                 bg-white
                 shadow-sm
-                overflow-hidden
               "
             >
 
@@ -216,46 +235,56 @@ export default function TeacherSchedule({
               {/* JOUR */}
               {/* ========================================= */}
 
-              <div className="
-                bg-[#6214BE]
-                px-4
-                py-3
-                text-center
-              ">
+              <div
+                className="
+                  bg-[#6214BE]
+                  px-4
+                  py-3
+                  text-center
+                "
+              >
 
-                <h2 className="
-                  font-semibold
-                  text-white
-                ">
+                <h2
+                  className="
+                    font-semibold
+                    text-white
+                  "
+                >
                   {day}
                 </h2>
 
               </div>
 
+
               {/* ========================================= */}
               {/* COURS */}
               {/* ========================================= */}
 
-              <div className="
-                space-y-3
-                p-4
-              ">
+              <div
+                className="
+                  space-y-3
+                  p-4
+                "
+              >
 
                 {daySchedules.length === 0 && (
 
-                  <div className="
-                    rounded-xl
-                    border
-                    border-dashed
-                    p-6
-                    text-center
-                    text-sm
-                    text-gray-400
-                  ">
+                  <div
+                    className="
+                      rounded-xl
+                      border
+                      border-dashed
+                      p-6
+                      text-center
+                      text-sm
+                      text-gray-400
+                    "
+                  >
                     Aucun cours
                   </div>
 
                 )}
+
 
                 {daySchedules.map(
                   (schedule: any) => {
@@ -288,14 +317,16 @@ export default function TeacherSchedule({
                       >
 
                         {/* ================================= */}
-                        {/* MATIÈRE / COURS */}
+                        {/* MATIÈRE */}
                         {/* ================================= */}
 
-                        <div className="
-                          flex
-                          items-start
-                          gap-2
-                        ">
+                        <div
+                          className="
+                            flex
+                            items-start
+                            gap-2
+                          "
+                        >
 
                           <BookOpen
                             size={18}
@@ -308,50 +339,42 @@ export default function TeacherSchedule({
 
                           <div>
 
-                            <h3 className="
-                              font-semibold
-                              text-gray-900
-                            ">
+                            <h3
+                              className="
+                                font-semibold
+                                text-gray-900
+                              "
+                            >
                               {title}
                             </h3>
-
-                            {/* Type d'affectation */}
-
-                            {schedule.assignment_type_label && (
-                              <p className="
-                                mt-1
-                                text-xs
-                                text-gray-500
-                              ">
-                                {
-                                  schedule
-                                    .assignment_type_label
-                                }
-                              </p>
-                            )}
 
                           </div>
 
                         </div>
 
+
                         {/* ================================= */}
                         {/* INFORMATIONS */}
                         {/* ================================= */}
 
-                        <div className="
-                          mt-4
-                          space-y-2
-                          text-sm
-                          text-gray-700
-                        ">
+                        <div
+                          className="
+                            mt-4
+                            space-y-2
+                            text-sm
+                            text-gray-700
+                          "
+                        >
 
-                          {/* Horaire */}
+                          {/* HORAIRE */}
 
-                          <div className="
-                            flex
-                            items-center
-                            gap-2
-                          ">
+                          <div
+                            className="
+                              flex
+                              items-center
+                              gap-2
+                            "
+                          >
 
                             <Clock3
                               size={15}
@@ -363,25 +386,32 @@ export default function TeacherSchedule({
 
                             <span>
 
-                              {schedule.start_time ||
-                                "--:--"}
+                              {
+                                schedule.time_slot_start ||
+                                "--:--"
+                              }
 
                               {" - "}
 
-                              {schedule.end_time ||
-                                "--:--"}
+                              {
+                                schedule.time_slot_end ||
+                                "--:--"
+                              }
 
                             </span>
 
                           </div>
 
-                          {/* Classe */}
 
-                          <div className="
-                            flex
-                            items-center
-                            gap-2
-                          ">
+                          {/* CLASSE */}
+
+                          <div
+                            className="
+                              flex
+                              items-center
+                              gap-2
+                            "
+                          >
 
                             <GraduationCap
                               size={15}
@@ -393,23 +423,28 @@ export default function TeacherSchedule({
 
                             <span>
 
-                              {getClassroomName(
-                                schedule
-                              )}
+                              {
+                                getClassroomName(
+                                  schedule
+                                )
+                              }
 
                             </span>
 
                           </div>
 
-                          {/* Salle */}
+
+                          {/* SALLE */}
 
                           {schedule.room && (
 
-                            <div className="
-                              flex
-                              items-center
-                              gap-2
-                            ">
+                            <div
+                              className="
+                                flex
+                                items-center
+                                gap-2
+                              "
+                            >
 
                               <MapPin
                                 size={15}
@@ -432,6 +467,7 @@ export default function TeacherSchedule({
                       </div>
 
                     );
+
                   }
                 )}
 
@@ -440,10 +476,12 @@ export default function TeacherSchedule({
             </div>
 
           );
+
         }
       )}
 
     </div>
 
   );
+
 }

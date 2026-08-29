@@ -12,6 +12,10 @@ interface TeacherStatsProps {
   schedules: any[];
 }
 
+// ==========================================================
+// JOURS DE LA SEMAINE
+// ==========================================================
+
 const WEEKDAYS = [
   "Dimanche",
   "Lundi",
@@ -26,7 +30,9 @@ const WEEKDAYS = [
 // NORMALISATION DES JOURS
 // ==========================================================
 
-const normalizeDay = (value: any): string => {
+const normalizeDay = (
+  value: any
+): string => {
   if (!value) {
     return "";
   }
@@ -39,13 +45,72 @@ const normalizeDay = (value: any): string => {
 };
 
 // ==========================================================
+// CORRESPONDANCE DES VALEURS DJANGO
+// ==========================================================
+
+const DAY_MAPPING: Record<string, string> = {
+  sunday: "dimanche",
+  monday: "lundi",
+  tuesday: "mardi",
+  wednesday: "mercredi",
+  thursday: "jeudi",
+  friday: "vendredi",
+  saturday: "samedi",
+
+  sun: "dimanche",
+  mon: "lundi",
+  tue: "mardi",
+  wed: "mercredi",
+  thu: "jeudi",
+  fri: "vendredi",
+  sat: "samedi",
+
+  dimanche: "dimanche",
+  lundi: "lundi",
+  mardi: "mardi",
+  mercredi: "mercredi",
+  jeudi: "jeudi",
+  vendredi: "vendredi",
+  samedi: "samedi",
+};
+
+// ==========================================================
+// NORMALISATION COMPLÈTE D'UN JOUR
+// ==========================================================
+
+const getNormalizedDay = (
+  value: any
+): string => {
+  const normalized =
+    normalizeDay(value);
+
+  return (
+    DAY_MAPPING[normalized] ||
+    normalized
+  );
+};
+
+// ==========================================================
+// RÉCUPÉRATION DU JOUR D'UNE SÉANCE
+// ==========================================================
+
+const getScheduleDay = (
+  schedule: any
+): string => {
+  return getNormalizedDay(
+    schedule.weekday_name ||
+    schedule.weekday_label ||
+    schedule.weekday
+  );
+};
+
+// ==========================================================
 // DÉTECTION DU TYPE D'AFFECTATION
 // ==========================================================
 
 const isPrimaryAssignment = (
   assignment: any
 ): boolean => {
-
   const type = String(
     assignment?.assignment_type || ""
   )
@@ -81,12 +146,13 @@ export default function TeacherStats({
   // TYPE D'ENSEIGNANT
   // ========================================================
 
-  const isPrimary = assignments.some(
-    (assignment) =>
-      isPrimaryAssignment(
-        assignment
-      )
-  );
+  const isPrimary =
+    assignments.some(
+      (assignment) =>
+        isPrimaryAssignment(
+          assignment
+        )
+    );
 
   // ========================================================
   // MATIÈRES DES AFFECTATIONS
@@ -105,8 +171,13 @@ export default function TeacherStats({
   // ========================================================
   // MATIÈRES RÉELLEMENT ENSEIGNÉES
   //
-  // Pour le primaire, la matière peut être portée
-  // par lesson_subject_name dans ClassSchedule.
+  // Une matière peut être portée par :
+  //
+  // - lesson_subject_name
+  // - subject_name
+  //
+  // Pour les cours groupés / primaire,
+  // lesson_subject_name est prioritaire.
   // ========================================================
 
   const scheduleSubjects =
@@ -133,31 +204,97 @@ export default function TeacherStats({
   // ========================================================
 
   const classrooms =
-    new Set(
-      assignments
-        .map(
-          (assignment) =>
-            assignment.classroom_name
-        )
-        .filter(Boolean)
-    );
+    new Set<string>();
 
   // ========================================================
-  // SI LES CLASSES NE SONT PAS DANS LES ASSIGNMENTS,
-  // ON LES RÉCUPÈRE AUSSI DEPUIS LES SÉANCES.
+  // CLASSES DEPUIS LES AFFECTATIONS
+  // ========================================================
+
+  assignments.forEach(
+    (assignment) => {
+      if (
+        assignment.classroom_name
+      ) {
+        classrooms.add(
+          assignment.classroom_name
+        );
+      }
+    }
+  );
+
+  // ========================================================
+  // CLASSES DEPUIS LES SÉANCES
+  //
+  // Compatible avec :
+  //
+  // - classroom_name
+  // - classroom_names
+  // - schedule_classes
+  //
   // ========================================================
 
   schedules.forEach(
     (schedule) => {
 
+      // ----------------------------------------------------
+      // Classe simple
+      // ----------------------------------------------------
+
       if (
         schedule.classroom_name
       ) {
-
         classrooms.add(
           schedule.classroom_name
         );
       }
+
+      // ----------------------------------------------------
+      // Liste de noms
+      // ----------------------------------------------------
+
+      if (
+        Array.isArray(
+          schedule.classroom_names
+        )
+      ) {
+        schedule.classroom_names.forEach(
+          (classroom: string) => {
+            if (classroom) {
+              classrooms.add(
+                classroom
+              );
+            }
+          }
+        );
+      }
+
+      // ----------------------------------------------------
+      // Classes participantes
+      // ----------------------------------------------------
+
+      if (
+        Array.isArray(
+          schedule.schedule_classes
+        )
+      ) {
+        schedule.schedule_classes.forEach(
+          (item: any) => {
+
+            const classroomName =
+              item.classroom_name ||
+              item.classroom?.name;
+
+            if (
+              classroomName
+            ) {
+              classrooms.add(
+                classroomName
+              );
+            }
+          }
+        );
+      }
+
     }
   );
 
@@ -171,18 +308,21 @@ export default function TeacherStats({
     ];
 
   const today =
-    normalizeDay(
+    getNormalizedDay(
       todayLabel
     );
+
+  // ========================================================
+  // SÉANCES D'AUJOURD'HUI
+  // ========================================================
 
   const todaySchedules =
     schedules.filter(
       (schedule) => {
 
         const scheduleDay =
-          normalizeDay(
-            schedule.weekday_label ||
-            schedule.weekday
+          getScheduleDay(
+            schedule
           );
 
         return (
@@ -232,8 +372,29 @@ export default function TeacherStats({
   );
 
   console.log(
-    "Aujourd'hui :",
+    "Aujourd'hui (label) :",
     todayLabel
+  );
+
+  console.log(
+    "Aujourd'hui (normalisé) :",
+    today
+  );
+
+  console.log(
+    "Jours des séances :",
+    schedules.map(
+      (schedule) => ({
+        id: schedule.id,
+        weekday: schedule.weekday,
+        weekday_name:
+          schedule.weekday_name,
+        normalized:
+          getScheduleDay(
+            schedule
+          ),
+      })
+    )
   );
 
   console.log(
@@ -242,8 +403,8 @@ export default function TeacherStats({
   );
 
   console.log(
-    "Schedules :",
-    schedules
+    "Schedules aujourd'hui :",
+    todaySchedules
   );
 
   // ========================================================
@@ -330,7 +491,8 @@ export default function TeacherStats({
     // ======================================================
 
     {
-      title: "Aujourd'hui",
+      title:
+        "Aujourd'hui",
 
       value:
         todaySchedules.length,
@@ -348,6 +510,7 @@ export default function TeacherStats({
       iconColor:
         "text-orange-600",
     },
+
   ];
 
   // ========================================================
@@ -356,13 +519,15 @@ export default function TeacherStats({
 
   return (
 
-    <div className="
-      grid
-      grid-cols-1
-      gap-4
-      md:grid-cols-2
-      xl:grid-cols-4
-    ">
+    <div
+      className="
+        grid
+        grid-cols-1
+        gap-4
+        md:grid-cols-2
+        xl:grid-cols-4
+      "
+    >
 
       {cards.map(
         (card) => {
@@ -373,7 +538,9 @@ export default function TeacherStats({
           return (
 
             <div
-              key={card.title}
+              key={
+                card.title
+              }
               className={`
                 rounded-2xl
                 border
@@ -387,27 +554,33 @@ export default function TeacherStats({
               `}
             >
 
-              <div className="
-                flex
-                items-center
-                justify-between
-              ">
+              <div
+                className="
+                  flex
+                  items-center
+                  justify-between
+                "
+              >
 
                 <div>
 
-                  <p className="
-                    text-sm
-                    text-gray-600
-                  ">
+                  <p
+                    className="
+                      text-sm
+                      text-gray-600
+                    "
+                  >
                     {card.title}
                   </p>
 
-                  <p className="
-                    mt-2
-                    text-3xl
-                    font-bold
-                    text-gray-900
-                  ">
+                  <p
+                    className="
+                      mt-2
+                      text-3xl
+                      font-bold
+                      text-gray-900
+                    "
+                  >
                     {card.value}
                   </p>
 
@@ -435,9 +608,11 @@ export default function TeacherStats({
             </div>
 
           );
+
         }
       )}
 
     </div>
+
   );
 }
