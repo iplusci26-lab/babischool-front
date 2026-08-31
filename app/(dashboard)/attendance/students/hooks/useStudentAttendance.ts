@@ -190,6 +190,37 @@ export function useStudentAttendance() {
     ]
   );
 
+  const handleCloseAttendance = async (
+    sessionId: string
+  ) => {
+    const confirmed = window.confirm(
+      "Voulez-vous vraiment clôturer cette séance ? " +
+      "Les présences ne pourront plus être modifiées."
+    );
+  
+    if (!confirmed) {
+      return;
+    }
+  
+    try {
+      setLoading(true);
+  
+      await api.post(
+        `/attendance/sessions/${sessionId}/close/`
+      );
+  
+      await loadDashboard();
+  
+    } catch (error) {
+      console.error(
+        "Erreur lors de la clôture de la séance :",
+        error
+      );
+  
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /* Verification l'heure appel est arrivé */
 
@@ -592,6 +623,8 @@ export function useStudentAttendance() {
   setSelectedOption,
   
   canStartSelectedAttendance,
+
+  handleCloseAttendance,
 
   hasPendingChanges:
     Object.keys(pendingChanges).length > 0,

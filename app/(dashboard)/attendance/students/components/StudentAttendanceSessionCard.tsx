@@ -57,6 +57,7 @@ interface StudentAttendanceSessionCardProps {
     recordId: string,
     status: AttendanceStatus
   ) => void;
+  onCloseAttendance: () => void;
 }
 
 export default function StudentAttendanceSessionCard({
@@ -65,6 +66,7 @@ export default function StudentAttendanceSessionCard({
   canStart,
   onStartAttendance,
   onAttendanceChange,
+  onCloseAttendance,
 }: StudentAttendanceSessionCardProps) {
 
   const isNotStarted =
@@ -175,11 +177,34 @@ export default function StudentAttendanceSessionCard({
             )}
 
             {isOpen && (
+              <div className="flex items-center gap-3">
+                <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+                  Appel en cours
+                </span>
 
-              <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
-                Appel en cours
-              </span>
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={onCloseAttendance}
+                  className="
+                    flex items-center gap-2
+                    rounded-lg
+                    bg-gray-800
+                    px-4 py-2
+                    text-sm
+                    font-medium
+                    text-white
+                    transition
+                    hover:bg-gray-900
+                    disabled:cursor-not-allowed
+                    disabled:opacity-50
+                  "
+                >
+                  <Lock size={16} />
 
+                  Clôturer l'appel
+                </button>
+              </div>
             )}
 
             {isClosed && (
