@@ -4,7 +4,7 @@ export default function StudentHeader({ student }: any) {
   
         <div>
           <h2 className="text-xl font-bold">
-            {student.first_name} {student.last_name}
+            {student.last_name} {student.first_name} 
           </h2>
   
           <p className="text-gray-500">
