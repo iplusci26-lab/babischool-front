@@ -1,4 +1,5 @@
 export type AssessmentType =
+  
   | "homework"
   | "test"
   | "exam"
@@ -163,7 +164,7 @@ export interface AssessmentFormData {
 
   //title: string;
 
-  assessment_type: AssessmentType;
+  assessment_type: AssessmentType | "";
 
   max_score: number | string;
 
@@ -271,6 +272,8 @@ export const ASSESSMENT_STATUS_COLORS: Record<
  * =========================================================== */
 
 export const ASSESSMENT_TYPE_OPTIONS = [
+
+ 
 
   {
     value: "homework",

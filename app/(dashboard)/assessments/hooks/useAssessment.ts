@@ -31,7 +31,7 @@ const INITIAL_FORM: AssessmentFormData = {
 
   //title: "",
 
-  assessment_type: "test",
+  assessment_type: "",
 
   max_score: 20,
 
