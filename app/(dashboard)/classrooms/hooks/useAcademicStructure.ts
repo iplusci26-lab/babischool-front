@@ -108,6 +108,7 @@ export function useAcademicStructure() {
         type: "SET_LEVELS",
         payload: response.results,
       });
+      console.log("classroom level------------------ ", response.results)
     } catch (error) {
       handleError(error);
     }
@@ -123,7 +124,7 @@ export function useAcademicStructure() {
         payload: response.results,
       });
 
-      console.log("------------------ ", response.results)
+      console.log("classroom------------------ ", response.results)
 
     } catch (error) {
       handleError(error);
