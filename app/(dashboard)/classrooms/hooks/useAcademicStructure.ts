@@ -122,6 +122,9 @@ export function useAcademicStructure() {
         type: "SET_CLASSROOMS",
         payload: response.results,
       });
+
+      console.log("------------------ ", response.results)
+
     } catch (error) {
       handleError(error);
     }
@@ -136,6 +139,7 @@ export function useAcademicStructure() {
         type: "SET_GROUPS",
         payload: response.results,
       });
+      
     } catch (error) {
       handleError(error);
     }
