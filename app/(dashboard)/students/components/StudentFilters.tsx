@@ -1,130 +1,275 @@
 "use client";
 
-import { Search, RotateCcw } from "lucide-react";
+import {
+  Search,
+  RotateCcw,
+} from "lucide-react";
 
 import Input from "@/components/ui/Input";
+
 import Select from "@/components/ui/Select";
 
-import { Classroom, StudentFilters as Filters } from "../types";
+import type {
+  Classroom,
+  StudentFilters as Filters,
+  UUID,
+} from "../types";
+
+
+// ==========================================================
+// PROPS
+// ==========================================================
 
 interface StudentFiltersProps {
+
   filters: Filters;
 
   classrooms: Classroom[];
 
-  onChange: (values: Partial<Filters>) => void;
+  onChange: (
+    values: Partial<Filters>
+  ) => void;
 
   onReset: () => void;
+
 }
 
+
+// ==========================================================
+// COMPONENT
+// ==========================================================
+
 export default function StudentFilters({
+
   filters,
+
   classrooms,
+
   onChange,
+
   onReset,
+
 }: StudentFiltersProps) {
+
+
+  // ========================================================
+  // CLASSROOM CHANGE
+  // ========================================================
+
+  const handleClassroomChange = (
+    value: string
+  ) => {
+
+    // Toutes les classes
+
+    if (
+      !value
+    ) {
+
+      onChange({
+        classroom: null,
+      });
+
+      return;
+
+    }
+
+
+    // UUID valide
+
+    const classroomId =
+      value.trim();
+
+
+    if (
+      classroomId.length === 0
+    ) {
+
+      onChange({
+        classroom: null,
+      });
+
+      return;
+
+    }
+
+
+    onChange({
+      classroom:
+        classroomId as UUID,
+    });
+
+  };
+
+
+  // ========================================================
+  // GENDER CHANGE
+  // ========================================================
+
+  const handleGenderChange = (
+    value: string
+  ) => {
+
+    if (
+      value !== "M" &&
+      value !== "F"
+    ) {
+
+      onChange({
+        gender: "",
+      });
+
+      return;
+
+    }
+
+
+    onChange({
+      gender: value,
+    });
+
+  };
+
+
+  // ========================================================
+  // RENDER
+  // ========================================================
+
   return (
+
     <div className="rounded-2xl border bg-white p-5 shadow-sm">
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
 
-        {/* Recherche */}
+
+        {/* ================================================== */}
+        {/* RECHERCHE */}
+        {/* ================================================== */}
 
         <Input
+
           placeholder="Rechercher un élève..."
-          value={filters.search}
-          onChange={(e) =>
+
+          value={
+            filters.search ?? ""
+          }
+
+          onChange={(event) =>
             onChange({
-              search: e.target.value,
+              search:
+                event.target.value,
             })
           }
-          leftIcon={<Search size={18} />}
+
+          leftIcon={
+            <Search size={18} />
+          }
+
         />
 
-        {/* Classe */}
+
+        {/* ================================================== */}
+        {/* CLASSE */}
+        {/* ================================================== */}
 
         <Select
-          value={String(filters.classroom ?? "")}
+
+          value={
+            filters.classroom ?? ""
+          }
+
           options={[
+
             {
-              label: "Toutes les classes",
+              label:
+                "Toutes les classes",
+
               value: "",
             },
 
-            ...classrooms.map((c) => ({
-              label: c.name,
-              value: String(c.id),
-            })),
+            ...classrooms.map(
+              (
+                classroom
+              ) => ({
+
+                label:
+                  classroom.name,
+
+                value:
+                  classroom.id,
+
+              })
+            ),
+
           ]}
-          onChange={(e) =>
-            onChange({
-              classroom: e.target.value
-            })
+
+          onChange={(event) =>
+
+            handleClassroomChange(
+              event.target.value
+            )
+
           }
+
         />
 
-        {/* Sexe */}
+
+        {/* ================================================== */}
+        {/* SEXE */}
+        {/* ================================================== */}
 
         <Select
-          value={filters.gender}
+
+          value={
+            filters.gender ?? ""
+          }
+
           options={[
+
             {
-              label: "Tous les sexes",
+              label:
+                "Tous les sexes",
+
               value: "",
             },
+
             {
-              label: "Garçons",
+              label:
+                "Garçons",
+
               value: "M",
             },
+
             {
-              label: "Filles",
+              label:
+                "Filles",
+
               value: "F",
             },
+
           ]}
-          onChange={(e) =>
-            onChange({
-              gender: e.target.value as "M" | "F" | "",
-            })
+
+          onChange={(event) =>
+
+            handleGenderChange(
+              event.target.value
+            )
+
           }
+
         />
 
-        {/* Statut */}
 
-        {/*<Select
-          value={filters.status}
-          options={[
-            {
-              label: "Tous les statuts",
-              value: "",
-            },
-            {
-              label: "Actif",
-              value: "ACTIVE",
-            },
-            {
-              label: "Inactif",
-              value: "INACTIVE",
-            },
-            {
-              label: "Transféré",
-              value: "TRANSFERRED",
-            },
-          ]}
-          onChange={(e) =>
-            onChange({
-              status: e.target.value as
-                | ""
-                | "ACTIVE"
-                | "INACTIVE"
-                | "TRANSFERRED",
-            })
-          }
-        />*/}
-
-        {/* Réinitialiser */}
+        {/* ================================================== */}
+        {/* RÉINITIALISER */}
+        {/* ================================================== */}
 
         <button
+
+          type="button"
+
           onClick={onReset}
+
           className="
             flex
             items-center
@@ -134,16 +279,24 @@ export default function StudentFilters({
             border
             px-4
             py-2
+            transition
             hover:bg-gray-50
+            cursor-pointer
           "
+
         >
+
           <RotateCcw size={18} />
 
           Réinitialiser
+
         </button>
+
 
       </div>
 
     </div>
+
   );
+
 }

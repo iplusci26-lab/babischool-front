@@ -1,31 +1,87 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import Modal from "@/components/ui/Modal";
+
 import Input from "@/components/ui/Input";
+
 import Select from "@/components/ui/Select";
 
-import { Student } from "../types";
+import type { Student } from "../types";
+
+
+// ==========================================================
+// PROPS
+// ==========================================================
 
 interface StudentModalProps {
   open: boolean;
+
   student: Student | null;
+
   loading?: boolean;
+
   onClose: () => void;
-  onSubmit: (data: Partial<Student>) => void;
+
+  onSubmit: (
+    data: Partial<Student>
+  ) => void | Promise<void>;
 }
+
+
+// ==========================================================
+// FORM TYPE
+// ==========================================================
 
 type StudentForm = {
   student_number: string;
+
   first_name: string;
+
   last_name: string;
+
   gender: "M" | "F";
+
   date_of_birth: string;
+
   birth_place: string;
+
   is_assigned: boolean;
+
   is_repeating: boolean;
 };
+
+
+// ==========================================================
+// INITIAL FORM
+// ==========================================================
+
+const INITIAL_FORM: StudentForm = {
+  student_number: "",
+
+  first_name: "",
+
+  last_name: "",
+
+  gender: "M",
+
+  date_of_birth: "",
+
+  birth_place: "",
+
+  is_assigned: false,
+
+  is_repeating: false,
+};
+
+
+// ==========================================================
+// COMPONENT
+// ==========================================================
 
 export default function StudentModal({
   open,
@@ -34,59 +90,162 @@ export default function StudentModal({
   onClose,
   onSubmit,
 }: StudentModalProps) {
-  const [form, setForm] = useState<StudentForm>({
-    student_number: "",
-    first_name: "",
-    last_name: "",
-    gender: "M",
-    date_of_birth: "",
-    birth_place: "",
-    is_assigned: false,
-    is_repeating: false,
-  });
+
 
   // ==========================================================
-  // INITIALISATION
+  // STATE
+  // ==========================================================
+
+  const [
+    form,
+    setForm,
+  ] = useState<StudentForm>(
+    INITIAL_FORM
+  );
+
+
+  // ==========================================================
+  // INITIALIZE FORM
   // ==========================================================
 
   useEffect(() => {
-    if (!student) {
+    if (
+      !open ||
+      !student
+    ) {
       return;
     }
 
     setForm({
-      student_number: student.student_number ?? "",
-      first_name: student.first_name ?? "",
-      last_name: student.last_name ?? "",
-      gender: student.gender ?? "M",
-      date_of_birth: student.date_of_birth ?? "",
-      birth_place: student.birth_place ?? "",
-      is_assigned: student.is_assigned ?? false,
-      is_repeating: student.is_repeating ?? false,
+      student_number:
+        student.student_number ?? "",
+
+      first_name:
+        student.first_name ?? "",
+
+      last_name:
+        student.last_name ?? "",
+
+      gender:
+        student.gender === "F"
+          ? "F"
+          : "M",
+
+      date_of_birth:
+        student.date_of_birth ?? "",
+
+      birth_place:
+        student.birth_place ?? "",
+
+      is_assigned:
+        Boolean(
+          student.is_assigned
+        ),
+
+      is_repeating:
+        Boolean(
+          student.is_repeating
+        ),
     });
-  }, [student]);
+
+  }, [
+    open,
+    student,
+  ]);
+
 
   // ==========================================================
-  // MODIFICATION DES CHAMPS
+  // RESET WHEN MODAL CLOSES
   // ==========================================================
 
-  const handleChange = <K extends keyof StudentForm>(
+  useEffect(() => {
+    if (open) {
+      return;
+    }
+
+    setForm(
+      INITIAL_FORM
+    );
+
+  }, [
+    open,
+  ]);
+
+
+  // ==========================================================
+  // HANDLE FIELD CHANGE
+  // ==========================================================
+
+  const handleChange = <
+    K extends keyof StudentForm
+  >(
     field: K,
     value: StudentForm[K]
   ) => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+
+    setForm(
+      (previous) => ({
+        ...previous,
+
+        [field]:
+          value,
+      })
+    );
   };
 
+
   // ==========================================================
-  // SOUMISSION
+  // HANDLE CLOSE
   // ==========================================================
 
-  const handleSubmit = () => {
-    onSubmit(form);
+  const handleClose = () => {
+    if (loading) {
+      return;
+    }
+
+    onClose();
   };
+
+
+  // ==========================================================
+  // HANDLE SUBMIT
+  // ==========================================================
+
+  const handleSubmit = async () => {
+    if (
+      loading ||
+      !student
+    ) {
+      return;
+    }
+
+    await onSubmit({
+      student_number:
+        form.student_number.trim(),
+
+      first_name:
+        form.first_name.trim(),
+
+      last_name:
+        form.last_name.trim(),
+
+      gender:
+        form.gender,
+
+      date_of_birth:
+        form.date_of_birth,
+
+      birth_place:
+        form.birth_place.trim(),
+
+      is_assigned:
+        form.is_assigned,
+
+      is_repeating:
+        form.is_repeating,
+    });
+  };
+
 
   // ==========================================================
   // RENDER
@@ -95,65 +254,104 @@ export default function StudentModal({
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       title="Modifier un élève"
     >
-      <div className="flex max-h-[calc(100vh-7rem)] flex-col">
+
+      <div
+        className="
+          flex
+          max-h-[calc(100vh-7rem)]
+          flex-col
+        "
+      >
+
 
         {/* ==================================================== */}
-        {/* FORMULAIRE */}
+        {/* FORM */}
         {/* ==================================================== */}
 
-        <div className="overflow-y-auto pr-1 sm:pr-2">
+        <div
+          className="
+            overflow-y-auto
+            pr-1
+            sm:pr-2
+          "
+        >
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div
+            className="
+              grid
+              grid-cols-1
+              gap-4
+              sm:grid-cols-2
+            "
+          >
+
 
             {/* ================================================= */}
-            {/* LIGNE 1 : NOM / PRÉNOM */}
+            {/* NOM */}
             {/* ================================================= */}
 
             <Input
               label="Nom"
               value={form.last_name}
-              onChange={(e) =>
+              disabled={loading}
+              onChange={(event) =>
                 handleChange(
                   "last_name",
-                  e.target.value
+                  event.target.value
                 )
               }
             />
+
+
+            {/* ================================================= */}
+            {/* PRENOM */}
+            {/* ================================================= */}
 
             <Input
               label="Prénom"
               value={form.first_name}
-              onChange={(e) =>
+              disabled={loading}
+              onChange={(event) =>
                 handleChange(
                   "first_name",
-                  e.target.value
+                  event.target.value
                 )
               }
             />
 
+
             {/* ================================================= */}
-            {/* LIGNE 2 : MATRICULE / SEXE */}
+            {/* MATRICULE */}
             {/* ================================================= */}
 
             <Input
               label="Matricule"
-              value={form.student_number}
+              value={
+                form.student_number
+              }
               placeholder="12345678M"
-              maxLength={9}
-              onChange={(e) =>
+              maxLength={20}
+              disabled={loading}
+              onChange={(event) =>
                 handleChange(
                   "student_number",
-                  e.target.value
+                  event.target.value
                 )
               }
             />
 
+
+            {/* ================================================= */}
+            {/* SEXE */}
+            {/* ================================================= */}
+
             <Select
               label="Sexe"
               value={form.gender}
+              disabled={loading}
               options={[
                 {
                   label: "Garçon",
@@ -164,100 +362,210 @@ export default function StudentModal({
                   value: "F",
                 },
               ]}
-              onChange={(e) =>
+              onChange={(event) =>
                 handleChange(
                   "gender",
-                  e.target.value as "M" | "F"
+                  event.target.value as
+                    | "M"
+                    | "F"
                 )
               }
             />
 
+
             {/* ================================================= */}
-            {/* LIGNE 3 : DATE / LIEU DE NAISSANCE */}
+            {/* DATE DE NAISSANCE */}
             {/* ================================================= */}
 
             <Input
               type="date"
               label="Date de naissance"
-              value={form.date_of_birth}
-              onChange={(e) =>
+              value={
+                form.date_of_birth
+              }
+              disabled={loading}
+              onChange={(event) =>
                 handleChange(
                   "date_of_birth",
-                  e.target.value
+                  event.target.value
                 )
               }
             />
+
+
+            {/* ================================================= */}
+            {/* LIEU DE NAISSANCE */}
+            {/* ================================================= */}
 
             <Input
               label="Lieu de naissance"
-              value={form.birth_place}
+              value={
+                form.birth_place
+              }
               placeholder="Ex : Abidjan"
-              onChange={(e) =>
+              disabled={loading}
+              onChange={(event) =>
                 handleChange(
                   "birth_place",
-                  e.target.value
+                  event.target.value
                 )
               }
             />
 
+
             {/* ================================================= */}
-            {/* LIGNE 4 : AFFECTÉ / REDOUBLANT */}
+            {/* AFFECTATION */}
             {/* ================================================= */}
 
-            <div className="flex min-h-[76px] items-center rounded-xl border border-gray-200 bg-gray-50 px-4">
+            <div
+              className="
+                flex
+                min-h-[76px]
+                items-center
+                rounded-xl
+                border
+                border-gray-200
+                bg-gray-50
+                px-4
+              "
+            >
 
-              <label className="flex w-full cursor-pointer items-center gap-3">
+              <label
+                className="
+                  flex
+                  w-full
+                  cursor-pointer
+                  items-center
+                  gap-3
+                "
+              >
 
                 <input
                   type="checkbox"
-                  checked={form.is_assigned}
-                  onChange={(e) =>
+                  checked={
+                    form.is_assigned
+                  }
+                  disabled={loading}
+                  onChange={(event) =>
                     handleChange(
                       "is_assigned",
-                      e.target.checked
+                      event.target.checked
                     )
                   }
-                  className="h-4 w-4 shrink-0 rounded border-gray-300 text-[#6214BE] focus:ring-[#6214BE]"
+                  className="
+                    h-4
+                    w-4
+                    shrink-0
+                    rounded
+                    border-gray-300
+                    text-[#6214BE]
+                    focus:ring-[#6214BE]
+                  "
                 />
 
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-800">
+
+                  <p
+                    className="
+                      text-sm
+                      font-medium
+                      text-gray-800
+                    "
+                  >
                     Élève affecté
                   </p>
 
-                  <p className="mt-0.5 text-xs text-gray-500">
-                    L'élève est affecté.
+                  <p
+                    className="
+                      mt-0.5
+                      text-xs
+                      text-gray-500
+                    "
+                  >
+                    L'élève est actuellement
+                    affecté à une classe.
                   </p>
+
                 </div>
 
               </label>
 
             </div>
 
-            <div className="flex min-h-[76px] items-center rounded-xl border border-gray-200 bg-gray-50 px-4">
 
-              <label className="flex w-full cursor-pointer items-center gap-3">
+            {/* ================================================= */}
+            {/* REDOUBLANT */}
+            {/* ================================================= */}
+
+            <div
+              className="
+                flex
+                min-h-[76px]
+                items-center
+                rounded-xl
+                border
+                border-gray-200
+                bg-gray-50
+                px-4
+              "
+            >
+
+              <label
+                className="
+                  flex
+                  w-full
+                  cursor-pointer
+                  items-center
+                  gap-3
+                "
+              >
 
                 <input
                   type="checkbox"
-                  checked={form.is_repeating}
-                  onChange={(e) =>
+                  checked={
+                    form.is_repeating
+                  }
+                  disabled={loading}
+                  onChange={(event) =>
                     handleChange(
                       "is_repeating",
-                      e.target.checked
+                      event.target.checked
                     )
                   }
-                  className="h-4 w-4 shrink-0 rounded border-gray-300 text-[#6214BE] focus:ring-[#6214BE]"
+                  className="
+                    h-4
+                    w-4
+                    shrink-0
+                    rounded
+                    border-gray-300
+                    text-[#6214BE]
+                    focus:ring-[#6214BE]
+                  "
                 />
 
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-800">
+
+                  <p
+                    className="
+                      text-sm
+                      font-medium
+                      text-gray-800
+                    "
+                  >
                     Élève redoublant
                   </p>
 
-                  <p className="mt-0.5 text-xs text-gray-500">
-                    L'élève est redoublant.
+                  <p
+                    className="
+                      mt-0.5
+                      text-xs
+                      text-gray-500
+                    "
+                  >
+                    L'élève reprend
+                    la même classe.
                   </p>
+
                 </div>
 
               </label>
@@ -268,26 +576,74 @@ export default function StudentModal({
 
         </div>
 
+
         {/* ==================================================== */}
         {/* ACTIONS */}
         {/* ==================================================== */}
 
-        <div className="mt-5 flex flex-col-reverse gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:justify-end">
+        <div
+          className="
+            mt-5
+            flex
+            flex-col-reverse
+            gap-3
+            border-t
+            border-gray-100
+            pt-4
+            sm:flex-row
+            sm:justify-end
+          "
+        >
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={loading}
-            className="w-full rounded-md border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            className="
+              w-full
+              rounded-md
+              border
+              border-gray-300
+              px-4
+              py-2.5
+              text-sm
+              font-medium
+              text-gray-700
+              transition
+              hover:bg-gray-100
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+              sm:w-auto
+            "
           >
             Annuler
           </button>
 
+
           <button
             type="button"
-            onClick={handleSubmit}
-            disabled={loading}
-            className="w-full rounded-md bg-[#6214BE] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#4f0f9c] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            onClick={() => {
+              void handleSubmit();
+            }}
+            disabled={
+              loading ||
+              !student
+            }
+            className="
+              w-full
+              rounded-md
+              bg-[#6214BE]
+              px-5
+              py-2.5
+              text-sm
+              font-medium
+              text-white
+              transition
+              hover:bg-[#4f0f9c]
+              disabled:cursor-not-allowed
+              disabled:opacity-50
+              sm:w-auto
+            "
           >
             {loading
               ? "Enregistrement..."
@@ -297,6 +653,7 @@ export default function StudentModal({
         </div>
 
       </div>
+
     </Modal>
   );
 }
