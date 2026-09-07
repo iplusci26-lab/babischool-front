@@ -11,11 +11,13 @@ import DataTable, {
 } from "@/components/data-table/DataTable";
 
 import StatusBadge from "@/components/data-table/StatusBadge";
+
 import ActionMenu from "@/components/data-table/ActionMenu";
 
 import {
   Homework,
 } from "../types";
+
 
 interface HomeworkTableProps {
 
@@ -37,6 +39,7 @@ interface HomeworkTableProps {
 
 }
 
+
 export default function HomeworkTable({
 
   homeworks,
@@ -51,16 +54,22 @@ export default function HomeworkTable({
 
 }: HomeworkTableProps) {
 
+
   const columns: DataTableColumn<Homework>[] = [
 
+    /* =======================================================
+     * EXERCICE
+     * ======================================================= */
+
     {
+
       key: "title",
 
       title: "Exercice",
 
       render: (homework) => (
 
-        <div>
+        <div className="max-w-xs">
 
           <div className="font-semibold">
 
@@ -68,7 +77,7 @@ export default function HomeworkTable({
 
           </div>
 
-          <div className="mt-1 text-xs text-gray-500">
+          <div className="mt-1 truncate text-xs text-gray-500">
 
             {homework.description}
 
@@ -80,25 +89,99 @@ export default function HomeworkTable({
 
     },
 
+
+    /* =======================================================
+     * CLASSE / GROUPE
+     * ======================================================= */
+
     {
+
       key: "classroom_name",
 
       title: "Classe",
+
+      render: (homework) => (
+
+        <div>
+
+          <div className="font-medium text-gray-900">
+
+            {homework.classroom_name}
+
+          </div>
+
+          <div className="mt-1 text-xs text-gray-500">
+
+            {homework.classroom_group_name
+              ? homework.classroom_group_name
+              : "Toute la classe"}
+
+          </div>
+
+        </div>
+
+      ),
+
     },
 
+
+    /* =======================================================
+     * MATIÈRE
+     * ======================================================= */
+
     {
+
       key: "subject_name",
 
       title: "Matière",
+
     },
 
+
+    /* =======================================================
+     * DATE LIMITE
+     * ======================================================= */
+
     {
+
       key: "due_date",
 
       title: "Date limite",
+
+      render: (homework) => {
+
+        if (!homework.due_date) {
+
+          return "-";
+
+        }
+
+        return new Intl.DateTimeFormat(
+          "fr-FR",
+          {
+
+            day: "2-digit",
+
+            month: "short",
+
+            year: "numeric",
+
+          }
+        ).format(
+          new Date(homework.due_date)
+        );
+
+      },
+
     },
 
+
+    /* =======================================================
+     * STATUT
+     * ======================================================= */
+
     {
+
       key: "status",
 
       title: "Statut",
@@ -141,7 +224,13 @@ export default function HomeworkTable({
 
     },
 
+
+    /* =======================================================
+     * ACTIONS
+     * ======================================================= */
+
     {
+
       key: "actions",
 
       title: "Actions",
@@ -153,24 +242,33 @@ export default function HomeworkTable({
           actions={[
 
             {
+
               label: "Voir",
 
               icon: <Eye size={16} />,
 
               onClick: () =>
+
                 onView(homework),
+
             },
 
+
             {
+
               label: "Modifier",
 
               icon: <Pencil size={16} />,
 
               onClick: () =>
+
                 onEdit(homework),
+
             },
 
+
             {
+
               label: "Supprimer",
 
               icon: <Trash2 size={16} />,
@@ -178,7 +276,9 @@ export default function HomeworkTable({
               danger: true,
 
               onClick: () =>
+
                 onDelete(homework),
+
             },
 
           ]}
@@ -190,6 +290,7 @@ export default function HomeworkTable({
     },
 
   ];
+
 
   return (
 

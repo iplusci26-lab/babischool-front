@@ -1,9 +1,13 @@
+/* ===========================================================
+ * ASSESSMENT TYPES
+ * =========================================================== */
+
 export type AssessmentType =
-  
   | "homework"
   | "test"
   | "exam"
   | "compo";
+
 
 export type AssessmentStatus =
   | "draft"
@@ -12,9 +16,11 @@ export type AssessmentStatus =
   | "published"
   | "republish_required";
 
+
 export type AssessmentCategory =
   | "class"
   | "scheduled";
+
 
 /* ===========================================================
  * GROUPE DE CLASSE
@@ -32,6 +38,7 @@ export interface ClassroomGroup {
 
 }
 
+
 /* ===========================================================
  * ASSESSMENT
  * =========================================================== */
@@ -40,56 +47,116 @@ export interface Assessment {
 
   id: string;
 
+
+  /* ---------------------------------------------------------
+   * CLASSE
+   * --------------------------------------------------------- */
+
   classroom: string;
 
   classroom_name: string;
 
-  /**
-   * Groupe concerné par l'évaluation.
+
+  /* ---------------------------------------------------------
+   * GROUPE
    *
    * null = toute la classe.
-   */
+   * --------------------------------------------------------- */
+
   classroom_group?: string | null;
 
   classroom_group_name?: string | null;
+
+
+  /* ---------------------------------------------------------
+   * MATIÈRE
+   * --------------------------------------------------------- */
 
   subject: string;
 
   subject_name: string;
 
+
+  /* ---------------------------------------------------------
+   * ENSEIGNANT
+   * --------------------------------------------------------- */
+
   teacher: string;
 
   teacher_name: string;
+
+
+  /* ---------------------------------------------------------
+   * CRÉATEUR
+   * --------------------------------------------------------- */
 
   created_by: string;
 
   created_by_name: string;
 
+
+  /* ---------------------------------------------------------
+   * PÉRIODE ACADÉMIQUE
+   * --------------------------------------------------------- */
+
   term: string;
 
   term_name: string;
 
-  //title: string;
+
+  /* ---------------------------------------------------------
+   * TYPE
+   * --------------------------------------------------------- */
 
   assessment_type: AssessmentType;
+
+
+  /* ---------------------------------------------------------
+   * NOTES
+   * --------------------------------------------------------- */
 
   max_score: number;
 
   weight: number;
 
+
+  /* ---------------------------------------------------------
+   * DATE
+   * --------------------------------------------------------- */
+
   date_assessment: string;
+
+
+  /* ---------------------------------------------------------
+   * STATUT
+   * --------------------------------------------------------- */
 
   status: AssessmentStatus;
 
   status_label: string;
 
+
+  /* ---------------------------------------------------------
+   * PUBLICATION
+   * --------------------------------------------------------- */
+
   can_publish: boolean;
 
   is_completed: boolean;
 
+
+  /* ---------------------------------------------------------
+   * DATES SYSTÈME
+   * --------------------------------------------------------- */
+
   created_at: string;
 
   updated_at: string;
+
+
+  /* ---------------------------------------------------------
+   * STATISTIQUES
+   * --------------------------------------------------------- */
 
   grades_count?: number;
 
@@ -99,9 +166,15 @@ export interface Assessment {
 
   total_students?: number;
 
+
+  /* ---------------------------------------------------------
+   * CATÉGORIE
+   * --------------------------------------------------------- */
+
   category: AssessmentCategory;
 
 }
+
 
 /* ===========================================================
  * CLASSE
@@ -113,9 +186,18 @@ export interface Classroom {
 
   name: string;
 
+
+  /*
+   * Groupes associés à la classe.
+   *
+   * Le tableau est optionnel car certaines réponses API
+   * peuvent ne pas inclure les groupes.
+   */
+
   groups?: ClassroomGroup[];
 
 }
+
 
 /* ===========================================================
  * MATIÈRE
@@ -131,8 +213,9 @@ export interface Subject {
 
 }
 
+
 /* ===========================================================
- * PÉRIODE
+ * PÉRIODE ACADÉMIQUE
  * =========================================================== */
 
 export interface Term {
@@ -141,7 +224,16 @@ export interface Term {
 
   name: string;
 
+  term_type?: string;
+
+  start_date?: string;
+
+  end_date?: string;
+
+  is_active?: boolean;
+
 }
+
 
 /* ===========================================================
  * FORMULAIRE ÉVALUATION
@@ -149,35 +241,76 @@ export interface Term {
 
 export interface AssessmentFormData {
 
+
+  /* ---------------------------------------------------------
+   * CLASSE
+   * --------------------------------------------------------- */
+
   classroom: string;
 
-  /**
-   * Groupe facultatif.
+
+  /* ---------------------------------------------------------
+   * GROUPE
    *
-   * "" = toute la classe
-   */
+   * "" = toute la classe.
+   * --------------------------------------------------------- */
+
   classroom_group: string;
+
+
+  /* ---------------------------------------------------------
+   * MATIÈRE
+   * --------------------------------------------------------- */
 
   subject: string;
 
+
+  /* ---------------------------------------------------------
+   * PÉRIODE ACADÉMIQUE
+   * --------------------------------------------------------- */
+
   term: string;
 
-  //title: string;
+
+  /* ---------------------------------------------------------
+   * TYPE
+   * --------------------------------------------------------- */
 
   assessment_type: AssessmentType | "";
 
+
+  /* ---------------------------------------------------------
+   * NOTE MAXIMALE
+   * --------------------------------------------------------- */
+
   max_score: number | string;
+
+
+  /* ---------------------------------------------------------
+   * COEFFICIENT
+   * --------------------------------------------------------- */
 
   weight: number | string;
 
+
+  /* ---------------------------------------------------------
+   * DATE
+   * --------------------------------------------------------- */
+
   date_assessment: string;
+
+
+  /* ---------------------------------------------------------
+   * CATÉGORIE
+   * --------------------------------------------------------- */
 
   category: AssessmentCategory;
 
 }
 
+
 /* ===========================================================
- * SUMMARY
+ * SUMMARY ASSESSMENT
  * =========================================================== */
 
 export interface AssessmentSummary {
@@ -192,8 +325,9 @@ export interface AssessmentSummary {
 
 }
 
+
 /* ===========================================================
- * FILTERS
+ * FILTERS ASSESSMENT
  * =========================================================== */
 
 export interface AssessmentFilters {
@@ -210,8 +344,9 @@ export interface AssessmentFilters {
 
 }
 
+
 /* ===========================================================
- * LIBELLÉS
+ * LIBELLÉS TYPES D'ÉVALUATIONS
  * =========================================================== */
 
 export const ASSESSMENT_TYPE_LABELS: Record<
@@ -219,32 +354,47 @@ export const ASSESSMENT_TYPE_LABELS: Record<
   string
 > = {
 
-  homework: "Devoir",
+  homework:
+    "Devoir",
 
-  test: "Interrogation",
+  test:
+    "Interrogation",
 
-  exam: "Examen",
+  exam:
+    "Examen",
 
-  compo: "Composition",
+  compo:
+    "Composition",
 
 };
+
+
+/* ===========================================================
+ * LIBELLÉS STATUTS D'ÉVALUATIONS
+ * =========================================================== */
 
 export const ASSESSMENT_STATUS_LABELS: Record<
   AssessmentStatus,
   string
 > = {
 
-  draft: "Brouillon",
+  draft:
+    "Brouillon",
 
-  in_progress: "Saisie en cours",
+  in_progress:
+    "Saisie en cours",
 
-  ready: "Prête",
+  ready:
+    "Prête",
 
-  published: "Publiée",
+  published:
+    "Publiée",
 
-  republish_required: "Republication",
+  republish_required:
+    "Republication",
 
 };
+
 
 /* ===========================================================
  * COULEURS DES BADGES
@@ -255,17 +405,23 @@ export const ASSESSMENT_STATUS_COLORS: Record<
   "gray" | "yellow" | "blue" | "green" | "orange"
 > = {
 
-  draft: "gray",
+  draft:
+    "gray",
 
-  in_progress: "yellow",
+  in_progress:
+    "yellow",
 
-  ready: "blue",
+  ready:
+    "blue",
 
-  published: "green",
+  published:
+    "green",
 
-  republish_required: "orange",
+  republish_required:
+    "orange",
 
 };
+
 
 /* ===========================================================
  * OPTIONS TYPES D'ÉVALUATIONS
@@ -273,45 +429,96 @@ export const ASSESSMENT_STATUS_COLORS: Record<
 
 export const ASSESSMENT_TYPE_OPTIONS = [
 
- 
-
   {
-    value: "homework",
-    label: "Devoir",
+
+    value:
+      "homework",
+
+    label:
+      "Devoir",
+
   },
 
   {
-    value: "test",
-    label: "Interrogation",
+
+    value:
+      "test",
+
+    label:
+      "Interrogation",
+
   },
 
   {
-    value: "exam",
-    label: "Examen",
+
+    value:
+      "exam",
+
+    label:
+      "Examen",
+
   },
 
   {
-    value: "compo",
-    label: "Composition",
+
+    value:
+      "compo",
+
+    label:
+      "Composition",
+
   },
 
 ];
 
+
 /* ===========================================================
- * HOMEWORK
+ * HOMEWORK FILTERS
  * =========================================================== */
 
 export interface HomeworkFilters {
 
+
+  /* ---------------------------------------------------------
+   * RECHERCHE
+   * --------------------------------------------------------- */
+
   search: string;
+
+
+  /* ---------------------------------------------------------
+   * CLASSE
+   * --------------------------------------------------------- */
 
   classroom: string;
 
+
+  /* ---------------------------------------------------------
+   * MATIÈRE
+   * --------------------------------------------------------- */
+
   subject: string;
+
+
+  /* ---------------------------------------------------------
+   * PÉRIODE ACADÉMIQUE
+   * --------------------------------------------------------- */
+
+  term: string;
+
+
+  /* ---------------------------------------------------------
+   * STATUT
+   * --------------------------------------------------------- */
 
   status: string;
 
 }
+
+
+/* ===========================================================
+ * HOMEWORK SUMMARY
+ * =========================================================== */
 
 export interface HomeworkSummary {
 
@@ -325,66 +532,223 @@ export interface HomeworkSummary {
 
 }
 
+
+/* ===========================================================
+ * HOMEWORK STATUS
+ * =========================================================== */
+
+export type HomeworkStatus =
+  | "pending"
+  | "completed"
+  | "overdue";
+
+
+/* ===========================================================
+ * HOMEWORK STATUS OPTIONS
+ * =========================================================== */
+
 export const HOMEWORK_STATUS_OPTIONS = [
 
   {
-    value: "",
-    label: "Tous les statuts",
+
+    value:
+      "",
+
+    label:
+      "Tous les statuts",
+
   },
 
   {
-    value: "pending",
-    label: "À rendre",
+
+    value:
+      "pending",
+
+    label:
+      "À rendre",
+
   },
 
   {
-    value: "completed",
-    label: "Terminé",
+
+    value:
+      "completed",
+
+    label:
+      "Terminé",
+
   },
 
   {
-    value: "overdue",
-    label: "En retard",
+
+    value:
+      "overdue",
+
+    label:
+      "En retard",
+
   },
 
 ];
 
+
+/* ===========================================================
+ * FORMULAIRE EXERCICE
+ * =========================================================== */
+
 export interface HomeworkFormData {
+
+
+  /* ---------------------------------------------------------
+   * CLASSE
+   * --------------------------------------------------------- */
 
   classroom: string;
 
+
+  /* ---------------------------------------------------------
+   * GROUPE
+   *
+   * "" = toute la classe.
+   * --------------------------------------------------------- */
+
+  classroom_group: string;
+
+
+  /* ---------------------------------------------------------
+   * MATIÈRE
+   * --------------------------------------------------------- */
+
   subject: string;
+
+
+  /* ---------------------------------------------------------
+   * PÉRIODE ACADÉMIQUE
+   * --------------------------------------------------------- */
+
+  term: string;
+
+
+  /* ---------------------------------------------------------
+   * TITRE
+   * --------------------------------------------------------- */
 
   title: string;
 
+
+  /* ---------------------------------------------------------
+   * DESCRIPTION
+   * --------------------------------------------------------- */
+
   description: string;
 
+
+  /* ---------------------------------------------------------
+   * DATE LIMITE
+   * --------------------------------------------------------- */
+
   due_date: string;
+
+
+  /* ---------------------------------------------------------
+   * PUBLICATION
+   * --------------------------------------------------------- */
 
   is_published: boolean;
 
 }
 
+
+/* ===========================================================
+ * HOMEWORK
+ * =========================================================== */
+
 export interface Homework {
 
   id: string;
+
+
+  /* ---------------------------------------------------------
+   * CLASSE
+   * --------------------------------------------------------- */
 
   classroom: string;
 
   classroom_name: string;
 
+
+  /* ---------------------------------------------------------
+   * GROUPE
+   *
+   * null = toute la classe.
+   * --------------------------------------------------------- */
+
+  classroom_group?: string | null;
+
+  classroom_group_name?: string | null;
+
+
+  /* ---------------------------------------------------------
+   * MATIÈRE
+   * --------------------------------------------------------- */
+
   subject: string;
 
   subject_name: string;
+
+
+  /* ---------------------------------------------------------
+   * PÉRIODE ACADÉMIQUE
+   * --------------------------------------------------------- */
+
+  term: string;
+
+  term_name: string;
+
+
+  /* ---------------------------------------------------------
+   * CONTENU
+   * --------------------------------------------------------- */
 
   title: string;
 
   description: string;
 
+
+  /* ---------------------------------------------------------
+   * DATE
+   * --------------------------------------------------------- */
+
   due_date: string;
 
-  status: "pending" | "completed" | "overdue";
+
+  /* ---------------------------------------------------------
+   * STATUT
+   * --------------------------------------------------------- */
+
+  status: HomeworkStatus;
+
+
+  /* ---------------------------------------------------------
+   * PUBLICATION
+   * --------------------------------------------------------- */
 
   is_published: boolean;
+
+
+  /* ---------------------------------------------------------
+   * PIÈCE JOINTE
+   * --------------------------------------------------------- */
+
+  attachment?: string | null;
+
+
+  /* ---------------------------------------------------------
+   * STATISTIQUES
+   * --------------------------------------------------------- */
+
+  total_students?: number;
+
+  submitted_students?: number;
 
 }

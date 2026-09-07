@@ -22,12 +22,12 @@ export default function DashboardLayout({
 
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar />
 
-      <div className="flex-1 flex flex-col">
+      <div className="min-w-0 flex-1 flex flex-col">
         <Topbar />
-        <main className="p-6 bg-background flex-1 overflow-auto">
+        <main className="w-full max-w-full p-6 bg-background flex-1 overflow-auto">
           {children}
         </main>
       </div>

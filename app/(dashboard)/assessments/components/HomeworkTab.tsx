@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import { BookPlus } from "lucide-react";
 
 import Drawer from "@/components/ui/Drawer";
@@ -15,9 +16,25 @@ import HomeworkForm from "./HomeworkForm";
 
 import { useHomework } from "../hooks/useHomework";
 
+import type { Homework } from "../types";
+
+
+/* ===========================================================
+ * COMPONENT
+ * =========================================================== */
+
 export default function HomeworkTab() {
 
+
+  /* ===========================================================
+   * HOOK
+   * =========================================================== */
+
   const {
+
+    /* ---------------------------------------------------------
+     * DONNÉES
+     * --------------------------------------------------------- */
 
     homeworks,
 
@@ -25,11 +42,37 @@ export default function HomeworkTab() {
 
     subjects,
 
+    terms,
+
+
+    /* ---------------------------------------------------------
+     * SUMMARY
+     * --------------------------------------------------------- */
+
     summary,
+
+
+    /* ---------------------------------------------------------
+     * FILTRES
+     * --------------------------------------------------------- */
 
     filters,
 
+    setFilters,
+
+
+    /* ---------------------------------------------------------
+     * FORMULAIRE
+     * --------------------------------------------------------- */
+
     form,
+
+    setForm,
+
+
+    /* ---------------------------------------------------------
+     * ÉTATS
+     * --------------------------------------------------------- */
 
     loading,
 
@@ -37,9 +80,10 @@ export default function HomeworkTab() {
 
     editingHomework,
 
-    setFilters,
 
-    setForm,
+    /* ---------------------------------------------------------
+     * ACTIONS
+     * --------------------------------------------------------- */
 
     saveHomework,
 
@@ -53,6 +97,11 @@ export default function HomeworkTab() {
 
   } = useHomework();
 
+
+  /* ===========================================================
+   * DRAWER
+   * =========================================================== */
+
   const [
 
     drawerOpen,
@@ -61,45 +110,96 @@ export default function HomeworkTab() {
 
   ] = useState(false);
 
+
+  /* ===========================================================
+   * NOUVEL EXERCICE
+   * =========================================================== */
+
   function handleNew() {
 
     resetForm();
 
-    setDrawerOpen(true);
+    setDrawerOpen(
+      true
+    );
 
   }
 
-  function handleEdit(homework: any) {
 
-    editHomework(homework);
+  /* ===========================================================
+   * MODIFICATION
+   * =========================================================== */
 
-    setDrawerOpen(true);
+  function handleEdit(
+    homework: Homework
+  ) {
+
+    editHomework(
+      homework
+    );
+
+    setDrawerOpen(
+      true
+    );
 
   }
+
+
+  /* ===========================================================
+   * SAUVEGARDE
+   * =========================================================== */
 
   async function handleSave() {
 
     await saveHomework();
 
-    setDrawerOpen(false);
+
+    /*
+     * On ferme uniquement après
+     * l'exécution de la sauvegarde.
+     */
+
+    setDrawerOpen(
+      false
+    );
 
   }
+
+
+  /* ===========================================================
+   * FERMETURE DRAWER
+   * =========================================================== */
 
   function handleClose() {
 
     closeEdition();
 
-    setDrawerOpen(false);
+    setDrawerOpen(
+      false
+    );
 
   }
+
+
+  /* ===========================================================
+   * RENDER
+   * =========================================================== */
 
   return (
 
     <div className="space-y-8">
 
-      {/* HEADER */}
+
+      {/* =====================================================
+       * HEADER
+       * ===================================================== */}
 
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+
+
+        {/* ---------------------------------------------------
+         * TITRE
+         * --------------------------------------------------- */}
 
         <div>
 
@@ -109,6 +209,7 @@ export default function HomeworkTab() {
 
           </h2>
 
+
           <p className="mt-2 text-gray-500">
 
             Communiquez les exercices à traiter à la maison.
@@ -116,6 +217,11 @@ export default function HomeworkTab() {
           </p>
 
         </div>
+
+
+        {/* ---------------------------------------------------
+         * ACTION
+         * --------------------------------------------------- */}
 
         <button
 
@@ -145,7 +251,10 @@ export default function HomeworkTab() {
 
       </div>
 
-      {/* SUMMARY */}
+
+      {/* =====================================================
+       * SUMMARY
+       * ===================================================== */}
 
       <HomeworkSummary
 
@@ -153,7 +262,10 @@ export default function HomeworkTab() {
 
       />
 
-      {/* FILTERS */}
+
+      {/* =====================================================
+       * FILTERS
+       * ===================================================== */}
 
       <HomeworkFilters
 
@@ -167,7 +279,10 @@ export default function HomeworkTab() {
 
       />
 
-      {/* TABLE */}
+
+      {/* =====================================================
+       * TABLE
+       * ===================================================== */}
 
       <HomeworkTable
 
@@ -177,7 +292,9 @@ export default function HomeworkTab() {
 
         onView={(homework) => {
 
-          console.log(homework);
+          console.log(
+            homework
+          );
 
         }}
 
@@ -193,7 +310,10 @@ export default function HomeworkTab() {
 
       />
 
-      {/* DRAWER */}
+
+      {/* =====================================================
+       * DRAWER
+       * ===================================================== */}
 
       <Drawer
 
@@ -204,6 +324,11 @@ export default function HomeworkTab() {
         size="md"
 
       >
+
+
+        {/* ===================================================
+         * HEADER
+         * =================================================== */}
 
         <DrawerHeader
 
@@ -231,7 +356,13 @@ export default function HomeworkTab() {
 
         />
 
+
+        {/* ===================================================
+         * CONTENT
+         * =================================================== */}
+
         <DrawerContent>
+
 
           <HomeworkForm
 
@@ -241,24 +372,49 @@ export default function HomeworkTab() {
 
             subjects={subjects}
 
+            /*
+             * IMPORTANT :
+             *
+             * Les périodes étaient correctement chargées
+             * dans useHomework(), mais elles n'étaient pas
+             * transmises au composant HomeworkForm.
+             */
+
+            terms={terms}
+
             onChange={setForm}
 
           />
 
+
         </DrawerContent>
 
+
+        {/* ===================================================
+         * FOOTER
+         * =================================================== */}
+
         <DrawerFooter>
+
+
+          {/* -------------------------------------------------
+           * ANNULER
+           * ------------------------------------------------- */}
 
           <button
 
             onClick={handleClose}
+
+            disabled={submitting}
 
             className="
               rounded-xl
               border
               px-5
               py-2
+              transition
               hover:bg-gray-50
+              disabled:opacity-50
             "
 
           >
@@ -266,6 +422,11 @@ export default function HomeworkTab() {
             Annuler
 
           </button>
+
+
+          {/* -------------------------------------------------
+           * SAUVEGARDE
+           * ------------------------------------------------- */}
 
           <button
 
@@ -303,9 +464,12 @@ export default function HomeworkTab() {
 
           </button>
 
+
         </DrawerFooter>
 
+
       </Drawer>
+
 
     </div>
 
