@@ -80,7 +80,7 @@ export default function AssignmentModal({
 
         course_group_id: "",
 
-        assignment_type: "SUBJECT",
+        assignment_type: "",
 
         start_date: "",
 
@@ -129,6 +129,7 @@ export default function AssignmentModal({
                 await getTeachers();
 
             setTeachers(data);
+           
 
         } catch (error) {
 
@@ -321,7 +322,7 @@ export default function AssignmentModal({
 
                 course_group_id: "",
 
-                assignment_type: "SUBJECT",
+                assignment_type: "",
 
                 start_date: "",
 
@@ -723,7 +724,7 @@ export default function AssignmentModal({
     
                             <label className="mb-2 block text-sm font-medium">
     
-                                Type d'affectation
+                                Type d'enseignant
     
                             </label>
     
@@ -741,16 +742,22 @@ export default function AssignmentModal({
                                 }
                                 className="w-full rounded-lg border p-3"
                             >
+                                
+                                <option >
     
+                                    Selectionnez le type d'enseignant
+    
+                                </option>
+
                                 <option value="PRIMARY">
     
-                                    Enseignant titulaire
+                                    Enseignant primaire
     
                                 </option>
     
                                 <option value="SUBJECT">
     
-                                    Enseignant de matière
+                                    Enseignant secondaire / supérieur
     
                                 </option>
     
