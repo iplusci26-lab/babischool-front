@@ -12,7 +12,7 @@ export default function StudentHeader({ student }: any) {
           </p>
   
           <p className="text-gray-500">
-            Classe: {student.classroom}
+            Classe: {student.classroom?.name}
           </p>
         </div>
   

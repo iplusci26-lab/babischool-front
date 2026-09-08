@@ -17,9 +17,9 @@ export default function StudentHomework({
     try {
 
       const res = await api.get(
-        `/homework/${studentId}/student/`
+        `/homework/student/${studentId}/`
       );
-
+      console.log("resuts------- ", res)
       setHomeworks(
         res.data.results || res.data
       );

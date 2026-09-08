@@ -9,8 +9,9 @@ import {
 
 import StatusBadge from "@/components/ui/StatusBadge";
 
-import type { Student } from "../types";
-
+import type {
+  Student,
+} from "../types";
 
 // ==========================================================
 // PROPS
@@ -30,7 +31,6 @@ interface StudentRowProps {
   ) => void;
 }
 
-
 // ==========================================================
 // HELPERS
 // ==========================================================
@@ -42,11 +42,6 @@ function formatDate(
     return "Date inconnue";
   }
 
-  /**
-   * Les dates ISO de type YYYY-MM-DD peuvent provoquer
-   * un décalage de jour avec new Date() selon le fuseau horaire.
-   * On les traite donc explicitement.
-   */
   const dateOnlyMatch =
     /^(\d{4})-(\d{2})-(\d{2})$/.exec(
       date
@@ -78,12 +73,15 @@ function formatDate(
     "fr-FR",
     {
       day: "2-digit",
+
       month: "2-digit",
+
       year: "numeric",
     }
-  ).format(parsedDate);
+  ).format(
+    parsedDate
+  );
 }
-
 
 // ==========================================================
 // COMPONENT
@@ -97,27 +95,26 @@ export default function StudentRow({
   onEdit,
 }: StudentRowProps) {
 
-
-  // ==========================================================
+  // ========================================================
   // INITIALS
-  // ==========================================================
+  // ========================================================
 
-  const initials = [
-    student.first_name
-      ?.trim()
-      .charAt(0) ?? "",
+  const initials =
+    [
+      student.first_name
+        .trim()
+        .charAt(0),
 
-    student.last_name
-      ?.trim()
-      .charAt(0) ?? "",
-  ]
-    .join("")
-    .toUpperCase();
+      student.last_name
+        .trim()
+        .charAt(0),
+    ]
+      .join("")
+      .toUpperCase();
 
-
-  // ==========================================================
+  // ========================================================
   // DISPLAY NAME
-  // ==========================================================
+  // ========================================================
 
   const displayName =
     student.display_name
@@ -126,73 +123,96 @@ export default function StudentRow({
       student.last_name,
       student.first_name,
     ]
-      .filter(
-        Boolean
-      )
+      .filter(Boolean)
       .join(" ")
       .trim() ||
     "Élève sans nom";
 
+  // ========================================================
+  // CLASSROOM
+  // ========================================================
 
-  // ==========================================================
+  /**
+   * Le backend retourne :
+   *
+   * classroom: {
+   *   id: UUID,
+   *   name: string
+   * }
+   *
+   * ou null.
+   */
+
+  const classroomName =
+    student.classroom?.name
+      ?.trim() ||
+    null;
+
+  // ========================================================
   // GROUPS
-  // ==========================================================
+  // ========================================================
 
   const studentGroups =
-    Array.isArray(
-      student.groups
-    )
-      ? student.groups
-      : [];
+    student.groups ?? [];
 
-
-  // ==========================================================
+  // ========================================================
   // GENDER
-  // ==========================================================
+  // ========================================================
 
   const genderLabel =
     student.gender === "M"
       ? "Garçon"
-      : student.gender === "F"
-        ? "Fille"
-        : "Non renseigné";
-
+      : "Fille";
 
   const genderColor =
     student.gender === "M"
       ? "blue"
-      : student.gender === "F"
-        ? "pink"
-        : "gray";
+      : "pink";
 
-
-  // ==========================================================
+  // ========================================================
   // ASSIGNMENT
-  // ==========================================================
+  // ========================================================
 
   const isAssigned =
-    student.is_assigned === true;
+    student.is_assigned;
 
-
-  // ==========================================================
+  // ========================================================
   // REPEATING
-  // ==========================================================
+  // ========================================================
 
   const isRepeating =
-    student.is_repeating === true;
+    student.is_repeating;
 
+  // ========================================================
+  // PARENT
+  // ========================================================
 
-  // ==========================================================
+  const parentName =
+    student.parent_name
+      ?.trim() ||
+    null;
+
+  const parentPhone =
+    student.parent_phone
+      ?.trim() ||
+    null;
+
+  // ========================================================
   // RENDER
-  // ==========================================================
+  // ========================================================
 
   return (
-    <tr className="border-t transition hover:bg-gray-50">
+    <tr
+      className="
+        border-t
+        transition
+        hover:bg-gray-50
+      "
+    >
 
-
-      {/* ================================================== */}
+      {/* ================================================= */}
       {/* CHECKBOX */}
-      {/* ================================================== */}
+      {/* ================================================= */}
 
       <td className="px-4 py-3">
 
@@ -206,17 +226,15 @@ export default function StudentRow({
 
       </td>
 
-
-      {/* ================================================== */}
+      {/* ================================================= */}
       {/* ÉLÈVE */}
-      {/* ================================================== */}
+      {/* ================================================= */}
 
       <td className="px-4 py-3">
 
         <div className="flex items-center gap-3">
 
-
-          {/* PHOTO / INITIALES */}
+          {/* PHOTO */}
 
           <div
             className="
@@ -256,8 +274,7 @@ export default function StudentRow({
 
           </div>
 
-
-          {/* NOM + INFORMATIONS */}
+          {/* INFORMATIONS */}
 
           <div className="min-w-0">
 
@@ -270,7 +287,6 @@ export default function StudentRow({
             >
               {displayName}
             </div>
-
 
             <div
               className="
@@ -309,10 +325,9 @@ export default function StudentRow({
 
       </td>
 
-
-      {/* ================================================== */}
+      {/* ================================================= */}
       {/* DATE DE NAISSANCE */}
-      {/* ================================================== */}
+      {/* ================================================= */}
 
       <td className="px-4 py-3">
 
@@ -329,10 +344,9 @@ export default function StudentRow({
 
       </td>
 
-
-      {/* ================================================== */}
+      {/* ================================================= */}
       {/* MATRICULE */}
-      {/* ================================================== */}
+      {/* ================================================= */}
 
       <td className="px-4 py-3">
 
@@ -347,19 +361,16 @@ export default function StudentRow({
 
       </td>
 
-
-      {/* ================================================== */}
+      {/* ================================================= */}
       {/* CLASSE */}
-      {/* ================================================== */}
+      {/* ================================================= */}
 
       <td className="px-4 py-3">
 
-        {student.classroom_name ? (
+        {classroomName ? (
 
           <StatusBadge
-            label={
-              student.classroom_name
-            }
+            label={classroomName}
             color="purple"
           />
 
@@ -378,10 +389,9 @@ export default function StudentRow({
 
       </td>
 
-
-      {/* ================================================== */}
+      {/* ================================================= */}
       {/* GROUPES */}
-      {/* ================================================== */}
+      {/* ================================================= */}
 
       <td className="px-4 py-3">
 
@@ -404,8 +414,8 @@ export default function StudentRow({
 
                 <span
                   key={
-                    group.membership_id ??
-                    group.group_id ??
+                    group.membership_id ||
+                    group.group_id ||
                     `${group.name}-${index}`
                   }
                   className="
@@ -436,8 +446,10 @@ export default function StudentRow({
                   />
 
                   <span className="truncate">
+
                     {group.name ||
                       "Groupe"}
+
                   </span>
 
                 </span>
@@ -462,10 +474,9 @@ export default function StudentRow({
 
       </td>
 
-
-      {/* ================================================== */}
+      {/* ================================================= */}
       {/* PARENT */}
-      {/* ================================================== */}
+      {/* ================================================= */}
 
       <td className="px-4 py-3">
 
@@ -485,10 +496,9 @@ export default function StudentRow({
             "
           />
 
-
           <div className="min-w-0">
 
-            {student.parent_name ? (
+            {parentName ? (
 
               <div
                 className="
@@ -498,7 +508,7 @@ export default function StudentRow({
                   text-gray-700
                 "
               >
-                {student.parent_name}
+                {parentName}
               </div>
 
             ) : (
@@ -514,17 +524,17 @@ export default function StudentRow({
 
             )}
 
+            {parentPhone ? (
 
-            {student.parent_phone ? (
-
-              <span
+              <div
                 className="
-                  text-sm
-                  text-gray-700
+                  mt-0.5
+                  text-xs
+                  text-gray-500
                 "
               >
-                {student.parent_phone}
-              </span>
+                {parentPhone}
+              </div>
 
             ) : null}
 
@@ -534,10 +544,9 @@ export default function StudentRow({
 
       </td>
 
-
-      {/* ================================================== */}
+      {/* ================================================= */}
       {/* SEXE */}
-      {/* ================================================== */}
+      {/* ================================================= */}
 
       <td className="px-4 py-3">
 
@@ -548,10 +557,9 @@ export default function StudentRow({
 
       </td>
 
-
-      {/* ================================================== */}
+      {/* ================================================= */}
       {/* AFFECTATION */}
-      {/* ================================================== */}
+      {/* ================================================= */}
 
       <td className="px-4 py-3 text-center">
 
@@ -570,10 +578,9 @@ export default function StudentRow({
 
       </td>
 
-
-      {/* ================================================== */}
+      {/* ================================================= */}
       {/* REDOUBLANT */}
-      {/* ================================================== */}
+      {/* ================================================= */}
 
       <td className="px-4 py-3 text-center">
 
@@ -592,10 +599,9 @@ export default function StudentRow({
 
       </td>
 
-
-      {/* ================================================== */}
+      {/* ================================================= */}
       {/* ACTIONS */}
-      {/* ================================================== */}
+      {/* ================================================= */}
 
       <td className="px-4 py-3">
 
@@ -607,8 +613,7 @@ export default function StudentRow({
           "
         >
 
-
-          {/* VOIR */}
+          {/* VIEW */}
 
           <button
             type="button"
@@ -624,13 +629,10 @@ export default function StudentRow({
             title="Voir"
             aria-label={`Voir ${displayName}`}
           >
-
             <Eye size={18} />
-
           </button>
 
-
-          {/* MODIFIER */}
+          {/* EDIT */}
 
           <button
             type="button"
@@ -648,11 +650,8 @@ export default function StudentRow({
             title="Modifier"
             aria-label={`Modifier ${displayName}`}
           >
-
             <Pencil size={18} />
-
           </button>
-
 
         </div>
 

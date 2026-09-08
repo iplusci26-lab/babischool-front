@@ -19,7 +19,7 @@ export default function StudentTabs({ student }: any) {
         <Tab label="Moyennes" value="grades" tab={tab} setTab={setTab} />
         <Tab label="Présences" value="attendance" tab={tab} setTab={setTab} />
         {/*<Tab label="Finance" value="finance" tab={tab} setTab={setTab}/>*/}
-        <Tab label="Devoirs" value="homework" tab={tab} setTab={setTab} />
+        <Tab label="Exercices" value="homework" tab={tab} setTab={setTab} />
       </div>
 
       {/* CONTENT */}

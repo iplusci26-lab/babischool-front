@@ -2,16 +2,20 @@
 
 import {
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
 import Modal from "@/components/ui/Modal";
-
 import Input from "@/components/ui/Input";
-
 import Select from "@/components/ui/Select";
 
-import type { Student } from "../types";
+import type {
+  Classroom,
+  Student,
+  StudentUpdatePayload,
+  UUID,
+} from "../types";
 
 
 // ==========================================================
@@ -23,12 +27,14 @@ interface StudentModalProps {
 
   student: Student | null;
 
+  classrooms?: Classroom[];
+
   loading?: boolean;
 
   onClose: () => void;
 
   onSubmit: (
-    data: Partial<Student>
+    data: StudentUpdatePayload
   ) => void | Promise<void>;
 }
 
@@ -38,6 +44,7 @@ interface StudentModalProps {
 // ==========================================================
 
 type StudentForm = {
+
   student_number: string;
 
   first_name: string;
@@ -53,6 +60,15 @@ type StudentForm = {
   is_assigned: boolean;
 
   is_repeating: boolean;
+
+  /**
+   * null est autorisé UNIQUEMENT
+   * dans l'état local du formulaire.
+   *
+   * Il ne sera jamais envoyé au backend.
+   */
+  classroom_id: UUID | null;
+
 };
 
 
@@ -61,6 +77,7 @@ type StudentForm = {
 // ==========================================================
 
 const INITIAL_FORM: StudentForm = {
+
   student_number: "",
 
   first_name: "",
@@ -76,6 +93,9 @@ const INITIAL_FORM: StudentForm = {
   is_assigned: false,
 
   is_repeating: false,
+
+  classroom_id: null,
+
 };
 
 
@@ -86,15 +106,26 @@ const INITIAL_FORM: StudentForm = {
 export default function StudentModal({
   open,
   student,
+  classrooms = [],
   loading = false,
   onClose,
   onSubmit,
 }: StudentModalProps) {
 
 
-  // ==========================================================
+  // ========================================================
+  // SAFE CLASSROOMS
+  // ========================================================
+
+  const safeClassrooms =
+    Array.isArray(classrooms)
+      ? classrooms
+      : [];
+
+
+  // ========================================================
   // STATE
-  // ==========================================================
+  // ========================================================
 
   const [
     form,
@@ -104,11 +135,23 @@ export default function StudentModal({
   );
 
 
-  // ==========================================================
+  // ========================================================
+  // CURRENT CLASSROOM ID
+  //
+  // Le Student actuel peut contenir classroom.
+  // ========================================================
+
+  const currentClassroomId =
+    student?.classroom?.id ??
+    null;
+
+
+  // ========================================================
   // INITIALIZE FORM
-  // ==========================================================
+  // ========================================================
 
   useEffect(() => {
+
     if (
       !open ||
       !student
@@ -116,52 +159,71 @@ export default function StudentModal({
       return;
     }
 
+
     setForm({
+
       student_number:
         student.student_number ?? "",
+
 
       first_name:
         student.first_name ?? "",
 
+
       last_name:
         student.last_name ?? "",
+
 
       gender:
         student.gender === "F"
           ? "F"
           : "M",
 
+
       date_of_birth:
         student.date_of_birth ?? "",
+
 
       birth_place:
         student.birth_place ?? "",
 
+
       is_assigned:
-        Boolean(
-          student.is_assigned
-        ),
+        student.is_assigned === true,
+
 
       is_repeating:
-        Boolean(
-          student.is_repeating
-        ),
+        student.is_repeating === true,
+
+
+      // ====================================================
+      // CLASSE ACTUELLE
+      // ====================================================
+
+      classroom_id:
+        currentClassroomId,
+
     });
 
   }, [
     open,
     student,
+    currentClassroomId,
   ]);
 
 
-  // ==========================================================
+  // ========================================================
   // RESET WHEN MODAL CLOSES
-  // ==========================================================
+  // ========================================================
 
   useEffect(() => {
-    if (open) {
+
+    if (
+      open
+    ) {
       return;
     }
+
 
     setForm(
       INITIAL_FORM
@@ -172,9 +234,9 @@ export default function StudentModal({
   ]);
 
 
-  // ==========================================================
+  // ========================================================
   // HANDLE FIELD CHANGE
-  // ==========================================================
+  // ========================================================
 
   const handleChange = <
     K extends keyof StudentForm
@@ -191,27 +253,73 @@ export default function StudentModal({
           value,
       })
     );
+
   };
 
 
-  // ==========================================================
+  // ========================================================
+  // CLASSROOM OPTIONS
+  // ========================================================
+
+  const classroomOptions =
+    useMemo(() => {
+
+      return [
+
+        {
+          label:
+            "Aucune classe",
+
+          value:
+            "",
+        },
+
+
+        ...safeClassrooms.map(
+          (
+            classroom
+          ) => ({
+
+            label:
+              classroom.name,
+
+            value:
+              classroom.id,
+
+          })
+        ),
+
+      ];
+
+    }, [
+      safeClassrooms,
+    ]);
+
+
+  // ========================================================
   // HANDLE CLOSE
-  // ==========================================================
+  // ========================================================
 
   const handleClose = () => {
-    if (loading) {
+
+    if (
+      loading
+    ) {
       return;
     }
 
+
     onClose();
+
   };
 
 
-  // ==========================================================
+  // ========================================================
   // HANDLE SUBMIT
-  // ==========================================================
+  // ========================================================
 
   const handleSubmit = async () => {
+
     if (
       loading ||
       !student
@@ -219,39 +327,121 @@ export default function StudentModal({
       return;
     }
 
-    await onSubmit({
+
+    // ======================================================
+    // BUILD PAYLOAD
+    // ======================================================
+
+    const payload: StudentUpdatePayload = {
+
       student_number:
         form.student_number.trim(),
+
 
       first_name:
         form.first_name.trim(),
 
+
       last_name:
         form.last_name.trim(),
+
 
       gender:
         form.gender,
 
-      date_of_birth:
-        form.date_of_birth,
-
-      birth_place:
-        form.birth_place.trim(),
 
       is_assigned:
         form.is_assigned,
 
+
       is_repeating:
         form.is_repeating,
-    });
+
+    };
+
+
+    // ======================================================
+    // CLASSROOM
+    //
+    // IMPORTANT:
+    //
+    // Le backend utilise :
+    //
+    // allow_null=False
+    //
+    // Donc :
+    //
+    // ❌ classroom_id: null
+    //
+    // n'est jamais envoyé.
+    //
+    // Si aucune classe n'est sélectionnée,
+    // le champ est simplement omis.
+    // ======================================================
+
+    if (
+      form.classroom_id
+    ) {
+
+      payload.classroom_id =
+        form.classroom_id;
+
+    }
+
+
+    // ======================================================
+    // DATE OF BIRTH
+    // ======================================================
+
+    const dateOfBirth =
+      form.date_of_birth.trim();
+
+
+    if (
+      dateOfBirth.length > 0
+    ) {
+
+      payload.date_of_birth =
+        dateOfBirth;
+
+    }
+
+
+    // ======================================================
+    // BIRTH PLACE
+    // ======================================================
+
+    const birthPlace =
+      form.birth_place.trim();
+
+
+    if (
+      birthPlace.length > 0
+    ) {
+
+      payload.birth_place =
+        birthPlace;
+
+    }
+
+
+    // ======================================================
+    // SUBMIT
+    // ======================================================
+
+    await onSubmit(
+      payload
+    );
+
   };
 
 
-  // ==========================================================
+  // ========================================================
   // RENDER
-  // ==========================================================
+  // ========================================================
 
   return (
+
     <Modal
       open={open}
       onClose={handleClose}
@@ -267,9 +457,9 @@ export default function StudentModal({
       >
 
 
-        {/* ==================================================== */}
+        {/* ================================================= */}
         {/* FORM */}
-        {/* ==================================================== */}
+        {/* ================================================= */}
 
         <div
           className="
@@ -289,9 +479,9 @@ export default function StudentModal({
           >
 
 
-            {/* ================================================= */}
+            {/* ============================================= */}
             {/* NOM */}
-            {/* ================================================= */}
+            {/* ============================================= */}
 
             <Input
               label="Nom"
@@ -306,9 +496,9 @@ export default function StudentModal({
             />
 
 
-            {/* ================================================= */}
+            {/* ============================================= */}
             {/* PRENOM */}
-            {/* ================================================= */}
+            {/* ============================================= */}
 
             <Input
               label="Prénom"
@@ -323,9 +513,9 @@ export default function StudentModal({
             />
 
 
-            {/* ================================================= */}
+            {/* ============================================= */}
             {/* MATRICULE */}
-            {/* ================================================= */}
+            {/* ============================================= */}
 
             <Input
               label="Matricule"
@@ -344,27 +534,37 @@ export default function StudentModal({
             />
 
 
-            {/* ================================================= */}
+            {/* ============================================= */}
             {/* SEXE */}
-            {/* ================================================= */}
+            {/* ============================================= */}
 
             <Select
               label="Sexe"
               value={form.gender}
               disabled={loading}
               options={[
+
                 {
-                  label: "Garçon",
-                  value: "M",
+                  label:
+                    "Garçon",
+
+                  value:
+                    "M",
                 },
+
                 {
-                  label: "Fille",
-                  value: "F",
+                  label:
+                    "Fille",
+
+                  value:
+                    "F",
                 },
+
               ]}
               onChange={(event) =>
                 handleChange(
                   "gender",
+
                   event.target.value as
                     | "M"
                     | "F"
@@ -373,9 +573,9 @@ export default function StudentModal({
             />
 
 
-            {/* ================================================= */}
+            {/* ============================================= */}
             {/* DATE DE NAISSANCE */}
-            {/* ================================================= */}
+            {/* ============================================= */}
 
             <Input
               type="date"
@@ -393,9 +593,9 @@ export default function StudentModal({
             />
 
 
-            {/* ================================================= */}
+            {/* ============================================= */}
             {/* LIEU DE NAISSANCE */}
-            {/* ================================================= */}
+            {/* ============================================= */}
 
             <Input
               label="Lieu de naissance"
@@ -413,9 +613,46 @@ export default function StudentModal({
             />
 
 
-            {/* ================================================= */}
+            {/* ============================================= */}
+            {/* CLASSE */}
+            {/* ============================================= */}
+
+            <Select
+              label="Classe"
+
+              value={
+                form.classroom_id ?? ""
+              }
+
+              disabled={
+                loading
+              }
+
+              options={
+                classroomOptions
+              }
+
+              onChange={(event) => {
+
+                const value =
+                  event.target.value;
+
+
+                handleChange(
+                  "classroom_id",
+
+                  value === ""
+                    ? null
+                    : value
+                );
+
+              }}
+            />
+
+
+            {/* ============================================= */}
             {/* AFFECTATION */}
-            {/* ================================================= */}
+            {/* ============================================= */}
 
             <div
               className="
@@ -442,16 +679,22 @@ export default function StudentModal({
 
                 <input
                   type="checkbox"
+
                   checked={
                     form.is_assigned
                   }
-                  disabled={loading}
+
+                  disabled={
+                    loading
+                  }
+
                   onChange={(event) =>
                     handleChange(
                       "is_assigned",
                       event.target.checked
                     )
                   }
+
                   className="
                     h-4
                     w-4
@@ -462,6 +705,7 @@ export default function StudentModal({
                     focus:ring-[#6214BE]
                   "
                 />
+
 
                 <div className="min-w-0">
 
@@ -474,6 +718,7 @@ export default function StudentModal({
                   >
                     Élève affecté
                   </p>
+
 
                   <p
                     className="
@@ -493,9 +738,9 @@ export default function StudentModal({
             </div>
 
 
-            {/* ================================================= */}
+            {/* ============================================= */}
             {/* REDOUBLANT */}
-            {/* ================================================= */}
+            {/* ============================================= */}
 
             <div
               className="
@@ -522,16 +767,22 @@ export default function StudentModal({
 
                 <input
                   type="checkbox"
+
                   checked={
                     form.is_repeating
                   }
-                  disabled={loading}
+
+                  disabled={
+                    loading
+                  }
+
                   onChange={(event) =>
                     handleChange(
                       "is_repeating",
                       event.target.checked
                     )
                   }
+
                   className="
                     h-4
                     w-4
@@ -542,6 +793,7 @@ export default function StudentModal({
                     focus:ring-[#6214BE]
                   "
                 />
+
 
                 <div className="min-w-0">
 
@@ -554,6 +806,7 @@ export default function StudentModal({
                   >
                     Élève redoublant
                   </p>
+
 
                   <p
                     className="
@@ -577,9 +830,9 @@ export default function StudentModal({
         </div>
 
 
-        {/* ==================================================== */}
+        {/* ================================================= */}
         {/* ACTIONS */}
-        {/* ==================================================== */}
+        {/* ================================================= */}
 
         <div
           className="
@@ -597,8 +850,15 @@ export default function StudentModal({
 
           <button
             type="button"
-            onClick={handleClose}
-            disabled={loading}
+
+            onClick={
+              handleClose
+            }
+
+            disabled={
+              loading
+            }
+
             className="
               w-full
               rounded-md
@@ -622,13 +882,16 @@ export default function StudentModal({
 
           <button
             type="button"
+
             onClick={() => {
               void handleSubmit();
             }}
+
             disabled={
               loading ||
               !student
             }
+
             className="
               w-full
               rounded-md
@@ -645,9 +908,13 @@ export default function StudentModal({
               sm:w-auto
             "
           >
-            {loading
-              ? "Enregistrement..."
-              : "Enregistrer"}
+
+            {
+              loading
+                ? "Enregistrement..."
+                : "Enregistrer"
+            }
+
           </button>
 
         </div>
@@ -655,5 +922,7 @@ export default function StudentModal({
       </div>
 
     </Modal>
+
   );
+
 }

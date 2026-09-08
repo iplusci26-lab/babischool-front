@@ -6,7 +6,61 @@ export type UUID = string;
 
 
 // ==========================================================
-// DOMAIN MODELS
+// PAYMENTS
+// ==========================================================
+
+export interface ParentPayment {
+
+  id: UUID;
+
+  amount: string | number;
+
+  payment_date: string;
+
+  reference?: string | null;
+
+  notes?: string | null;
+
+}
+
+
+// ==========================================================
+// CLASSROOM
+// ==========================================================
+
+/**
+ * Classe utilisée dans les listes de classes.
+ */
+export interface Classroom {
+
+  id: UUID;
+
+  name: string;
+
+}
+
+
+/**
+ * Classe actuellement associée à un élève.
+ *
+ * Exemple :
+ *
+ * {
+ *   id: "...",
+ *   name: "..."
+ * }
+ */
+export interface StudentClassroom {
+
+  id: UUID;
+
+  name: string;
+
+}
+
+
+// ==========================================================
+// STUDENT GROUP
 // ==========================================================
 
 export interface StudentGroup {
@@ -28,7 +82,29 @@ export interface StudentGroup {
 }
 
 
+// ==========================================================
+// STUDENT
+// ==========================================================
+
+/**
+ * Structure normalisée d'un élève retournée par le backend.
+ *
+ * Selon l'endpoint utilisé, la classe peut être retournée sous
+ * différentes formes :
+ *
+ * - classroom: { id, name }
+ * - classroom_id: UUID
+ * - classroom_name: string
+ *
+ * Les champs classroom_id et classroom_name sont conservés pour
+ * assurer la compatibilité avec StudentListSerializer.
+ */
 export interface Student {
+
+
+  // ========================================================
+  // IDENTITÉ
+  // ========================================================
 
   id: UUID;
 
@@ -38,64 +114,165 @@ export interface Student {
 
   last_name: string;
 
-  display_name: string;
-
   gender: "M" | "F";
 
-  date_of_birth?: string | null;
+  date_of_birth: string | null;
+
+  birth_place: string | null;
+
+  display_name: string;
+
+
+  /**
+   * Photo de l'élève.
+   *
+   * Certains endpoints peuvent ne pas encore la retourner.
+   */
+  photo?: string | null;
+
+
+  // ========================================================
+  // INFORMATIONS SCOLAIRES
+  // ========================================================
 
   is_assigned: boolean;
 
   is_repeating: boolean;
 
-  birth_place?: string | null;
 
-  classroom?: UUID | null;
+  // ========================================================
+  // CLASSE
+  // ========================================================
 
+  /**
+   * Format détaillé utilisé notamment par StudentDetailSerializer.
+   */
+  classroom?: StudentClassroom | null;
+
+
+  /**
+   * UUID de la classe.
+   *
+   * Utile pour StudentListSerializer et pour pré-remplir
+   * le StudentModal.
+   */
+  classroom_id?: UUID | null;
+
+
+  /**
+   * Nom de la classe actuelle.
+   *
+   * Utilisé notamment dans les listes d'élèves.
+   */
   classroom_name?: string | null;
-
-
-  // ========================================================
-  // GROUPS
-  // ========================================================
-
-  groups?: StudentGroup[];
 
 
   // ========================================================
   // PARENT
   // ========================================================
 
+  /**
+   * Numéro du parent retourné par l'API.
+   */
+  parent_phone: string | null;
+
+
+  /**
+   * Conservés pour compatibilité avec certains endpoints.
+   */
   parent?: UUID | null;
 
   parent_name?: string | null;
 
-  parent_phone?: string | null;
+
+  // ========================================================
+  // FINANCES
+  //
+  // Certains endpoints peuvent ne pas retourner ces champs.
+  // Ils sont donc optionnels pour permettre l'utilisation du
+  // même type dans StudentListSerializer et
+  // StudentDetailSerializer.
+  // ========================================================
+
+  tuition_fee?: string | number;
+
+  amount_paid?: string | number;
+
+  balance?: string | number;
+
+  payments?: ParentPayment[];
 
 
   // ========================================================
-  // PHOTO / STATUS
+  // GROUPES
   // ========================================================
 
-  photo?: string | null;
-
-  status:
-    | "ACTIVE"
-    | "INACTIVE"
-    | "TRANSFERRED";
+  groups: StudentGroup[];
 
 }
 
 
 // ==========================================================
-// CLASSROOM
+// STUDENT UPDATE PAYLOAD
 // ==========================================================
 
-export interface Classroom {
+/**
+ * Payload envoyé vers :
+ *
+ * PATCH /students/:student_id/
+ *
+ * Correspond à StudentUpdateSerializer.
+ */
+export interface StudentUpdatePayload {
 
-  id: UUID;
 
-  name: string;
+  // ========================================================
+  // IDENTITÉ
+  // ========================================================
+
+  student_number?: string;
+
+  first_name?: string;
+
+  last_name?: string;
+
+  gender?: "M" | "F";
+
+  date_of_birth?: string;
+
+  birth_place?: string;
+
+
+  // ========================================================
+  // INFORMATIONS SCOLAIRES
+  // ========================================================
+
+  is_assigned?: boolean;
+
+  is_repeating?: boolean;
+
+
+  // ========================================================
+  // CLASSROOM
+  // ========================================================
+
+  /**
+   * UUID de la nouvelle classe.
+   *
+   * IMPORTANT :
+   *
+   * Le backend utilise :
+   *
+   * allow_null=False
+   *
+   * Donc :
+   *
+   * ❌ null ne doit jamais être envoyé.
+   *
+   * Si aucune classe n'est sélectionnée,
+   * le champ doit simplement être omis.
+   */
+  classroom_id?: UUID;
 
 }
 
@@ -110,9 +287,9 @@ export interface ClassroomGroup {
 
   classroom: UUID;
 
-  classroom_name?: string;
+  classroom_name?: string | null;
 
-  classroom_level_name?: string;
+  classroom_level_name?: string | null;
 
   name: string;
 
@@ -133,15 +310,10 @@ export interface ClassroomGroup {
 
 export interface StudentGroupMember {
 
-  /**
-   * ID réel de l'élève.
-   *
-   * Nécessaire pour :
-   *
-   * - sélectionner un membre
-   * - retirer un membre
-   * - identifier l'élève dans StudentGroupManager
-   */
+
+  // ========================================================
+  // IDENTITÉ
+  // ========================================================
 
   id: UUID;
 
@@ -155,13 +327,28 @@ export interface StudentGroupMember {
 
   gender: "M" | "F";
 
+
+  // ========================================================
+  // CLASSROOM
+  // ========================================================
+
   classroom?: UUID | null;
 
   classroom_name?: string | null;
 
+
+  // ========================================================
+  // INFORMATIONS SCOLAIRES
+  // ========================================================
+
   is_assigned: boolean;
 
   is_repeating: boolean;
+
+
+  // ========================================================
+  // GROUPS
+  // ========================================================
 
   groups?: StudentGroup[];
 
@@ -226,11 +413,7 @@ export interface StudentFilters {
 
   /**
    * UUID de la classe sélectionnée.
-   *
-   * Les identifiants du projet utilisent UUID,
-   * donc la valeur doit rester une string.
    */
-
   classroom: UUID | null;
 
 
@@ -238,13 +421,6 @@ export interface StudentFilters {
     | ""
     | "M"
     | "F";
-
-
-  // status:
-  //   | ""
-  //   | "ACTIVE"
-  //   | "INACTIVE"
-  //   | "TRANSFERRED";
 
 }
 
@@ -294,14 +470,17 @@ export type ExportType =
 // API RESPONSE
 // ==========================================================
 
+/**
+ * Réponse retournée par StudentListView.
+ */
 export interface StudentListResponse {
 
   data: Student[];
 
-  total_E: number;
+  queryset_F: number;
 
   queryset_M: number;
 
-  queryset_F: number;
+  total_E: number;
 
 }

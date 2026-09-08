@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useState,
+} from "react";
 
-import { useRouter } from "next/navigation";
+import {
+  useRouter,
+} from "next/navigation";
 
 import StudentModal from "./components/StudentModal";
 
@@ -16,7 +20,9 @@ import StudentTable from "./components/StudentsTable";
 
 import StudentGroupManager from "./components/StudentGroupManager";
 
-import { useStudents } from "./hooks/useStudents";
+import {
+  useStudents,
+} from "./hooks/useStudents";
 
 import type {
   Student,
@@ -35,7 +41,7 @@ export default function StudentsPage() {
 
 
   // ========================================================
-  // GROUP MANAGEMENT MODAL
+  // GROUP MANAGER MODAL
   // ========================================================
 
   const [
@@ -51,23 +57,14 @@ export default function StudentsPage() {
   // ========================================================
 
   const {
-
     loading,
-
     students,
-
     classrooms,
-
     filters,
-
     stats,
-
     selectedStudents,
-
     actions,
-
     studentModal,
-
   } = useStudents();
 
 
@@ -77,12 +74,6 @@ export default function StudentsPage() {
 
   const openGroupManager =
     () => {
-
-      /*if (
-        selectedStudents.length === 0
-      ) {
-        return;
-      }*/
 
       setGroupManagerOpen(
         true
@@ -130,14 +121,11 @@ export default function StudentsPage() {
 
 
       const allSelected =
-
         currentPageStudentIds.length > 0 &&
-
         currentPageStudentIds.every(
           (
             studentId
           ) =>
-
             selectedStudents.includes(
               studentId
             )
@@ -147,16 +135,6 @@ export default function StudentsPage() {
       if (
         allSelected
       ) {
-
-        /**
-         * NOTE:
-         *
-         * Cette action vide actuellement toute la sélection,
-         * y compris les élèves sélectionnés sur d'autres pages.
-         *
-         * On conserve ce comportement pour rester cohérent
-         * avec le reducer actuel.
-         */
 
         actions.clearSelection();
 
@@ -176,7 +154,8 @@ export default function StudentsPage() {
 
   const handleViewStudent =
     (
-      student: Student
+      student:
+        Student
     ) => {
 
       router.push(
@@ -192,14 +171,9 @@ export default function StudentsPage() {
 
   const handleGroupManagerSelectionChange =
     (
-      studentIds: UUID[]
+      studentIds:
+        UUID[]
     ) => {
-
-      /**
-       * On remplace la sélection actuelle
-       * par celle provenant du gestionnaire
-       * de groupes.
-       */
 
       actions.clearSelection();
 
@@ -209,10 +183,8 @@ export default function StudentsPage() {
           (
             studentId
           ): studentId is UUID =>
-
             typeof studentId ===
               "string" &&
-
             studentId.trim().length >
               0
         )
@@ -244,7 +216,13 @@ export default function StudentsPage() {
       {/* STUDENTS PAGE */}
       {/* ================================================== */}
 
-      <div className="min-w-0 max-w-full space-y-6">
+      <div
+        className="
+          min-w-0
+          max-w-full
+          space-y-6
+        "
+      >
 
 
         {/* ================================================ */}
@@ -252,35 +230,26 @@ export default function StudentsPage() {
         {/* ================================================ */}
 
         <StudentToolbar
-
           total={
             stats.total
           }
-
           selectedCount={
             selectedStudents.length
           }
-
           onCreate={() =>
-
             router.push(
               "/admissions"
             )
-
           }
-
           onExportExcel={
             actions.exportExcel
           }
-
           onExportPDF={
             actions.exportPDF
           }
-
           onManageGroups={
             openGroupManager
           }
-
         />
 
 
@@ -289,23 +258,18 @@ export default function StudentsPage() {
         {/* ================================================ */}
 
         <StudentFilters
-
           filters={
             filters
           }
-
           classrooms={
             classrooms
           }
-
           onChange={
             actions.setFilters
           }
-
           onReset={
             actions.resetFilters
           }
-
         />
 
 
@@ -314,23 +278,18 @@ export default function StudentsPage() {
         {/* ================================================ */}
 
         <StudentStats
-
           total={
             stats.total
           }
-
           girls={
             stats.girls
           }
-
           boys={
             stats.boys
           }
-
           classrooms={
             stats.classrooms
           }
-
         />
 
 
@@ -339,37 +298,28 @@ export default function StudentsPage() {
         {/* ================================================ */}
 
         <StudentTable
-
           students={
             students
           }
-
           loading={
             loading
           }
-
           selectedStudents={
             selectedStudents
           }
-
           onToggleSelection={
             actions.toggleStudentSelection
           }
-
           onSelectAll={
             handleSelectAll
           }
-
           onView={
             handleViewStudent
           }
-
           onEdit={
             actions.editStudent
           }
-
         />
-
 
       </div>
 
@@ -379,27 +329,26 @@ export default function StudentsPage() {
       {/* ================================================== */}
 
       <StudentModal
-
         open={
           studentModal.open
         }
-
         student={
           studentModal.student
+        }
+
+        classrooms={
+          classrooms
         }
 
         loading={
           studentModal.loading
         }
-
         onClose={
           actions.closeStudentModal
         }
-
         onSubmit={
           actions.updateStudent
         }
-
       />
 
 
@@ -410,7 +359,6 @@ export default function StudentsPage() {
       {groupManagerOpen && (
 
         <div
-
           className="
             fixed
             inset-0
@@ -421,15 +369,12 @@ export default function StudentsPage() {
             bg-black/50
             p-4
           "
-
           onMouseDown={
             closeGroupManager
           }
-
         >
 
           <div
-
             className="
               relative
               max-h-[95vh]
@@ -441,31 +386,20 @@ export default function StudentsPage() {
               p-6
               shadow-2xl
             "
-
             onMouseDown={
               (
                 event
               ) =>
-
                 event.stopPropagation()
-
             }
-
           >
 
 
-            {/* ============================================ */}
-            {/* CLOSE BUTTON */}
-            {/* ============================================ */}
-
             <button
-
               type="button"
-
               onClick={
                 closeGroupManager
               }
-
               className="
                 absolute
                 right-4
@@ -483,43 +417,29 @@ export default function StudentsPage() {
                 hover:bg-gray-100
                 hover:text-gray-900
               "
-
               aria-label="Fermer"
-
             >
-
               ×
-
             </button>
 
 
-            {/* ============================================ */}
-            {/* STUDENT GROUP MANAGER */}
-            {/* ============================================ */}
-
             <StudentGroupManager
-
               classrooms={
                 classrooms
               }
-
               selectedStudents={
                 selectedStudents
               }
-
               onSelectionChange={
                 handleGroupManagerSelectionChange
               }
-
             />
-
 
           </div>
 
         </div>
 
       )}
-
 
     </>
 
