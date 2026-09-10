@@ -32,6 +32,7 @@ import {
 } from "./reducer";
 
 
+
 // ==========================================================
 // API RESPONSE TYPES
 // ==========================================================
@@ -43,11 +44,13 @@ interface PaginatedResponse<T> {
 }
 
 
+
 interface ClassroomStudentsResponse {
   data?: Student[];
 
   results?: Student[];
 }
+
 
 
 // ==========================================================
@@ -67,36 +70,35 @@ function getResponseList<T>(
   }
 
 
+
   if (
-    Array.isArray(
-      data
-    )
+    Array.isArray(data)
   ) {
     return data;
   }
 
 
+
   if (
-    Array.isArray(
-      data.data
-    )
+    Array.isArray(data.data)
   ) {
     return data.data;
   }
 
 
+
   if (
-    Array.isArray(
-      data.results
-    )
+    Array.isArray(data.results)
   ) {
     return data.results;
   }
 
 
+
   return [];
 
 }
+
 
 
 // ==========================================================
@@ -118,6 +120,7 @@ function isValidId(
 }
 
 
+
 // ==========================================================
 // NORMALIZE IDS
 // ==========================================================
@@ -137,22 +140,11 @@ function normalizeIds(
 }
 
 
+
 // ==========================================================
 // NORMALIZE CLASSROOM
 // ==========================================================
 
-/**
- * Normalise la classe retournée par le backend.
- *
- * Le backend retourne normalement :
- *
- * {
- *   id: UUID,
- *   name: string
- * }
- *
- * ou null.
- */
 function normalizeClassroom(
   classroom:
     | StudentClassroom
@@ -165,6 +157,7 @@ function normalizeClassroom(
   }
 
 
+
   if (
     !isValidId(
       classroom.id
@@ -174,12 +167,14 @@ function normalizeClassroom(
   }
 
 
+
   if (
     typeof classroom.name !==
     "string"
   ) {
     return null;
   }
+
 
 
   return {
@@ -193,14 +188,11 @@ function normalizeClassroom(
 }
 
 
+
 // ==========================================================
 // NORMALIZE STUDENT
 // ==========================================================
 
-/**
- * Garantit que tous les élèves utilisés dans
- * le frontend respectent exactement l'interface Student.
- */
 function normalizeStudent(
   student: Student
 ): Student {
@@ -231,11 +223,13 @@ function normalizeStudent(
 }
 
 
+
 // ==========================================================
 // HOOK
 // ==========================================================
 
 export function useStudents() {
+
 
 
   // ========================================================
@@ -251,6 +245,7 @@ export function useStudents() {
   );
 
 
+
   // ========================================================
   // STUDENT MODAL
   // ========================================================
@@ -263,6 +258,7 @@ export function useStudents() {
   );
 
 
+
   const [
     studentModalOpen,
     setStudentModalOpen,
@@ -271,12 +267,14 @@ export function useStudents() {
   );
 
 
+
   const [
     savingStudent,
     setSavingStudent,
   ] = useState(
     false
   );
+
 
 
   // ========================================================
@@ -291,12 +289,14 @@ export function useStudents() {
   );
 
 
+
   const [
     groupMembers,
     setGroupMembers,
   ] = useState<StudentGroupMember[]>(
     []
   );
+
 
 
   const [
@@ -307,12 +307,14 @@ export function useStudents() {
   );
 
 
+
   const [
     loadingGroups,
     setLoadingGroups,
   ] = useState(
     false
   );
+
 
 
   const [
@@ -323,12 +325,14 @@ export function useStudents() {
   );
 
 
+
   const [
     savingGroupMembers,
     setSavingGroupMembers,
   ] = useState(
     false
   );
+
 
 
   // ========================================================
@@ -343,12 +347,14 @@ export function useStudents() {
   );
 
 
+
   const [
     loadingGroupManagerStudents,
     setLoadingGroupManagerStudents,
   ] = useState(
     false
   );
+
 
 
   // ========================================================
@@ -368,6 +374,7 @@ export function useStudents() {
         );
 
 
+
         setStudentModalOpen(
           true
         );
@@ -375,6 +382,7 @@ export function useStudents() {
       },
       []
     );
+
 
 
   // ========================================================
@@ -390,6 +398,7 @@ export function useStudents() {
         );
 
 
+
         setSelectedStudent(
           null
         );
@@ -397,6 +406,7 @@ export function useStudents() {
       },
       []
     );
+
 
 
   // ========================================================
@@ -418,10 +428,12 @@ export function useStudents() {
             );
 
 
+
           const classrooms =
             getResponseList<Classroom>(
               response.data
             );
+
 
 
           dispatch({
@@ -442,6 +454,7 @@ export function useStudents() {
           );
 
 
+
           toast.error(
             "Impossible de charger les classes"
           );
@@ -453,6 +466,7 @@ export function useStudents() {
     );
 
 
+
   // ========================================================
   // LOAD STUDENTS
   // ========================================================
@@ -460,6 +474,84 @@ export function useStudents() {
   const loadStudents =
     useCallback(
       async () => {
+
+        // ==================================================
+        // CLASSROOM REQUIRED
+        // ==================================================
+
+        if (
+          !isValidId(
+            state.filters.classroom
+          )
+        ) {
+
+          dispatch({
+            type:
+              "SET_STUDENTS",
+
+            payload:
+              [],
+          });
+
+
+
+          dispatch({
+            type:
+              "SET_STATS",
+
+            payload: {
+              total: 0,
+
+              girls: 0,
+
+              boys: 0,
+
+              classrooms:
+                state.classrooms.length,
+            },
+          });
+
+
+
+          dispatch({
+            type:
+              "SET_PAGINATION",
+
+            payload: {
+              page: 1,
+
+              total: 0,
+            },
+          });
+
+
+
+          dispatch({
+            type:
+              "CLEAR_SELECTION",
+          });
+
+
+
+          dispatch({
+            type:
+              "SET_LOADING",
+
+            payload:
+              false,
+          });
+
+
+
+          return;
+
+        }
+
+
+
+        // ==================================================
+        // LOADING
+        // ==================================================
 
         dispatch({
           type:
@@ -470,7 +562,12 @@ export function useStudents() {
         });
 
 
+
         try {
+
+          // ==================================================
+          // API REQUEST
+          // ==================================================
 
           const response =
             await api.get<
@@ -480,14 +577,15 @@ export function useStudents() {
               {
                 params: {
 
+                  classroom_id:
+                    state.filters.classroom,
+
+
+
                   search:
                     state.filters.search ||
                     undefined,
 
-
-                  classroom_id:
-                    state.filters.classroom ??
-                    undefined,
 
 
                   gender:
@@ -495,16 +593,22 @@ export function useStudents() {
                     undefined,
 
 
+
                   page:
                     state.pagination.page,
 
 
+
+                  /**
+                   * Maximum 20 élèves par page.
+                   */
                   page_size:
-                    state.pagination.pageSize,
+                    20,
 
                 },
               }
             );
+
 
 
           // ==================================================
@@ -517,6 +621,7 @@ export function useStudents() {
             )
               ? response.data.data
               : [];
+
 
 
           // ==================================================
@@ -534,6 +639,7 @@ export function useStudents() {
             );
 
 
+
           // ==================================================
           // SET STUDENTS
           // ==================================================
@@ -545,6 +651,7 @@ export function useStudents() {
             payload:
               students,
           });
+
 
 
           // ==================================================
@@ -562,9 +669,11 @@ export function useStudents() {
                 0,
 
 
+
               girls:
                 response.data.queryset_F ??
                 0,
+
 
 
               boys:
@@ -572,11 +681,13 @@ export function useStudents() {
                 0,
 
 
+
               classrooms:
                 state.classrooms.length,
 
             },
           });
+
 
 
           // ==================================================
@@ -593,12 +704,16 @@ export function useStudents() {
                 response.data.total_E ??
                 0,
 
+              pageSize:
+                20,
+
             },
           });
 
 
+
           // ==================================================
-          // CLEAR INVALID SELECTIONS
+          // CURRENT PAGE IDS
           // ==================================================
 
           const studentIds =
@@ -614,8 +729,14 @@ export function useStudents() {
               );
 
 
+
+          // ==================================================
+          // EMPTY PAGE
+          // ==================================================
+
           if (
-            studentIds.length === 0
+            studentIds.length === 0 &&
+            state.pagination.page === 1
           ) {
 
             dispatch({
@@ -635,9 +756,20 @@ export function useStudents() {
           );
 
 
+
           toast.error(
             "Impossible de charger les élèves"
           );
+
+
+
+          dispatch({
+            type:
+              "SET_STUDENTS",
+
+            payload:
+              [],
+          });
 
         } finally {
 
@@ -653,14 +785,14 @@ export function useStudents() {
 
       },
       [
-        state.filters.search,
         state.filters.classroom,
+        state.filters.search,
         state.filters.gender,
         state.pagination.page,
-        state.pagination.pageSize,
         state.classrooms.length,
       ]
     );
+
 
 
   // ========================================================
@@ -691,6 +823,7 @@ export function useStudents() {
   );
 
 
+
   // ========================================================
   // UPDATE STUDENT
   // ========================================================
@@ -709,6 +842,7 @@ export function useStudents() {
         }
 
 
+
         if (
           !isValidId(
             selectedStudent.id
@@ -724,11 +858,13 @@ export function useStudents() {
         }
 
 
+
         try {
 
           setSavingStudent(
             true
           );
+
 
 
           await api.patch(
@@ -737,12 +873,15 @@ export function useStudents() {
           );
 
 
+
           toast.success(
             "Élève modifié avec succès"
           );
 
 
+
           await loadStudents();
+
 
 
           closeStudentModal();
@@ -755,6 +894,7 @@ export function useStudents() {
             "Erreur modification élève:",
             error
           );
+
 
 
           toast.error(
@@ -778,6 +918,7 @@ export function useStudents() {
     );
 
 
+
   // ========================================================
   // LOAD GROUPS
   // ========================================================
@@ -797,6 +938,7 @@ export function useStudents() {
           );
 
 
+
           const params:
             Record<
               string,
@@ -807,6 +949,7 @@ export function useStudents() {
                 true,
 
             };
+
 
 
           if (
@@ -821,6 +964,7 @@ export function useStudents() {
           }
 
 
+
           const response =
             await api.get<
               | ClassroomGroup[]
@@ -833,15 +977,18 @@ export function useStudents() {
             );
 
 
+
           const loadedGroups =
             getResponseList<ClassroomGroup>(
               response.data
             );
 
 
+
           setGroups(
             loadedGroups
           );
+
 
 
           return loadedGroups;
@@ -856,14 +1003,17 @@ export function useStudents() {
           );
 
 
+
           toast.error(
             "Impossible de charger les groupes"
           );
 
 
+
           setGroups(
             []
           );
+
 
 
           return [];
@@ -879,6 +1029,7 @@ export function useStudents() {
       },
       []
     );
+
 
 
   // ========================================================
@@ -898,6 +1049,7 @@ export function useStudents() {
         );
 
 
+
         setGroupMembers(
           []
         );
@@ -905,6 +1057,7 @@ export function useStudents() {
       },
       []
     );
+
 
 
   // ========================================================
@@ -934,11 +1087,13 @@ export function useStudents() {
         }
 
 
+
         try {
 
           setLoadingGroupManagerStudents(
             true
           );
+
 
 
           const response =
@@ -954,6 +1109,7 @@ export function useStudents() {
                     classroomId,
 
 
+
                   page_size:
                     1000,
 
@@ -962,10 +1118,12 @@ export function useStudents() {
             );
 
 
+
           const rawStudents =
             getResponseList<Student>(
               response.data
             );
+
 
 
           const students =
@@ -979,9 +1137,11 @@ export function useStudents() {
             );
 
 
+
           setGroupManagerStudents(
             students
           );
+
 
 
           return students;
@@ -996,14 +1156,17 @@ export function useStudents() {
           );
 
 
+
           toast.error(
             "Impossible de charger les élèves de la classe"
           );
 
 
+
           setGroupManagerStudents(
             []
           );
+
 
 
           return [];
@@ -1019,6 +1182,7 @@ export function useStudents() {
       },
       []
     );
+
 
 
   // ========================================================
@@ -1050,11 +1214,13 @@ export function useStudents() {
         }
 
 
+
         try {
 
           setLoadingGroupMembers(
             true
           );
+
 
 
           const response =
@@ -1065,8 +1231,10 @@ export function useStudents() {
             );
 
 
+
           const result =
             response.data;
+
 
 
           const members =
@@ -1077,9 +1245,11 @@ export function useStudents() {
               : [];
 
 
+
           setGroupMembers(
             members
           );
+
 
 
           return result;
@@ -1094,14 +1264,17 @@ export function useStudents() {
           );
 
 
+
           toast.error(
             "Impossible de charger les membres du groupe"
           );
 
 
+
           setGroupMembers(
             []
           );
+
 
 
           return null;
@@ -1119,6 +1292,7 @@ export function useStudents() {
     );
 
 
+
   // ========================================================
   // CLEAR GROUP MEMBERS
   // ========================================================
@@ -1132,6 +1306,7 @@ export function useStudents() {
         );
 
 
+
         setSelectedGroup(
           null
         );
@@ -1139,6 +1314,7 @@ export function useStudents() {
       },
       []
     );
+
 
 
   // ========================================================
@@ -1163,10 +1339,12 @@ export function useStudents() {
           );
 
 
+
         const normalizedGroupIds =
           normalizeIds(
             groupIds
           );
+
 
 
         if (
@@ -1183,12 +1361,12 @@ export function useStudents() {
         }
 
 
+
         const payload:
           BulkGroupMembersPayload = {
 
             student_ids:
               normalizedStudentIds,
-
 
             group_ids:
               normalizedGroupIds,
@@ -1196,11 +1374,13 @@ export function useStudents() {
           };
 
 
+
         try {
 
           setSavingGroupMembers(
             true
           );
+
 
 
           const response =
@@ -1212,14 +1392,17 @@ export function useStudents() {
             );
 
 
+
           const result =
             response.data;
+
 
 
           toast.success(
             result.detail ||
             "Élèves ajoutés aux groupes avec succès"
           );
+
 
 
           if (
@@ -1236,6 +1419,7 @@ export function useStudents() {
           }
 
 
+
           return result;
 
         } catch (
@@ -1248,9 +1432,11 @@ export function useStudents() {
           );
 
 
+
           toast.error(
             "Impossible d'ajouter les élèves aux groupes"
           );
+
 
 
           return null;
@@ -1269,6 +1455,7 @@ export function useStudents() {
         loadGroupMembers,
       ]
     );
+
 
 
   // ========================================================
@@ -1293,10 +1480,12 @@ export function useStudents() {
           );
 
 
+
         const normalizedGroupIds =
           normalizeIds(
             groupIds
           );
+
 
 
         if (
@@ -1313,12 +1502,12 @@ export function useStudents() {
         }
 
 
+
         const payload:
           BulkGroupMembersPayload = {
 
             student_ids:
               normalizedStudentIds,
-
 
             group_ids:
               normalizedGroupIds,
@@ -1326,11 +1515,13 @@ export function useStudents() {
           };
 
 
+
         try {
 
           setSavingGroupMembers(
             true
           );
+
 
 
           const response =
@@ -1342,14 +1533,17 @@ export function useStudents() {
             );
 
 
+
           const result =
             response.data;
+
 
 
           toast.success(
             result.detail ||
             "Élèves retirés des groupes avec succès"
           );
+
 
 
           if (
@@ -1366,6 +1560,7 @@ export function useStudents() {
           }
 
 
+
           return result;
 
         } catch (
@@ -1378,9 +1573,11 @@ export function useStudents() {
           );
 
 
+
           toast.error(
             "Impossible de retirer les élèves des groupes"
           );
+
 
 
           return null;
@@ -1399,6 +1596,7 @@ export function useStudents() {
         loadGroupMembers,
       ]
     );
+
 
 
   // ========================================================
@@ -1425,6 +1623,7 @@ export function useStudents() {
     );
 
 
+
   // ========================================================
   // REMOVE SELECTED STUDENTS FROM GROUPS
   // ========================================================
@@ -1449,6 +1648,7 @@ export function useStudents() {
     );
 
 
+
   // ========================================================
   // FILTERS
   // ========================================================
@@ -1469,21 +1669,42 @@ export function useStudents() {
         });
 
 
+
+        /**
+         * Retour automatique à la première page
+         * après modification d'un filtre.
+         */
         dispatch({
           type:
             "SET_PAGINATION",
 
           payload: {
-
             page:
               1,
-
           },
         });
+
+
+
+        /**
+         * Lors d'un changement de classe,
+         * la sélection précédente est supprimée.
+         */
+        if (
+          "classroom" in values
+        ) {
+
+          dispatch({
+            type:
+              "CLEAR_SELECTION",
+          });
+
+        }
 
       },
       []
     );
+
 
 
   const resetFilters =
@@ -1495,22 +1716,10 @@ export function useStudents() {
             "RESET_FILTERS",
         });
 
-
-        dispatch({
-          type:
-            "SET_PAGINATION",
-
-          payload: {
-
-            page:
-              1,
-
-          },
-        });
-
       },
       []
     );
+
 
 
   // ========================================================
@@ -1533,6 +1742,7 @@ export function useStudents() {
         }
 
 
+
         dispatch({
           type:
             "TOGGLE_STUDENT_SELECTION",
@@ -1544,6 +1754,7 @@ export function useStudents() {
       },
       []
     );
+
 
 
   const clearSelection =
@@ -1558,6 +1769,7 @@ export function useStudents() {
       },
       []
     );
+
 
 
   const selectAllStudents =
@@ -1588,6 +1800,7 @@ export function useStudents() {
     );
 
 
+
   // ========================================================
   // PAGINATION
   // ========================================================
@@ -1609,20 +1822,42 @@ export function useStudents() {
         }
 
 
+
+        const totalPages =
+          Math.max(
+            1,
+            Math.ceil(
+              state.pagination.total /
+              state.pagination.pageSize
+            )
+          );
+
+
+
+        if (
+          page > totalPages
+        ) {
+          return;
+        }
+
+
+
         dispatch({
           type:
             "SET_PAGINATION",
 
           payload: {
-
             page,
-
           },
         });
 
       },
-      []
+      [
+        state.pagination.total,
+        state.pagination.pageSize,
+      ]
     );
+
 
 
   // ========================================================
@@ -1647,17 +1882,16 @@ export function useStudents() {
                 state.filters.search ||
                 undefined,
 
-
               classroom_id:
                 state.filters.classroom ??
                 undefined,
-
 
               gender:
                 state.filters.gender ||
                 undefined,
 
             };
+
 
 
           if (
@@ -1672,19 +1906,18 @@ export function useStudents() {
           }
 
 
+
           const response =
             await api.get(
               "/students/export/excel/",
               {
-
                 params,
-
 
                 responseType:
                   "blob",
-
               }
             );
+
 
 
           const blob =
@@ -1699,10 +1932,12 @@ export function useStudents() {
             );
 
 
+
           const url =
             window.URL.createObjectURL(
               blob
             );
+
 
 
           const link =
@@ -1711,8 +1946,10 @@ export function useStudents() {
             );
 
 
+
           link.href =
             url;
+
 
 
           link.download =
@@ -1724,15 +1961,19 @@ export function useStudents() {
               )}.xlsx`;
 
 
+
           document.body.appendChild(
             link
           );
 
 
+
           link.click();
 
 
+
           link.remove();
+
 
 
           window.URL.revokeObjectURL(
@@ -1749,6 +1990,7 @@ export function useStudents() {
           );
 
 
+
           toast.error(
             "Impossible d'exporter les élèves"
           );
@@ -1763,6 +2005,7 @@ export function useStudents() {
         state.selectedStudents,
       ]
     );
+
 
 
   // ========================================================
@@ -1787,17 +2030,16 @@ export function useStudents() {
                 state.filters.search ||
                 undefined,
 
-
               classroom_id:
                 state.filters.classroom ??
                 undefined,
-
 
               gender:
                 state.filters.gender ||
                 undefined,
 
             };
+
 
 
           if (
@@ -1812,19 +2054,18 @@ export function useStudents() {
           }
 
 
+
           const response =
             await api.get(
               "/students/export/pdf/",
               {
-
                 params,
-
 
                 responseType:
                   "blob",
-
               }
             );
+
 
 
           const blob =
@@ -1839,10 +2080,12 @@ export function useStudents() {
             );
 
 
+
           const url =
             window.URL.createObjectURL(
               blob
             );
+
 
 
           const link =
@@ -1851,8 +2094,10 @@ export function useStudents() {
             );
 
 
+
           link.href =
             url;
+
 
 
           link.download =
@@ -1864,15 +2109,19 @@ export function useStudents() {
               )}.pdf`;
 
 
+
           document.body.appendChild(
             link
           );
 
 
+
           link.click();
 
 
+
           link.remove();
+
 
 
           window.URL.revokeObjectURL(
@@ -1889,6 +2138,7 @@ export function useStudents() {
           );
 
 
+
           toast.error(
             "Impossible d'exporter les élèves"
           );
@@ -1903,6 +2153,7 @@ export function useStudents() {
         state.selectedStudents,
       ]
     );
+
 
 
   // ========================================================
@@ -1924,6 +2175,7 @@ export function useStudents() {
   );
 
 
+
   /**
    * Chargement initial des groupes.
    */
@@ -1939,11 +2191,14 @@ export function useStudents() {
   );
 
 
+
   /**
    * Chargement des élèves.
    *
-   * Le rechargement se fait automatiquement
-   * lorsque les filtres ou la pagination changent.
+   * IMPORTANT :
+   *
+   * Aucun élève n'est chargé tant qu'aucune
+   * classe n'est sélectionnée.
    */
   useEffect(
     () => {
@@ -1957,6 +2212,7 @@ export function useStudents() {
   );
 
 
+
   // ========================================================
   // RETURN
   // ========================================================
@@ -1964,6 +2220,7 @@ export function useStudents() {
   return {
 
     ...state,
+
 
 
     // ======================================================
@@ -1975,15 +2232,14 @@ export function useStudents() {
       open:
         studentModalOpen,
 
-
       student:
         selectedStudent,
-
 
       loading:
         savingStudent,
 
     },
+
 
 
     // ======================================================
@@ -2003,6 +2259,7 @@ export function useStudents() {
     savingGroupMembers,
 
 
+
     // ======================================================
     // GROUP MANAGER STUDENTS
     // ======================================================
@@ -2010,6 +2267,7 @@ export function useStudents() {
     groupManagerStudents,
 
     loadingGroupManagerStudents,
+
 
 
     // ======================================================
@@ -2025,9 +2283,11 @@ export function useStudents() {
       loadClassrooms,
 
 
+
       // Group manager
 
       loadGroupManagerStudents,
+
 
 
       // Groups
@@ -2049,11 +2309,13 @@ export function useStudents() {
       removeSelectedStudentsFromGroups,
 
 
+
       // Filters
 
       setFilters,
 
       resetFilters,
+
 
 
       // Selection
@@ -2065,9 +2327,11 @@ export function useStudents() {
       selectAllStudents,
 
 
+
       // Pagination
 
       changePage,
+
 
 
       // Export
@@ -2075,6 +2339,7 @@ export function useStudents() {
       exportExcel,
 
       exportPDF,
+
 
 
       // Student modal

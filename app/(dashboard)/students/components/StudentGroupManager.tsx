@@ -198,14 +198,12 @@ export default function StudentGroupManager({
     UUID | null
   >(null);
 
-
   const [
     groups,
     setGroups,
   ] = useState<
     ClassroomGroup[]
   >([]);
-
 
   const [
     selectedGroup,
@@ -214,14 +212,12 @@ export default function StudentGroupManager({
     ClassroomGroup | null
   >(null);
 
-
   const [
     members,
     setMembers,
   ] = useState<
     StudentGroupMember[]
   >([]);
-
 
   const [
     students,
@@ -230,36 +226,30 @@ export default function StudentGroupManager({
     Student[]
   >([]);
 
-
   const [
     loadingGroups,
     setLoadingGroups,
   ] = useState(false);
-
 
   const [
     loadingMembers,
     setLoadingMembers,
   ] = useState(false);
 
-
   const [
     loadingStudents,
     setLoadingStudents,
   ] = useState(false);
-
 
   const [
     updating,
     setUpdating,
   ] = useState(false);
 
-
   const [
     search,
     setSearch,
   ] = useState("");
-
 
   const [
     selectedAvailableStudents,
@@ -268,14 +258,12 @@ export default function StudentGroupManager({
     UUID[]
   >([]);
 
-
   const [
     selectedMembers,
     setSelectedMembers,
   ] = useState<
     UUID[]
   >([]);
-
 
   // ========================================================
   // SAFE VALUES
@@ -287,7 +275,6 @@ export default function StudentGroupManager({
       ? selectedClassroom
       : null;
 
-
   const safeSelectedGroupId =
     selectedGroup?.id &&
     String(
@@ -297,7 +284,6 @@ export default function StudentGroupManager({
           selectedGroup.id
         )
       : null;
-
 
   // ========================================================
   // EXTERNAL SELECTION
@@ -313,7 +299,6 @@ export default function StudentGroupManager({
         selectedStudents,
       ]
     );
-
 
   // ========================================================
   // LOAD GROUPS
@@ -333,7 +318,6 @@ export default function StudentGroupManager({
             true
           );
 
-
           const response =
             await api.get<
               | ClassroomGroup[]
@@ -351,7 +335,6 @@ export default function StudentGroupManager({
               }
             );
 
-
           const data =
             getResponseList<
               ClassroomGroup
@@ -359,11 +342,9 @@ export default function StudentGroupManager({
               response.data
             );
 
-
           setGroups(
             data
           );
-
 
           return data;
 
@@ -376,16 +357,13 @@ export default function StudentGroupManager({
             error
           );
 
-
           toast.error(
             "Impossible de charger les groupes."
           );
 
-
           setGroups(
             []
           );
-
 
           return [];
 
@@ -399,7 +377,6 @@ export default function StudentGroupManager({
       },
       []
     );
-
 
   // ========================================================
   // LOAD STUDENTS
@@ -419,7 +396,6 @@ export default function StudentGroupManager({
             true
           );
 
-
           const response =
             await api.get<
               | Student[]
@@ -437,7 +413,6 @@ export default function StudentGroupManager({
               }
             );
 
-
           const data =
             getResponseList<
               Student
@@ -445,11 +420,9 @@ export default function StudentGroupManager({
               response.data
             );
 
-
           setStudents(
             data
           );
-
 
           return data;
 
@@ -462,16 +435,13 @@ export default function StudentGroupManager({
             error
           );
 
-
           toast.error(
             "Impossible de charger les élèves."
           );
 
-
           setStudents(
             []
           );
-
 
           return [];
 
@@ -485,7 +455,6 @@ export default function StudentGroupManager({
       },
       []
     );
-
 
   // ========================================================
   // LOAD MEMBERS
@@ -505,14 +474,12 @@ export default function StudentGroupManager({
             true
           );
 
-
           const response =
             await api.get<
               ClassroomGroupMembersResponse
             >(
               `/students/classroom-groups/${groupId}/members/`
             );
-
 
           const data =
             Array.isArray(
@@ -521,16 +488,13 @@ export default function StudentGroupManager({
               ? response.data.data
               : [];
 
-
           setMembers(
             data
           );
 
-
           setSelectedMembers(
             []
           );
-
 
           return data;
 
@@ -543,21 +507,17 @@ export default function StudentGroupManager({
             error
           );
 
-
           toast.error(
             "Impossible de charger les membres du groupe."
           );
-
 
           setMembers(
             []
           );
 
-
           setSelectedMembers(
             []
           );
-
 
           return [];
 
@@ -571,7 +531,6 @@ export default function StudentGroupManager({
       },
       []
     );
-
 
   // ========================================================
   // LOAD DATA WHEN CLASSROOM CHANGES
@@ -612,7 +571,6 @@ export default function StudentGroupManager({
         return;
       }
 
-
       setSelectedGroup(
         null
       );
@@ -625,11 +583,9 @@ export default function StudentGroupManager({
         []
       );
 
-
       void loadGroups(
         safeSelectedClassroom
       );
-
 
       void loadStudents(
         safeSelectedClassroom
@@ -642,7 +598,6 @@ export default function StudentGroupManager({
       loadStudents,
     ]
   );
-
 
   // ========================================================
   // LOAD MEMBERS WHEN GROUP CHANGES
@@ -667,7 +622,6 @@ export default function StudentGroupManager({
         return;
       }
 
-
       void loadMembers(
         safeSelectedGroupId
       );
@@ -678,7 +632,6 @@ export default function StudentGroupManager({
       loadMembers,
     ]
   );
-
 
   // ========================================================
   // MEMBER IDS
@@ -710,7 +663,6 @@ export default function StudentGroupManager({
       ]
     );
 
-
   // ========================================================
   // AVAILABLE STUDENTS
   // ========================================================
@@ -734,7 +686,6 @@ export default function StudentGroupManager({
       ]
     );
 
-
   // ========================================================
   // FILTER STUDENTS
   // ========================================================
@@ -748,13 +699,11 @@ export default function StudentGroupManager({
             .trim()
             .toLowerCase();
 
-
         if (
           !searchValue
         ) {
           return availableStudents;
         }
-
 
         return availableStudents.filter(
           (
@@ -766,24 +715,20 @@ export default function StudentGroupManager({
                 ?.toLowerCase() ??
               "";
 
-
             const lastName =
               student.last_name
                 ?.toLowerCase() ??
               "";
-
 
             const studentNumber =
               student.student_number
                 ?.toLowerCase() ??
               "";
 
-
             const displayName =
               student.display_name
                 ?.toLowerCase() ??
               "";
-
 
             return (
               firstName.includes(
@@ -813,7 +758,6 @@ export default function StudentGroupManager({
       ]
     );
 
-
   // ========================================================
   // AVAILABLE STUDENT IDS
   // ========================================================
@@ -822,20 +766,27 @@ export default function StudentGroupManager({
     useMemo(
       () =>
         new Set<UUID>(
-          availableStudents.map(
-            (
-              student
-            ) =>
-              String(
-                student.id
-              )
-          )
+          availableStudents
+            .map(
+              (
+                student
+              ) =>
+                String(
+                  student.id
+                )
+            )
+            .filter(
+              (
+                id
+              ) =>
+                id.trim().length >
+                0
+            )
         ),
       [
         availableStudents,
       ]
     );
-
 
   // ========================================================
   // SYNC EXTERNAL SELECTION
@@ -853,7 +804,6 @@ export default function StudentGroupManager({
               id
             )
         );
-
 
       setSelectedAvailableStudents(
         (
@@ -881,57 +831,71 @@ export default function StudentGroupManager({
     ]
   );
 
-
   // ========================================================
-  // CLEAN AVAILABLE SELECTION
+  // AVAILABLE SELECTION STATE
   // ========================================================
 
-  useEffect(
-    () => {
+  const areAllAvailableStudentsSelected =
+    useMemo(
+      () => {
 
-      setSelectedAvailableStudents(
-        (
-          current
-        ) => {
-
-          const next =
-            current.filter(
-              (
-                id
-              ) =>
-                availableStudentIds.has(
-                  id
-                )
-            );
-
-
-          if (
-            areArraysEqual(
-              current,
-              next
-            )
-          ) {
-            return current;
-          }
-
-
-          onSelectionChange?.(
-            next
-          );
-
-
-          return next;
-
+        if (
+          filteredStudents.length ===
+          0
+        ) {
+          return false;
         }
-      );
 
-    },
-    [
-      availableStudentIds,
-      onSelectionChange,
-    ]
-  );
+        return filteredStudents.every(
+          (
+            student
+          ) =>
+            selectedAvailableStudents.includes(
+              String(
+                student.id
+              )
+            )
+        );
 
+      },
+      [
+        filteredStudents,
+        selectedAvailableStudents,
+      ]
+    );
+
+  // ========================================================
+  // MEMBER SELECTION STATE
+  // ========================================================
+
+  const areAllMembersSelected =
+    useMemo(
+      () => {
+
+        if (
+          members.length ===
+          0
+        ) {
+          return false;
+        }
+
+        return members.every(
+          (
+            student
+          ) =>
+            selectedMembers.includes(
+              String(
+                student.id
+              )
+            )
+        );
+
+      },
+      [
+        members,
+        selectedMembers,
+      ]
+    );
 
   // ========================================================
   // TOGGLE AVAILABLE STUDENT
@@ -950,7 +914,6 @@ export default function StudentGroupManager({
         ) {
           return;
         }
-
 
         setSelectedAvailableStudents(
           (
@@ -973,11 +936,9 @@ export default function StudentGroupManager({
                     studentId,
                   ];
 
-
             onSelectionChange?.(
               next
             );
-
 
             return next;
 
@@ -989,7 +950,6 @@ export default function StudentGroupManager({
         onSelectionChange,
       ]
     );
-
 
   // ========================================================
   // TOGGLE MEMBER
@@ -1008,7 +968,6 @@ export default function StudentGroupManager({
         ) {
           return;
         }
-
 
         setSelectedMembers(
           (
@@ -1034,7 +993,6 @@ export default function StudentGroupManager({
       []
     );
 
-
   // ========================================================
   // TOGGLE ALL AVAILABLE STUDENTS
   // ========================================================
@@ -1055,22 +1013,15 @@ export default function StudentGroupManager({
             )
           );
 
-
-        const allSelected =
-          ids.length >
-            0 &&
-          ids.every(
-            (
-              id
-            ) =>
-              selectedAvailableStudents.includes(
-                id
-              )
-          );
-
+        if (
+          ids.length ===
+          0
+        ) {
+          return;
+        }
 
         const next =
-          allSelected
+          areAllAvailableStudentsSelected
             ? selectedAvailableStudents.filter(
                 (
                   id
@@ -1086,11 +1037,9 @@ export default function StudentGroupManager({
                 ]
               );
 
-
         setSelectedAvailableStudents(
           next
         );
-
 
         onSelectionChange?.(
           next
@@ -1100,10 +1049,10 @@ export default function StudentGroupManager({
       [
         filteredStudents,
         selectedAvailableStudents,
+        areAllAvailableStudentsSelected,
         onSelectionChange,
       ]
     );
-
 
   // ========================================================
   // TOGGLE ALL MEMBERS
@@ -1125,22 +1074,15 @@ export default function StudentGroupManager({
             )
           );
 
-
-        const allSelected =
-          ids.length >
-            0 &&
-          ids.every(
-            (
-              id
-            ) =>
-              selectedMembers.includes(
-                id
-              )
-          );
-
+        if (
+          ids.length ===
+          0
+        ) {
+          return;
+        }
 
         setSelectedMembers(
-          allSelected
+          areAllMembersSelected
             ? []
             : ids
         );
@@ -1148,10 +1090,9 @@ export default function StudentGroupManager({
       },
       [
         members,
-        selectedMembers,
+        areAllMembersSelected,
       ]
     );
-
 
   // ========================================================
   // ADD STUDENTS
@@ -1174,12 +1115,10 @@ export default function StudentGroupManager({
 
         }
 
-
         const studentIds =
           normalizeIds(
             selectedAvailableStudents
           );
-
 
         if (
           studentIds.length ===
@@ -1194,13 +1133,11 @@ export default function StudentGroupManager({
 
         }
 
-
         try {
 
           setUpdating(
             true
           );
-
 
           await api.post(
             "/students/classroom-groups/members/bulk-add/",
@@ -1214,21 +1151,17 @@ export default function StudentGroupManager({
             }
           );
 
-
           toast.success(
             "Élèves ajoutés au groupe avec succès."
           );
-
 
           setSelectedAvailableStudents(
             []
           );
 
-
           onSelectionChange?.(
             []
           );
-
 
           await loadMembers(
             safeSelectedGroupId
@@ -1242,7 +1175,6 @@ export default function StudentGroupManager({
             "Erreur ajout élèves:",
             error
           );
-
 
           toast.error(
             "Impossible d'ajouter les élèves."
@@ -1265,7 +1197,6 @@ export default function StudentGroupManager({
       ]
     );
 
-
   // ========================================================
   // REMOVE STUDENTS
   // ========================================================
@@ -1287,12 +1218,10 @@ export default function StudentGroupManager({
 
         }
 
-
         const studentIds =
           normalizeIds(
             selectedMembers
           );
-
 
         if (
           studentIds.length ===
@@ -1307,13 +1236,11 @@ export default function StudentGroupManager({
 
         }
 
-
         try {
 
           setUpdating(
             true
           );
-
 
           await api.post(
             "/students/classroom-groups/members/bulk-remove/",
@@ -1327,16 +1254,13 @@ export default function StudentGroupManager({
             }
           );
 
-
           toast.success(
             "Élèves retirés du groupe avec succès."
           );
 
-
           setSelectedMembers(
             []
           );
-
 
           await loadMembers(
             safeSelectedGroupId
@@ -1350,7 +1274,6 @@ export default function StudentGroupManager({
             "Erreur retrait élèves:",
             error
           );
-
 
           toast.error(
             "Impossible de retirer les élèves."
@@ -1371,7 +1294,6 @@ export default function StudentGroupManager({
         loadMembers,
       ]
     );
-
 
   // ========================================================
   // CLASSROOM CHANGE
@@ -1428,7 +1350,6 @@ export default function StudentGroupManager({
 
         }
 
-
         const classroom =
           classrooms.find(
             (
@@ -1439,7 +1360,6 @@ export default function StudentGroupManager({
               ) ===
               value
           );
-
 
         if (
           !classroom
@@ -1454,17 +1374,14 @@ export default function StudentGroupManager({
 
         }
 
-
         const classroomId =
           String(
             classroom.id
           );
 
-
         setSelectedClassroom(
           classroomId
         );
-
 
         setSelectedGroup(
           null
@@ -1505,7 +1422,6 @@ export default function StudentGroupManager({
       ]
     );
 
-
   // ========================================================
   // GROUP CHANGE
   // ========================================================
@@ -1537,7 +1453,6 @@ export default function StudentGroupManager({
 
         }
 
-
         const group =
           groups.find(
             (
@@ -1549,7 +1464,6 @@ export default function StudentGroupManager({
               value
           ) ??
           null;
-
 
         if (
           !group
@@ -1564,11 +1478,9 @@ export default function StudentGroupManager({
 
         }
 
-
         setSelectedGroup(
           group
         );
-
 
         setMembers(
           []
@@ -1583,7 +1495,6 @@ export default function StudentGroupManager({
         groups,
       ]
     );
-
 
   // ========================================================
   // RENDER
@@ -1633,13 +1544,10 @@ export default function StudentGroupManager({
                 text-violet-700
               "
             >
-
               <Users
                 size={24}
               />
-
             </div>
-
 
             <div>
 
@@ -1652,7 +1560,6 @@ export default function StudentGroupManager({
               >
                 Gestion des groupes
               </h2>
-
 
               <p
                 className="
@@ -1668,7 +1575,6 @@ export default function StudentGroupManager({
             </div>
 
           </div>
-
 
           {selectedGroup && (
 
@@ -1693,7 +1599,6 @@ export default function StudentGroupManager({
         </div>
 
       </div>
-
 
       {/* ================================================== */}
       {/* SELECTORS */}
@@ -1728,7 +1633,6 @@ export default function StudentGroupManager({
           >
             Classe
           </label>
-
 
           <div className="relative">
 
@@ -1771,7 +1675,6 @@ export default function StudentGroupManager({
                 Sélectionner une classe
               </option>
 
-
               {classrooms.map(
                 (
                   classroom
@@ -1797,7 +1700,6 @@ export default function StudentGroupManager({
 
             </select>
 
-
             <ChevronDown
               size={18}
               className="
@@ -1814,7 +1716,6 @@ export default function StudentGroupManager({
 
         </div>
 
-
         {/* GROUP */}
 
         <div>
@@ -1830,7 +1731,6 @@ export default function StudentGroupManager({
           >
             Groupe
           </label>
-
 
           <div className="relative">
 
@@ -1882,7 +1782,6 @@ export default function StudentGroupManager({
                   : "Sélectionner un groupe"}
               </option>
 
-
               {groups.map(
                 (
                   group
@@ -1913,7 +1812,6 @@ export default function StudentGroupManager({
 
             </select>
 
-
             <ChevronDown
               size={18}
               className="
@@ -1931,7 +1829,6 @@ export default function StudentGroupManager({
         </div>
 
       </div>
-
 
       {/* ================================================== */}
       {/* EMPTY CLASSROOM */}
@@ -1966,16 +1863,13 @@ export default function StudentGroupManager({
               shadow-sm
             "
           >
-
             <Users
               size={24}
               className="
                 text-gray-400
               "
             />
-
           </div>
-
 
           <h3
             className="
@@ -1985,7 +1879,6 @@ export default function StudentGroupManager({
           >
             Sélectionnez une classe
           </h3>
-
 
           <p
             className="
@@ -2001,7 +1894,6 @@ export default function StudentGroupManager({
         </div>
 
       )}
-
 
       {/* ================================================== */}
       {/* LOADING CLASSROOM DATA */}
@@ -2042,7 +1934,6 @@ export default function StudentGroupManager({
 
       )}
 
-
       {/* ================================================== */}
       {/* EMPTY GROUP */}
       {/* ================================================== */}
@@ -2075,7 +1966,6 @@ export default function StudentGroupManager({
               "
             />
 
-
             <h3
               className="
                 font-semibold
@@ -2084,7 +1974,6 @@ export default function StudentGroupManager({
             >
               Sélectionnez un groupe
             </h3>
-
 
             <p
               className="
@@ -2100,7 +1989,6 @@ export default function StudentGroupManager({
           </div>
 
         )}
-
 
       {/* ================================================== */}
       {/* GROUP MANAGEMENT */}
@@ -2162,7 +2050,6 @@ export default function StudentGroupManager({
                     Élèves disponibles
                   </h3>
 
-
                   <p
                     className="
                       mt-1
@@ -2187,11 +2074,14 @@ export default function StudentGroupManager({
 
                 </div>
 
-
                 <button
                   type="button"
                   onClick={
                     toggleAllStudents
+                  }
+                  disabled={
+                    filteredStudents.length ===
+                    0
                   }
                   className="
                     rounded-lg
@@ -2202,13 +2092,16 @@ export default function StudentGroupManager({
                     text-violet-700
                     transition
                     hover:bg-violet-50
+                    disabled:cursor-not-allowed
+                    disabled:opacity-40
                   "
                 >
-                  Tout sélectionner
+                  {areAllAvailableStudentsSelected
+                    ? "Tout désélectionner"
+                    : "Tout sélectionner"}
                 </button>
 
               </div>
-
 
               <div
                 className="
@@ -2228,7 +2121,6 @@ export default function StudentGroupManager({
                     text-gray-400
                   "
                 />
-
 
                 <input
                   value={search}
@@ -2262,7 +2154,6 @@ export default function StudentGroupManager({
 
             </div>
 
-
             <div
               className="
                 max-h-[500px]
@@ -2272,50 +2163,21 @@ export default function StudentGroupManager({
               "
             >
 
-              {loadingStudents && (
+              {filteredStudents.length ===
+                0 && (
 
                 <div
                   className="
-                    flex
-                    items-center
-                    justify-center
-                    gap-2
                     p-10
+                    text-center
+                    text-sm
                     text-gray-500
                   "
                 >
-
-                  <Loader2
-                    size={20}
-                    className="
-                      animate-spin
-                    "
-                  />
-
-                  Chargement...
-
+                  Aucun élève disponible.
                 </div>
 
               )}
-
-
-              {!loadingStudents &&
-                filteredStudents.length ===
-                  0 && (
-
-                  <div
-                    className="
-                      p-10
-                      text-center
-                      text-sm
-                      text-gray-500
-                    "
-                  >
-                    Aucun élève disponible.
-                  </div>
-
-                )}
-
 
               {filteredStudents.map(
                 (
@@ -2331,7 +2193,6 @@ export default function StudentGroupManager({
                     selectedAvailableStudents.includes(
                       studentId
                     );
-
 
                   return (
 
@@ -2368,7 +2229,6 @@ export default function StudentGroupManager({
                         "
                       />
 
-
                       <div
                         className="
                           flex
@@ -2389,7 +2249,6 @@ export default function StudentGroupManager({
                         )}
                       </div>
 
-
                       <div
                         className="
                           min-w-0
@@ -2409,7 +2268,6 @@ export default function StudentGroupManager({
                           )}
                         </p>
 
-
                         <p
                           className="
                             text-sm
@@ -2420,7 +2278,6 @@ export default function StudentGroupManager({
                         </p>
 
                       </div>
-
 
                       {isSelected && (
 
@@ -2442,7 +2299,6 @@ export default function StudentGroupManager({
               )}
 
             </div>
-
 
             <div
               className="
@@ -2500,9 +2356,7 @@ export default function StudentGroupManager({
 
                 )}
 
-
                 Ajouter au groupe
-
 
                 {selectedAvailableStudents.length >
                   0 &&
@@ -2513,7 +2367,6 @@ export default function StudentGroupManager({
             </div>
 
           </div>
-
 
           {/* ============================================== */}
           {/* GROUP MEMBERS */}
@@ -2558,7 +2411,6 @@ export default function StudentGroupManager({
                     Membres du groupe
                   </h3>
 
-
                   <p
                     className="
                       mt-1
@@ -2585,7 +2437,6 @@ export default function StudentGroupManager({
 
                 </div>
 
-
                 <button
                   type="button"
                   onClick={
@@ -2608,13 +2459,14 @@ export default function StudentGroupManager({
                     disabled:opacity-40
                   "
                 >
-                  Tout sélectionner
+                  {areAllMembersSelected
+                    ? "Tout désélectionner"
+                    : "Tout sélectionner"}
                 </button>
 
               </div>
 
             </div>
-
 
             <div
               className="
@@ -2651,7 +2503,6 @@ export default function StudentGroupManager({
 
               )}
 
-
               {!loadingMembers &&
                 members.length ===
                   0 && (
@@ -2669,133 +2520,127 @@ export default function StudentGroupManager({
 
                 )}
 
+              {!loadingMembers &&
+                members.map(
+                  (
+                    student
+                  ) => {
 
-              {members.map(
-                (
-                  student
-                ) => {
+                    const studentId =
+                      String(
+                        student.id
+                      );
 
-                  const studentId =
-                    String(
-                      student.id
-                    );
-
-                  const isSelected =
-                    selectedMembers.includes(
-                      studentId
-                    );
-
-
-                  return (
-
-                    <label
-                      key={
+                    const isSelected =
+                      selectedMembers.includes(
                         studentId
-                      }
-                      className="
-                        flex
-                        cursor-pointer
-                        items-center
-                        gap-3
-                        p-4
-                        transition
-                        hover:bg-red-50/40
-                      "
-                    >
+                      );
 
-                      <input
-                        type="checkbox"
-                        checked={
-                          isSelected
+                    return (
+
+                      <label
+                        key={
+                          studentId
                         }
-                        onChange={() =>
-                          toggleMember(
-                            studentId
-                          )
-                        }
-                        className="
-                          h-4
-                          w-4
-                          cursor-pointer
-                          accent-red-600
-                        "
-                      />
-
-
-                      <div
                         className="
                           flex
-                          h-10
-                          w-10
-                          shrink-0
+                          cursor-pointer
                           items-center
-                          justify-center
-                          rounded-full
-                          bg-violet-100
-                          text-sm
-                          font-bold
-                          text-violet-700
-                        "
-                      >
-                        {getInitials(
-                          student
-                        )}
-                      </div>
-
-
-                      <div
-                        className="
-                          min-w-0
-                          flex-1
+                          gap-3
+                          p-4
+                          transition
+                          hover:bg-red-50/40
                         "
                       >
 
-                        <p
+                        <input
+                          type="checkbox"
+                          checked={
+                            isSelected
+                          }
+                          onChange={() =>
+                            toggleMember(
+                              studentId
+                            )
+                          }
                           className="
-                            truncate
-                            font-medium
-                            text-gray-900
-                          "
-                        >
-                          {getStudentName(
-                            student
-                          )}
-                        </p>
-
-
-                        <p
-                          className="
-                            text-sm
-                            text-gray-500
-                          "
-                        >
-                          {student.student_number}
-                        </p>
-
-                      </div>
-
-
-                      {isSelected && (
-
-                        <Check
-                          size={19}
-                          className="
-                            shrink-0
-                            text-red-600
+                            h-4
+                            w-4
+                            cursor-pointer
+                            accent-red-600
                           "
                         />
 
-                      )}
+                        <div
+                          className="
+                            flex
+                            h-10
+                            w-10
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-full
+                            bg-violet-100
+                            text-sm
+                            font-bold
+                            text-violet-700
+                          "
+                        >
+                          {getInitials(
+                            student
+                          )}
+                        </div>
 
-                    </label>
+                        <div
+                          className="
+                            min-w-0
+                            flex-1
+                          "
+                        >
 
-                  );
+                          <p
+                            className="
+                              truncate
+                              font-medium
+                              text-gray-900
+                            "
+                          >
+                            {getStudentName(
+                              student
+                            )}
+                          </p>
 
-                }
-              )}
+                          <p
+                            className="
+                              text-sm
+                              text-gray-500
+                            "
+                          >
+                            {student.student_number}
+                          </p>
+
+                        </div>
+
+                        {isSelected && (
+
+                          <Check
+                            size={19}
+                            className="
+                              shrink-0
+                              text-red-600
+                            "
+                          />
+
+                        )}
+
+                      </label>
+
+                    );
+
+                  }
+                )}
 
             </div>
-
 
             <div
               className="
@@ -2853,9 +2698,7 @@ export default function StudentGroupManager({
 
                 )}
 
-
                 Retirer du groupe
-
 
                 {selectedMembers.length >
                   0 &&
@@ -2873,4 +2716,4 @@ export default function StudentGroupManager({
 
     </div>
   );
-}
+}     

@@ -7,6 +7,8 @@ import type {
   UUID,
 } from "../types";
 
+
+
 // ==========================================================
 // PROPS
 // ==========================================================
@@ -15,6 +17,11 @@ interface StudentTableProps {
   students: Student[];
 
   loading: boolean;
+
+  /**
+   * Permet de savoir si une classe a été sélectionnée.
+   */
+  classroomSelected: boolean;
 
   selectedStudents: UUID[];
 
@@ -33,6 +40,8 @@ interface StudentTableProps {
   ) => void;
 }
 
+
+
 // ==========================================================
 // COMPONENT
 // ==========================================================
@@ -40,12 +49,15 @@ interface StudentTableProps {
 export default function StudentTable({
   students,
   loading,
+  classroomSelected,
   selectedStudents,
   onToggleSelection,
   onSelectAll,
   onView,
   onEdit,
 }: StudentTableProps) {
+
+
 
   // ========================================================
   // ALL SELECTED
@@ -60,12 +72,80 @@ export default function StudentTable({
         )
     );
 
+
+
+  // ========================================================
+  // NO CLASSROOM SELECTED
+  // ========================================================
+
+  if (
+    !classroomSelected &&
+    !loading
+  ) {
+
+    return (
+
+      <div
+        className="
+          rounded-2xl
+          border
+          border-dashed
+          border-gray-300
+          bg-white
+          p-10
+          text-center
+          shadow-sm
+        "
+      >
+
+        <div
+          className="
+            mx-auto
+            max-w-md
+          "
+        >
+
+          <h3
+            className="
+              text-lg
+              font-semibold
+              text-gray-800
+            "
+          >
+            Sélectionnez une classe
+          </h3>
+
+          <p
+            className="
+              mt-2
+              text-sm
+              text-gray-500
+            "
+          >
+            Veuillez sélectionner une classe dans les filtres
+            pour afficher la liste des élèves.
+          </p>
+
+        </div>
+
+      </div>
+
+    );
+
+  }
+
+
+
   // ========================================================
   // LOADING
   // ========================================================
 
-  if (loading) {
+  if (
+    loading
+  ) {
+
     return (
+
       <div
         className="
           rounded-2xl
@@ -77,17 +157,27 @@ export default function StudentTable({
           shadow-sm
         "
       >
+
         Chargement des élèves...
+
       </div>
+
     );
+
   }
+
+
 
   // ========================================================
   // EMPTY STATE
   // ========================================================
 
-  if (students.length === 0) {
+  if (
+    students.length === 0
+  ) {
+
     return (
+
       <div
         className="
           rounded-2xl
@@ -100,16 +190,23 @@ export default function StudentTable({
           shadow-sm
         "
       >
-        Aucun élève trouvé.
+
+        Aucun élève trouvé dans cette classe.
+
       </div>
+
     );
+
   }
+
+
 
   // ========================================================
   // RENDER
   // ========================================================
 
   return (
+
     <div
       className="
         w-full
@@ -122,28 +219,62 @@ export default function StudentTable({
         shadow-sm
       "
     >
-      <div className="w-full overflow-x-auto">
 
-        <table className="min-w-[1200px] border-collapse">
+      <div
+        className="
+          w-full
+          overflow-x-auto
+        "
+      >
+
+        <table
+          className="
+            min-w-[1200px]
+            border-collapse
+          "
+        >
+
+
 
           {/* ================================================= */}
           {/* HEADER */}
           {/* ================================================= */}
 
-          <thead className="bg-gray-50">
+          <thead
+            className="
+              bg-gray-50
+            "
+          >
+
             <tr>
+
+
 
               {/* SELECTION */}
 
-              <th className="w-12 px-4 py-4">
+              <th
+                className="
+                  w-12
+                  px-4
+                  py-4
+                "
+              >
+
                 <input
                   type="checkbox"
                   checked={allSelected}
                   onChange={onSelectAll}
-                  className="cursor-pointer"
-                  aria-label="Sélectionner tous les élèves"
+                  className="
+                    cursor-pointer
+                  "
+                  aria-label="
+                    Sélectionner tous les élèves
+                  "
                 />
+
               </th>
+
+
 
               {/* STUDENT */}
 
@@ -161,6 +292,8 @@ export default function StudentTable({
                 Élève
               </th>
 
+
+
               {/* DATE OF BIRTH */}
 
               <th
@@ -176,6 +309,8 @@ export default function StudentTable({
               >
                 Date de naissance
               </th>
+
+
 
               {/* STUDENT NUMBER */}
 
@@ -193,6 +328,8 @@ export default function StudentTable({
                 Matricule
               </th>
 
+
+
               {/* CLASSROOM */}
 
               <th
@@ -208,6 +345,8 @@ export default function StudentTable({
               >
                 Classe
               </th>
+
+
 
               {/* GROUPS */}
 
@@ -225,6 +364,8 @@ export default function StudentTable({
                 Groupes
               </th>
 
+
+
               {/* PARENT */}
 
               <th
@@ -240,6 +381,8 @@ export default function StudentTable({
               >
                 Parent
               </th>
+
+
 
               {/* GENDER */}
 
@@ -257,6 +400,8 @@ export default function StudentTable({
                 Sexe
               </th>
 
+
+
               {/* ASSIGNMENT */}
 
               <th
@@ -273,6 +418,8 @@ export default function StudentTable({
                 Affectation
               </th>
 
+
+
               {/* REPEATING */}
 
               <th
@@ -288,6 +435,8 @@ export default function StudentTable({
               >
                 Redoublant
               </th>
+
+
 
               {/* ACTIONS */}
 
@@ -306,13 +455,17 @@ export default function StudentTable({
               </th>
 
             </tr>
+
           </thead>
+
+
 
           {/* ================================================= */}
           {/* BODY */}
           {/* ================================================= */}
 
           <tbody>
+
             {students.map(
               (student) => {
 
@@ -322,35 +475,36 @@ export default function StudentTable({
                   );
 
                 return (
+
                   <StudentRow
                     key={student.id}
-
                     student={student}
-
                     selected={isSelected}
-
                     onToggleSelection={() =>
                       onToggleSelection(
                         student.id
                       )
                     }
-
                     onView={() =>
                       onView(
                         student
                       )
                     }
-
                     onEdit={onEdit}
                   />
+
                 );
+
               }
             )}
+
           </tbody>
 
         </table>
 
       </div>
+
     </div>
+
   );
 }

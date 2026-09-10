@@ -16,12 +16,12 @@ import type {
 } from "../types";
 
 
+
 // ==========================================================
 // PROPS
 // ==========================================================
 
 interface StudentFiltersProps {
-
   filters: Filters;
 
   classrooms: Classroom[];
@@ -31,8 +31,8 @@ interface StudentFiltersProps {
   ) => void;
 
   onReset: () => void;
-
 }
+
 
 
 // ==========================================================
@@ -40,16 +40,12 @@ interface StudentFiltersProps {
 // ==========================================================
 
 export default function StudentFilters({
-
   filters,
-
   classrooms,
-
   onChange,
-
   onReset,
-
 }: StudentFiltersProps) {
+
 
 
   // ========================================================
@@ -60,25 +56,9 @@ export default function StudentFilters({
     value: string
   ) => {
 
-    // Toutes les classes
-
-    if (
-      !value
-    ) {
-
-      onChange({
-        classroom: null,
-      });
-
-      return;
-
-    }
-
-
-    // UUID valide
-
     const classroomId =
       value.trim();
+
 
 
     if (
@@ -94,12 +74,14 @@ export default function StudentFilters({
     }
 
 
+
     onChange({
       classroom:
         classroomId as UUID,
     });
 
   };
+
 
 
   // ========================================================
@@ -124,11 +106,13 @@ export default function StudentFilters({
     }
 
 
+
     onChange({
       gender: value,
     });
 
   };
+
 
 
   // ========================================================
@@ -137,9 +121,25 @@ export default function StudentFilters({
 
   return (
 
-    <div className="rounded-2xl border bg-white p-5 shadow-sm">
+    <div
+      className="
+        rounded-2xl
+        border
+        bg-white
+        p-5
+        shadow-sm
+      "
+    >
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div
+        className="
+          grid
+          gap-4
+          md:grid-cols-2
+          xl:grid-cols-5
+        "
+      >
+
 
 
         {/* ================================================== */}
@@ -147,25 +147,21 @@ export default function StudentFilters({
         {/* ================================================== */}
 
         <Input
-
           placeholder="Rechercher un élève..."
-
           value={
             filters.search ?? ""
           }
-
           onChange={(event) =>
             onChange({
               search:
                 event.target.value,
             })
           }
-
           leftIcon={
             <Search size={18} />
           }
-
         />
+
 
 
         {/* ================================================== */}
@@ -173,17 +169,13 @@ export default function StudentFilters({
         {/* ================================================== */}
 
         <Select
-
           value={
             filters.classroom ?? ""
           }
-
           options={[
-
             {
               label:
-                "Toutes les classes",
-
+                "Sélectionnez une classe",
               value: "",
             },
 
@@ -191,27 +183,21 @@ export default function StudentFilters({
               (
                 classroom
               ) => ({
-
                 label:
                   classroom.name,
 
                 value:
                   classroom.id,
-
               })
             ),
-
           ]}
-
           onChange={(event) =>
-
             handleClassroomChange(
               event.target.value
             )
-
           }
-
         />
+
 
 
         {/* ================================================== */}
@@ -219,45 +205,35 @@ export default function StudentFilters({
         {/* ================================================== */}
 
         <Select
-
           value={
             filters.gender ?? ""
           }
-
           options={[
-
             {
               label:
                 "Tous les sexes",
-
               value: "",
             },
 
             {
               label:
                 "Garçons",
-
               value: "M",
             },
 
             {
               label:
                 "Filles",
-
               value: "F",
             },
-
           ]}
-
           onChange={(event) =>
-
             handleGenderChange(
               event.target.value
             )
-
           }
-
         />
+
 
 
         {/* ================================================== */}
@@ -265,11 +241,8 @@ export default function StudentFilters({
         {/* ================================================== */}
 
         <button
-
           type="button"
-
           onClick={onReset}
-
           className="
             flex
             items-center
@@ -283,7 +256,6 @@ export default function StudentFilters({
             hover:bg-gray-50
             cursor-pointer
           "
-
         >
 
           <RotateCcw size={18} />
@@ -292,11 +264,9 @@ export default function StudentFilters({
 
         </button>
 
-
       </div>
 
     </div>
 
   );
-
 }

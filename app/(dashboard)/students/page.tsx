@@ -62,6 +62,7 @@ export default function StudentsPage() {
     classrooms,
     filters,
     stats,
+    pagination,
     selectedStudents,
     actions,
     studentModal,
@@ -298,11 +299,12 @@ export default function StudentsPage() {
         {/* ================================================ */}
 
         <StudentTable
-          students={
-            students
-          }
-          loading={
-            loading
+          students={students}
+          loading={loading}
+          classroomSelected={
+            Boolean(
+              filters.classroom
+            )
           }
           selectedStudents={
             selectedStudents
@@ -320,6 +322,132 @@ export default function StudentsPage() {
             actions.editStudent
           }
         />
+        {filters.classroom && (
+  <div
+    className="
+      flex
+      flex-col
+      items-center
+      justify-between
+      gap-4
+      rounded-2xl
+      border
+      border-gray-200
+      bg-white
+      px-5
+      py-4
+      shadow-sm
+      md:flex-row
+    "
+  >
+
+    <p
+      className="
+        text-sm
+        text-gray-500
+      "
+    >
+      {pagination.total === 0
+        ? "Aucun élève"
+        : `${pagination.total} élève${
+            pagination.total > 1
+              ? "s"
+              : ""
+          } au total`}
+    </p>
+
+
+
+    <div
+      className="
+        flex
+        items-center
+        gap-3
+      "
+    >
+
+      <button
+        type="button"
+        disabled={
+          pagination.page <= 1
+        }
+        onClick={() =>
+          actions.changePage(
+            pagination.page - 1
+          )
+        }
+        className="
+          rounded-lg
+          border
+          px-4
+          py-2
+          text-sm
+          transition
+          hover:bg-gray-50
+          disabled:cursor-not-allowed
+          disabled:opacity-50
+        "
+      >
+        Précédent
+      </button>
+
+
+
+      <span
+        className="
+          text-sm
+          font-medium
+          text-gray-700
+        "
+      >
+        Page {pagination.page} sur{" "}
+        {Math.max(
+          1,
+          Math.ceil(
+            pagination.total /
+            pagination.pageSize
+          )
+        )}
+      </span>
+
+
+
+      <button
+        type="button"
+        disabled={
+          pagination.page >=
+          Math.max(
+            1,
+            Math.ceil(
+              pagination.total /
+              pagination.pageSize
+            )
+          )
+        }
+        onClick={() =>
+          actions.changePage(
+            pagination.page + 1
+          )
+        }
+        className="
+          rounded-lg
+          border
+          px-4
+          py-2
+          text-sm
+          transition
+          hover:bg-gray-50
+          disabled:cursor-not-allowed
+          disabled:opacity-50
+        "
+      >
+        Suivant
+      </button>
+
+    </div>
+
+  </div>
+)}
 
       </div>
 
