@@ -385,6 +385,8 @@ function FinanceStudents() {
           : []
       );
 
+      console.log("donneee-------- ",res.data)
+
     } catch (error) {
 
       console.error(
