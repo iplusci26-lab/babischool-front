@@ -1,8 +1,11 @@
 "use client";
 
-import { X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import {
   CreditCard,
@@ -12,9 +15,42 @@ import {
   Plus,
   BookOpen,
   Users,
+  Trash2,
+  Pencil,
+ 
 } from "lucide-react";
 
 import { api } from "@/lib/api";
+import { toast } from "sonner";
+import EditPaymentModal from "./components/EditPaymentModal";
+import PaymentModal from "./components/PaymentModal";
+
+
+/* ============================================================
+ * FORMAT DATE
+ * ============================================================ */
+
+function formatFrenchDate(
+  date: string | null | undefined
+) {
+
+  if (!date) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat(
+    "fr-FR",
+    {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }
+  ).format(
+    new Date(
+      `${date}T00:00:00`
+    )
+  );
+}
 
 /* ============================================================
  * FINANCE PAGE
@@ -142,6 +178,7 @@ function FinanceDashboard() {
   const [data, setData] =
     useState<any>(null);
 
+
   const loadDashboard = async () => {
 
     try {
@@ -162,6 +199,7 @@ function FinanceDashboard() {
 
     }
   };
+
 
   useEffect(() => {
 
@@ -282,15 +320,21 @@ function FinanceDashboard() {
                 <div className="text-right">
 
                   <p className="font-semibold text-green-600">
+
                     +{" "}
+
                     {Number(
                       payment.amount
                     ).toLocaleString()}{" "}
+
                     FCFA
+
                   </p>
 
                   <p className="text-sm text-gray-500">
-                    {payment.payment_date}
+                  {formatFrenchDate(
+                      payment.payment_date
+                    )}
                   </p>
 
                 </div>
@@ -384,8 +428,6 @@ function FinanceStudents() {
           ? res.data
           : []
       );
-
-      console.log("donneee-------- ",res.data)
 
     } catch (error) {
 
@@ -523,17 +565,23 @@ function FinanceStudents() {
                     </td>
 
                     <td className="p-4">
+
                       {Number(
                         student.tuition_fee
                       ).toLocaleString()}{" "}
+
                       FCFA
+
                     </td>
 
                     <td className="p-4 font-medium text-green-600">
+
                       {Number(
                         student.amount_paid
                       ).toLocaleString()}{" "}
+
                       FCFA
+
                     </td>
 
                     <td className="p-4">
@@ -551,6 +599,7 @@ function FinanceStudents() {
                         {Number(
                           student.balance
                         ).toLocaleString()}{" "}
+
                         FCFA
 
                       </span>
@@ -654,11 +703,35 @@ function FinanceStudents() {
  * PAYMENTS PAGE
  * ============================================================ */
 
+/* ============================================================
+ * PAYMENTS PAGE
+ * ============================================================ */
+
+/* ============================================================
+ * PAYMENTS PAGE
+ * ============================================================ */
+
 function PaymentsPage() {
 
   const [payments, setPayments] =
     useState<any[]>([]);
 
+  const [search, setSearch] =
+    useState("");
+
+  const [selectedPayment, setSelectedPayment] =
+    useState<any>(null);
+
+  const [openEditPayment, setOpenEditPayment] =
+    useState(false);
+
+  const [deletingId, setDeletingId] =
+    useState<string | null>(null);
+
+
+  /* ==========================================================
+   * LOAD PAYMENTS
+   * ========================================================== */
 
   const loadPayments = async () => {
 
@@ -683,6 +756,7 @@ function PaymentsPage() {
       );
 
     }
+
   };
 
 
@@ -693,76 +767,561 @@ function PaymentsPage() {
   }, []);
 
 
+  /* ==========================================================
+   * FILTER PAYMENTS
+   * ========================================================== */
+
+  const filteredPayments = useMemo(() => {
+
+    const query =
+      search
+        .trim()
+        .toLowerCase();
+
+
+    if (!query) {
+
+      return payments;
+
+    }
+
+
+    return payments.filter(
+      (payment) => {
+
+        const studentName =
+          payment.student_name
+            ?.toLowerCase()
+            || "";
+
+        const classroomName =
+          payment.classroom_name
+            ?.toLowerCase()
+            || "";
+
+        const paymentMethod =
+          getPaymentMethodLabel(
+            payment.payment_method,
+            payment.reference
+          )
+            ?.toLowerCase()
+            || "";
+
+        const reference =
+          payment.reference
+            ?.toLowerCase()
+            || "";
+
+        const amount =
+          String(
+            payment.amount
+          );
+
+        const date =
+        formatFrenchDate(payment.payment_date)
+            ?.toLowerCase()
+            || "";
+
+
+        return (
+
+          studentName.includes(query) ||
+
+          classroomName.includes(query) ||
+
+          paymentMethod.includes(query) ||
+
+          reference.includes(query) ||
+
+          amount.includes(query) ||
+
+          date.includes(query)
+
+        );
+
+      }
+    );
+
+  }, [
+    payments,
+    search,
+  ]);
+
+
+  /* ==========================================================
+   * EDIT PAYMENT
+   * ========================================================== */
+
+  const openEditModal = (
+    payment: any
+  ) => {
+
+    setSelectedPayment(
+      payment
+    );
+
+    setOpenEditPayment(
+      true
+    );
+
+  };
+
+
+  const closeEditModal = () => {
+
+    setOpenEditPayment(
+      false
+    );
+
+    setSelectedPayment(
+      null
+    );
+
+  };
+
+
+  /* ==========================================================
+   * DELETE PAYMENT
+   * ========================================================== */
+
+  const deletePayment = async (
+    payment: any
+  ) => {
+
+    const confirmed =
+      window.confirm(
+        `Voulez-vous vraiment supprimer le paiement de ${payment.student_name} ?`
+      );
+
+
+    if (!confirmed) {
+
+      return;
+
+    }
+
+
+    try {
+
+      setDeletingId(
+        payment.id
+      );
+
+
+      await api.delete(
+        `/finance/payments/${payment.id}/`
+      );
+
+
+      await loadPayments();
+
+
+      toast.success(
+        "Paiement supprimé avec succès."
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Erreur suppression paiement :",
+        error
+      );
+
+
+      toast.error(
+        "Erreur lors de la suppression du paiement."
+      );
+
+    } finally {
+
+      setDeletingId(
+        null
+      );
+
+    }
+
+  };
+
+
   return (
 
-    <div className="overflow-hidden rounded-3xl border bg-white shadow-sm">
+    <>
 
-      <div className="flex items-center justify-between border-b p-5">
+      <div className="overflow-hidden rounded-3xl border bg-white shadow-sm">
 
-        <h2 className="text-lg font-semibold">
-          Historique des paiements
-        </h2>
+
+        {/* ==================================================
+         * HEADER
+         * ================================================== */}
+
+        <div className="flex flex-col gap-4 border-b p-5 lg:flex-row lg:items-center lg:justify-between">
+
+          <div>
+
+            <h2 className="text-lg font-semibold">
+              Historique des paiements
+            </h2>
+
+            <p className="mt-1 text-sm text-gray-500">
+
+              {filteredPayments.length} paiement
+              {filteredPayments.length !== 1
+                ? "s"
+                : ""
+              }
+
+            </p>
+
+          </div>
+
+
+          {/* ================================================
+           * SEARCH
+           * ================================================ */}
+
+          <div className="flex w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 lg:w-96">
+
+            <Search
+              size={18}
+              className="shrink-0 text-gray-400"
+            />
+
+            <input
+              type="text"
+              value={search}
+              onChange={(e) =>
+                setSearch(
+                  e.target.value
+                )
+              }
+              placeholder="Rechercher un paiement..."
+              className="
+                w-full
+                bg-transparent
+                text-sm
+                outline-none
+                placeholder:text-gray-400
+              "
+            />
+
+          </div>
+
+        </div>
+
+
+        {/* ==================================================
+         * TABLE
+         * ================================================== */}
+
+        <div className="overflow-x-auto">
+
+          <table className="w-full min-w-[850px]">
+
+
+            {/* ==============================================
+             * TABLE HEADER
+             * ============================================== */}
+
+            <thead className="bg-gray-50 text-sm text-gray-600">
+
+              <tr>
+
+                <th className="px-5 py-4 text-left font-medium">
+                  Nom
+                </th>
+
+                <th className="px-5 py-4 text-left font-medium">
+                  Classe
+                </th>
+
+                <th className="px-5 py-4 text-left font-medium">
+                  Méthode de paiement
+                </th>
+
+                <th className="px-5 py-4 text-left font-medium">
+                  Date
+                </th>
+
+                <th className="px-5 py-4 text-right font-medium">
+                  Montant
+                </th>
+
+                <th className="px-5 py-4 text-center font-medium">
+                  Actions
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            {/* ==============================================
+             * TABLE BODY
+             * ============================================== */}
+
+            <tbody>
+
+
+              {/* EMPTY STATE */}
+
+              {filteredPayments.length === 0 && (
+
+                <tr>
+
+                  <td
+                    colSpan={6}
+                    className="px-5 py-16 text-center"
+                  >
+
+                    <Search
+                      size={36}
+                      className="mx-auto text-gray-300"
+                    />
+
+                    <p className="mt-4 font-medium text-gray-700">
+                      Aucun paiement trouvé
+                    </p>
+
+                    <p className="mt-1 text-sm text-gray-500">
+                      Essayez une autre recherche.
+                    </p>
+
+                  </td>
+
+                </tr>
+
+              )}
+
+
+              {/* PAYMENTS */}
+
+              {filteredPayments.map(
+                (payment) => (
+
+                  <tr
+                    key={payment.id}
+                    className="border-t transition hover:bg-gray-50"
+                  >
+
+
+                    {/* NOM */}
+
+                    <td className="px-5 py-4">
+
+                      <p className="font-medium text-gray-900">
+
+                        {payment.student_name}
+
+                      </p>
+
+                    </td>
+
+
+                    {/* CLASSE */}
+
+                    <td className="px-5 py-4 text-sm text-gray-600">
+
+                      {payment.classroom_name}
+
+                    </td>
+
+
+                    {/* MÉTHODE */}
+
+                    <td className="px-5 py-4">
+
+                      <span className="inline-flex rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700">
+
+                        {getPaymentMethodLabel(
+                          payment.payment_method,
+                          payment.reference
+                        )}
+
+                      </span>
+
+                    </td>
+
+
+                    {/* DATE */}
+
+                    <td className="px-5 py-4 text-sm text-gray-600">
+
+                    {formatFrenchDate(
+                      payment.payment_date
+                    )}
+
+                    </td>
+
+
+                    {/* MONTANT */}
+
+                    <td className="px-5 py-4 text-right">
+
+                      <span className="font-semibold text-green-600">
+
+                        +{" "}
+
+                        {Number(
+                          payment.amount
+                        ).toLocaleString()}{" "}
+
+                        FCFA
+
+                      </span>
+
+                    </td>
+
+
+                    {/* ACTIONS */}
+
+                    <td className="px-5 py-4">
+
+                      <div className="flex items-center justify-center gap-2">
+
+
+                        {/* EDIT */}
+
+                        <button
+                          type="button"
+
+                          onClick={() =>
+                            openEditModal(
+                              payment
+                            )
+                          }
+
+                          className="
+                            flex
+                            h-10
+                            w-10
+                            items-center
+                            justify-center
+                            rounded-xl
+                            bg-indigo-50
+                            text-indigo-600
+                            transition
+                            hover:bg-indigo-100
+                          "
+
+                          title="Modifier le paiement"
+
+                          aria-label="Modifier le paiement"
+                        >
+
+                          <Pencil size={18} />
+
+                        </button>
+
+
+                        {/* DELETE */}
+
+                        <button
+                          type="button"
+
+                          onClick={() =>
+                            deletePayment(
+                              payment
+                            )
+                          }
+
+                          disabled={
+                            deletingId ===
+                            payment.id
+                          }
+
+                          className="
+                            flex
+                            h-10
+                            w-10
+                            items-center
+                            justify-center
+                            rounded-xl
+                            bg-red-50
+                            text-red-600
+                            transition
+                            hover:bg-red-100
+                            disabled:cursor-not-allowed
+                            disabled:opacity-50
+                          "
+
+                          title="Supprimer le paiement"
+
+                          aria-label="Supprimer le paiement"
+                        >
+
+                          {deletingId ===
+                          payment.id
+
+                            ? (
+
+                              <span className="text-xs">
+                                ...
+                              </span>
+
+                            )
+
+                            : (
+
+                              <Trash2
+                                size={18}
+                              />
+
+                            )}
+
+                        </button>
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                )
+              )}
+
+            </tbody>
+
+          </table>
+
+        </div>
 
       </div>
 
 
-      <div className="divide-y">
+      {/* ====================================================
+       * EDIT PAYMENT MODAL
+       * ==================================================== */}
 
-        {payments.map(
-          (payment) => (
+      {openEditPayment &&
+        selectedPayment && (
 
-            <div
-              key={payment.id}
-              className="flex items-center justify-between p-5"
-            >
+          <EditPaymentModal
 
-              <div>
+            payment={
+              selectedPayment
+            }
 
-                <p className="font-medium">
-                  {payment.student_name}
-                </p>
+            onClose={
+              closeEditModal
+            }
 
-                <p className="text-sm text-gray-500">
-                  {payment.classroom_name}
-                </p>
+            onSuccess={() => {
 
-                <p className="mt-1 text-sm font-medium text-indigo-600">
-                  {getPaymentMethodLabel(
-                    payment.payment_method,
-                    payment.reference
-                  )}
-                </p>
+              loadPayments();
 
-              </div>
+              closeEditModal();
 
+            }}
 
-              <div className="text-right">
+          />
 
-                <p className="font-semibold text-green-600">
-                  +{" "}
-                  {Number(
-                    payment.amount
-                  ).toLocaleString()}{" "}
-                  FCFA
-                </p>
-
-                <p className="text-sm text-gray-500">
-                  {payment.payment_date}
-                </p>
-
-              </div>
-
-            </div>
-
-          )
         )}
 
-      </div>
+    </>
 
-    </div>
   );
-}
 
+}
 
 /* ============================================================
  * PAYMENT METHOD LABEL
@@ -792,573 +1351,9 @@ function getPaymentMethodLabel(
 
     default:
 
-      /*
-       * Compatibilité avec les anciens paiements
-       * enregistrés avant l'ajout de payment_method.
-       */
-      return reference || "Moyen non renseigné";
+      return (
+        reference ||
+        "Moyen non renseigné"
+      );
   }
-}
-
-
-/* ============================================================
- * PAYMENT MODAL
- * ============================================================ */
-
-function PaymentModal({
-  student,
-  onClose,
-  onSuccess,
-}: any) {
-
-  const [amount, setAmount] =
-    useState("");
-
-  const [paymentMethod, setPaymentMethod] =
-    useState("");
-
-  const [notes, setNotes] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-
-  /* ==========================================================
-   * SUBMIT
-   * ========================================================== */
-
-  const submit = async () => {
-
-    if (!amount) {
-
-      alert(
-        "Veuillez saisir le montant."
-      );
-
-      return;
-    }
-
-
-    if (!paymentMethod) {
-
-      alert(
-        "Veuillez sélectionner un moyen de paiement."
-      );
-
-      return;
-    }
-
-
-    try {
-
-      setLoading(true);
-
-
-      await api.post(
-        "/finance/payments/",
-        {
-          enrollment_id:
-            student.id,
-
-          amount,
-
-          payment_date:
-            new Date()
-              .toISOString()
-              .split("T")[0],
-
-          payment_method:
-            paymentMethod,
-
-          notes,
-        }
-      );
-
-
-      alert(
-        "Paiement enregistré"
-      );
-
-
-      onSuccess();
-
-    } catch (error) {
-
-      console.error(
-        "Erreur paiement :",
-        error
-      );
-
-      alert(
-        "Erreur lors de l'enregistrement du paiement."
-      );
-
-    } finally {
-
-      setLoading(false);
-
-    }
-  };
-
-
-  /* ==========================================================
-   * UI
-   * ========================================================== */
-
-  return (
-
-    <div
-      className="
-        fixed
-        inset-0
-        z-50
-        flex
-        items-start
-        justify-center
-        overflow-y-auto
-        bg-black/40
-        p-3
-        backdrop-blur-sm
-        sm:items-center
-        sm:p-4
-      "
-    >
-
-      {/* ====================================================
-       * MODAL
-       * ==================================================== */}
-
-      <div
-        className="
-          flex
-          w-full
-          max-w-lg
-          max-h-[calc(100vh-1.5rem)]
-          flex-col
-          overflow-hidden
-          rounded-2xl
-          bg-white
-          shadow-2xl
-          sm:max-h-[90vh]
-          sm:rounded-3xl
-        "
-      >
-
-        {/* ==================================================
-         * HEADER
-         * ================================================== */}
-
-        <div
-          className="
-            flex
-            shrink-0
-            items-center
-            justify-between
-            bg-gradient-to-r
-            from-indigo-500
-            to-purple-600
-            p-4
-            text-white
-            sm:p-6
-          "
-        >
-
-          <div className="min-w-0">
-
-            <h2
-              className="
-                truncate
-                text-xl
-                font-bold
-                sm:text-2xl
-              "
-            >
-              Nouveau paiement
-            </h2>
-
-            <p
-              className="
-                mt-1
-                truncate
-                text-sm
-                text-indigo-100
-                sm:text-base
-              "
-            >
-              {student.student_name}
-            </p>
-
-          </div>
-
-
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            aria-label="Fermer"
-            className="
-              ml-3
-              flex
-              h-9
-              w-9
-              shrink-0
-              items-center
-              justify-center
-              rounded-full
-              bg-white/20
-              transition
-              hover:bg-white/30
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-              sm:h-10
-              sm:w-10
-            "
-          >
-
-            <X size={20} />
-
-          </button>
-
-        </div>
-
-
-        {/* ==================================================
-         * BODY
-         * ================================================== */}
-
-        <div
-          className="
-            min-h-0
-            flex-1
-            overflow-y-auto
-            p-4
-            sm:p-6
-          "
-        >
-
-          <div className="space-y-5">
-
-            {/* ==============================================
-             * INFORMATIONS FINANCIÈRES
-             * ============================================== */}
-
-            <div
-              className="
-                grid
-                grid-cols-1
-                gap-3
-                sm:grid-cols-2
-                sm:gap-4
-              "
-            >
-
-              {/* FRAIS */}
-
-              <div
-                className="
-                  rounded-2xl
-                  bg-gray-50
-                  p-4
-                "
-              >
-
-                <p className="text-sm text-gray-500">
-                  Frais
-                </p>
-
-                <h3
-                  className="
-                    mt-1
-                    text-lg
-                    font-bold
-                  "
-                >
-                  {Number(
-                    student.tuition_fee
-                  ).toLocaleString()}{" "}
-                  FCFA
-                </h3>
-
-              </div>
-
-
-              {/* SOLDE */}
-
-              <div
-                className="
-                  rounded-2xl
-                  bg-red-50
-                  p-4
-                "
-              >
-
-                <p className="text-sm text-red-500">
-                  Solde
-                </p>
-
-                <h3
-                  className="
-                    mt-1
-                    text-lg
-                    font-bold
-                    text-red-600
-                  "
-                >
-                  {Number(
-                    student.balance
-                  ).toLocaleString()}{" "}
-                  FCFA
-                </h3>
-
-              </div>
-
-            </div>
-
-
-            {/* ==============================================
-             * MONTANT
-             * ============================================== */}
-
-            <div>
-
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                "
-              >
-                Montant
-              </label>
-
-              <input
-                type="number"
-                min="0"
-                value={amount}
-                onChange={(e) =>
-                  setAmount(
-                    e.target.value
-                  )
-                }
-                className="
-                  h-12
-                  w-full
-                  rounded-2xl
-                  border
-                  border-gray-200
-                  px-4
-                  outline-none
-                  transition
-                  focus:border-indigo-500
-                  focus:ring-2
-                  focus:ring-indigo-500/20
-                  sm:h-14
-                "
-                placeholder="50000"
-              />
-
-            </div>
-
-
-            {/* ==============================================
-             * MOYEN DE PAIEMENT
-             * ============================================== */}
-
-            <div>
-
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                "
-              >
-                Moyen de paiement
-              </label>
-
-              <select
-                value={paymentMethod}
-                onChange={(e) =>
-                  setPaymentMethod(
-                    e.target.value
-                  )
-                }
-                className="
-                  h-12
-                  w-full
-                  rounded-2xl
-                  border
-                  border-gray-200
-                  bg-white
-                  px-4
-                  outline-none
-                  transition
-                  focus:border-indigo-500
-                  focus:ring-2
-                  focus:ring-indigo-500/20
-                  sm:h-14
-                "
-              >
-
-                <option value="">
-                  Sélectionner un moyen de paiement
-                </option>
-
-                <option value="wave">
-                  Wave
-                </option>
-
-                <option value="omoney">
-                  Orange Money
-                </option>
-
-                <option value="momo">
-                  MoMo
-                </option>
-
-                <option value="cheque">
-                  Chèque
-                </option>
-
-                <option value="espece">
-                  Espèce
-                </option>
-
-              </select>
-
-            </div>
-
-
-            {/* ==============================================
-             * NOTES
-             * ============================================== */}
-
-            <div>
-
-              <label
-                className="
-                  mb-2
-                  block
-                  text-sm
-                  font-medium
-                "
-              >
-                Notes
-              </label>
-
-              <textarea
-                value={notes}
-                onChange={(e) =>
-                  setNotes(
-                    e.target.value
-                  )
-                }
-                rows={4}
-                className="
-                  min-h-[110px]
-                  w-full
-                  resize-y
-                  rounded-2xl
-                  border
-                  border-gray-200
-                  p-4
-                  outline-none
-                  transition
-                  focus:border-indigo-500
-                  focus:ring-2
-                  focus:ring-indigo-500/20
-                "
-                placeholder="Informations supplémentaires"
-              />
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-        {/* ==================================================
-         * FOOTER
-         * ================================================== */}
-
-        <div
-          className="
-            flex
-            shrink-0
-            flex-col-reverse
-            gap-3
-            border-t
-            bg-white
-            p-4
-            sm:flex-row
-            sm:justify-end
-            sm:p-6
-          "
-        >
-
-          {/* ANNULER */}
-
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            className="
-              w-full
-              rounded-2xl
-              border
-              px-5
-              py-3
-              transition
-              hover:bg-gray-50
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-              sm:w-auto
-            "
-          >
-            Annuler
-          </button>
-
-
-          {/* VALIDER */}
-
-          <button
-            type="button"
-            onClick={submit}
-            disabled={
-              loading ||
-              !amount ||
-              !paymentMethod
-            }
-            className="
-              w-full
-              rounded-2xl
-              bg-indigo-600
-              px-5
-              py-3
-              font-medium
-              text-white
-              transition
-              hover:bg-indigo-700
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-              sm:w-auto
-            "
-          >
-
-            {loading
-              ? "Enregistrement..."
-              : "Valider paiement"}
-
-          </button>
-
-        </div>
-
-      </div>
-
-    </div>
-  );
 }
