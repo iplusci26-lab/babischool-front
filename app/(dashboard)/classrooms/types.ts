@@ -34,7 +34,9 @@
   
     name: string;
   
-    annual_tuition_fee: number;
+    annual_tuition_fee_assigned: number;
+
+    annual_tuition_fee_unassigned: number;
   
     created_at: string;
     updated_at: string;
@@ -88,7 +90,9 @@
   
     name: string;
   
-    annual_tuition_fee: number;
+    annual_tuition_fee_assigned: number;
+
+    annual_tuition_fee_unassigned: number;
   }
   
   export interface ClassroomGroupForm {

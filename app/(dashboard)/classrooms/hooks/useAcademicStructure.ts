@@ -1,6 +1,10 @@
 "use client";
 
-import { useCallback,useEffect, useReducer } from "react";
+import {
+  useCallback,
+  useEffect,
+  useReducer,
+} from "react";
 
 import { CrudService } from "@/lib/crud";
 
@@ -18,513 +22,765 @@ import {
   initialState,
 } from "./reducer";
 
+
 /* ==========================================================
- * CRUD Services
+ * CRUD SERVICES
  * ========================================================== */
-
-
 
 const levelService = new CrudService<
   ClassroomLevel,
   ClassroomLevelForm
->("/students/classroom-levels/");
+>(
+  "/students/classroom-levels/"
+);
 
 const classroomService = new CrudService<
   Classroom,
   ClassroomForm
->("/students/classrooms/");
+>(
+  "/students/classrooms/"
+);
 
 const groupService = new CrudService<
   ClassroomGroup,
   ClassroomGroupForm
->("/students/classroom-groups/");
+>(
+  "/students/classroom-groups/"
+);
+
 
 /* ==========================================================
- * Hook
+ * HOOK
  * ========================================================== */
 
-/*function generateCycleCode(name: string): string {
-    return name
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^A-Za-z0-9 ]/g, "")
-      .trim()
-      .split(/\s+/)
-      .map((word) => word.substring(0, 4))
-      .join("")
-      .toUpperCase()
-      .substring(0, 10);
-  }*/
-
 export function useAcademicStructure() {
-  const [state, dispatch] = useReducer(
+
+  const [
+    state,
+    dispatch,
+  ] = useReducer(
     academicStructureReducer,
     initialState
   );
 
+
   /* ==========================================================
-   * Helpers
+   * HELPERS
    * ========================================================== */
 
-  const setLoading = (value: boolean) =>
+  const setLoading = (
+    value: boolean
+  ) => {
+
     dispatch({
       type: "SET_LOADING",
       payload: value,
     });
 
-  const setSaving = (value: boolean) =>
+  };
+
+
+  const setSaving = (
+    value: boolean
+  ) => {
+
     dispatch({
       type: "SET_SAVING",
       payload: value,
     });
 
-  const setError = (message: string | null) =>
+  };
+
+
+  const setError = (
+    message: string | null
+  ) => {
+
     dispatch({
       type: "SET_ERROR",
       payload: message,
     });
 
-  const handleError = (error: any) => {
+  };
+
+
+  const handleError = (
+    error: any
+  ) => {
+
     console.error(error);
 
     setError(
+
       error?.response?.data?.detail ??
+
       error?.message ??
+
       "Une erreur est survenue."
+
     );
+
   };
 
+
   /* ==========================================================
-   * Loaders
+   * LOADERS
    * ========================================================== */
 
- 
+  const loadLevels = useCallback(
+    async () => {
 
-  const loadLevels = useCallback(async () => {
-    try {
-      const response = await levelService.list();
+      try {
 
-      dispatch({
-        type: "SET_LEVELS",
-        payload: response.results,
-      });
-      console.log("classroom level------------------ ", response.results)
-    } catch (error) {
-      handleError(error);
-    }
-  }, []);
+        const response =
+          await levelService.list();
 
-  const loadClassrooms = useCallback(async () => {
-    try {
-      const response =
-        await classroomService.list();
+        dispatch({
+          type: "SET_LEVELS",
+          payload: response.results,
+        });
 
-      dispatch({
-        type: "SET_CLASSROOMS",
-        payload: response.results,
-      });
+      } catch (error) {
 
-      console.log("classroom------------------ ", response.results)
+        handleError(error);
 
-    } catch (error) {
-      handleError(error);
-    }
-  }, []);
+      }
 
-  const loadGroups = useCallback(async () => {
-    try {
-      const response =
-        await groupService.list();
+    },
+    []
+  );
 
-      dispatch({
-        type: "SET_GROUPS",
-        payload: response.results,
-      });
-      
-    } catch (error) {
-      handleError(error);
-    }
-  }, []);
 
-  const loadAll = useCallback(async () => {
-    setLoading(true);
+  const loadClassrooms = useCallback(
+    async () => {
+
+      try {
+
+        const response =
+          await classroomService.list();
+
+        dispatch({
+          type: "SET_CLASSROOMS",
+          payload: response.results,
+        });
+
+      } catch (error) {
+
+        handleError(error);
+
+      }
+
+    },
+    []
+  );
+
+
+  const loadGroups = useCallback(
+    async () => {
+
+      try {
+
+        const response =
+          await groupService.list();
+
+        dispatch({
+          type: "SET_GROUPS",
+          payload: response.results,
+        });
+
+      } catch (error) {
+
+        handleError(error);
+
+      }
+
+    },
+    []
+  );
+
+
+  const loadAll = useCallback(
+    async () => {
+
+      setLoading(true);
+
+      setError(null);
+
+      try {
+
+        await Promise.all([
+
+          loadLevels(),
+
+          loadClassrooms(),
+
+          loadGroups(),
+
+        ]);
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    },
+    [
+
+      loadLevels,
+
+      loadClassrooms,
+
+      loadGroups,
+
+    ]
+  );
+
+
+  /* ==========================================================
+   * GENERIC CRUD HELPERS
+   * ========================================================== */
+
+  const saveEntity = async <TForm,>(
+
+    id: string | undefined,
+
+    data: TForm,
+
+    service: CrudService<any, TForm>,
+
+    resetAction:
+
+      | "RESET_LEVEL_FORM"
+      | "RESET_CLASSROOM_FORM"
+      | "RESET_GROUP_FORM"
+
+  ) => {
+
+    setSaving(true);
+
     setError(null);
 
     try {
-      await Promise.all([
-        loadLevels(),
-        loadClassrooms(),
-        loadGroups(),
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    loadLevels,
-    loadClassrooms,
-    loadGroups,
-  ]);
 
-    /* ==========================================================
-   * Generic CRUD Helpers
-   * ========================================================== */
+      if (id) {
 
-    const saveEntity = async <TForm>(
-        id: string | undefined,
-        data: TForm,
-        service: CrudService<any, TForm>,
-        resetAction:
-          
-          | "RESET_LEVEL_FORM"
-          | "RESET_CLASSROOM_FORM"
-          | "RESET_GROUP_FORM"
-      ) => {
-        setSaving(true);
-        setError(null);
-    
-        try {
-          if (id) {
-            await service.update(id, data);
-          } else {
-            await service.create(data);
-          }
-    
-          dispatch({
-            type: resetAction,
-          });
-    
-          await loadAll();
-        } catch (error) {
-          handleError(error);
-        } finally {
-          setSaving(false);
-        }
-      };
-    
-      const deleteEntity = async (
-        id: string,
-        service: CrudService<any, any>
-      ) => {
-        setSaving(true);
-        setError(null);
-    
-        try {
-          await service.remove(id);
-          await loadAll();
-        } catch (error) {
-          handleError(error);
-        } finally {
-          setSaving(false);
-        }
-      };
-    
-      const editEntity = <T>(
-        entity: T,
-        action:
-         
-          | "SET_LEVEL_FORM"
-          | "SET_CLASSROOM_FORM"
-          | "SET_GROUP_FORM"
-      ) => {
-        dispatch({
-          type: action,
-          payload: entity as any,
-        });
-      };
-    
-     
-    
-      /* ==========================================================
-       * Classroom Level
-       * ========================================================== */
-      const openLevelForm = (
-        level: ClassroomLevel
-    ) => {
-    
-        dispatch({
-    
-            type: "SET_LEVEL_FORM",
-    
-            payload: {
-    
-                id: level.id,
-    
-                name: level.name,
-    
-                description: level.description ?? "",
-    
-                display_order: level.display_order,
-    
-                is_active: level.is_active,
-    
-            },
-    
-        });
-    
-    };
+        await service.update(
+          id,
+          data
+        );
 
-    const resetLevelForm = () => {
+      } else {
+
+        await service.create(
+          data
+        );
+
+      }
+
+
       dispatch({
-        type: "SET_LEVEL_FORM",
-        payload: {
-         
-          name: "",
-          description: "",
-          display_order: 1,
-          is_active: true,
-        },
+        type: resetAction,
       });
-    };
 
-    const saveLevel = async () =>
-      saveEntity(
-        state.levelForm.id,
-        state.levelForm,
-        levelService,
-        "RESET_LEVEL_FORM"
+
+      await loadAll();
+
+    } catch (error) {
+
+      handleError(error);
+
+    } finally {
+
+      setSaving(false);
+
+    }
+
+  };
+
+
+  const deleteEntity = async (
+
+    id: string,
+
+    service: CrudService<any, any>
+
+  ) => {
+
+    setSaving(true);
+
+    setError(null);
+
+    try {
+
+      await service.remove(
+        id
       );
-    
-      const deleteLevel = async (id: string) =>
-        deleteEntity(id, levelService);
-    
-      const editLevel = (level: ClassroomLevel) =>
-        editEntity(
-          {
-            id: level.id,
-           
-            name: level.name,
-            description: level.description,
-            display_order: level.display_order,
-            is_active: level.is_active,
-          },
-          "SET_LEVEL_FORM"
-        );
-    
-      /* ==========================================================
-       * Classroom
-       * ========================================================== */
-      const openClassroomForm = (
-        classroom: Classroom
-        ) => {
-        
-            dispatch({
-        
-                type: "SET_CLASSROOM_FORM",
-        
-                payload: {
-        
-                    id: classroom.id,
-        
-                    classroom_level:
-                        classroom.classroom_level,
-        
-                    name: classroom.name,
-        
-                    annual_tuition_fee:
-                        classroom.annual_tuition_fee,
-        
-                    next_classroom:
-                        classroom.next_classroom,
-        
-                },
-        
-            });
-        
-        };
-        
-        const resetClassroomForm = () => {
 
-            dispatch({
-        
-                type: "RESET_CLASSROOM_FORM",
-        
-            });
-        
-        };
+      await loadAll();
 
-      const saveClassroom = async () =>
-        saveEntity(
-          state.classroomForm.id,
-          state.classroomForm,
-          classroomService,
-          "RESET_CLASSROOM_FORM"
-        );
-    
-      const deleteClassroom = async (id: string) =>
-        deleteEntity(id, classroomService);
-    
-      const editClassroom = (classroom: Classroom) =>
-        editEntity(
-          {
-            id: classroom.id,
-            classroom_level: classroom.classroom_level,
-            next_classroom: classroom.next_classroom,
-            name: classroom.name,
-            annual_tuition_fee:
-              classroom.annual_tuition_fee,
-          },
-          "SET_CLASSROOM_FORM"
-        );
-    
-      /* ==========================================================
-       * Classroom Group
-       * ========================================================== */
-      const openGroupForm = (
-        group: ClassroomGroup
-    ) => {
-    
-        dispatch({
-    
-            type: "SET_GROUP_FORM",
-    
-            payload: {
-    
-                id: group.id,
-    
-                classroom: group.classroom,
-    
-                name: group.name,
-    
-                code: group.code,
-    
-                description:
-                    group.description,
-    
-                display_order:
-                    group.display_order,
-    
-                is_active:
-                    group.is_active,
-    
-            },
-    
-        });
-    
-    };
-    const resetGroupForm = () => {
+    } catch (error) {
 
-        dispatch({
-    
-            type: "RESET_GROUP_FORM",
-    
-        });
-    
-    };
-      const saveGroup = async () =>
-        saveEntity(
-          state.groupForm.id,
-          state.groupForm,
-          groupService,
-          "RESET_GROUP_FORM"
-        );
-    
-      const deleteGroup = async (id: string) =>
-        deleteEntity(id, groupService);
-    
-      const editGroup = (group: ClassroomGroup) =>
-        editEntity(
-          {
-            id: group.id,
-            classroom: group.classroom,
-            name: group.name,
-            code: group.code,
-            description: group.description,
-            display_order: group.display_order,
-            is_active: group.is_active,
-          },
-          "SET_GROUP_FORM"
-        );
+      handleError(error);
 
-      /* ==========================================================
-   * Selection
-   * ========================================================== */
+    } finally {
 
-  const selectLevel = (levelId: string | null) => {
-    dispatch({
-      type: "SET_SELECTED_LEVEL",
-      payload: levelId,
-    });
+      setSaving(false);
+
+    }
+
   };
 
-  const selectClassroom = (classroomId: string | null) => {
-    dispatch({
-      type: "SET_SELECTED_CLASSROOM",
-      payload: classroomId,
-    });
-  };
 
   /* ==========================================================
-   * Forms
+   * CLASSROOM LEVEL
    * ========================================================== */
 
+  const openLevelForm = (
+    level: ClassroomLevel
+  ) => {
 
-
-  const setLevelForm = (form: Partial<ClassroomLevelForm>) => {
     dispatch({
+
       type: "SET_LEVEL_FORM",
-      payload: form as ClassroomLevelForm,
+
+      payload: {
+
+        id: level.id,
+
+        name: level.name,
+
+        description:
+          level.description ?? "",
+
+        display_order:
+          level.display_order,
+
+        is_active:
+          level.is_active,
+
+      },
+
     });
+
   };
 
-  const setClassroomForm = (form: Partial<ClassroomForm>) => {
+
+  const resetLevelForm = () => {
+
     dispatch({
-      type: "SET_CLASSROOM_FORM",
-      payload: form,
+      type: "RESET_LEVEL_FORM",
     });
+
   };
 
-  const setGroupForm = (form: Partial<ClassroomGroupForm>) => {
-    dispatch({
-      type: "SET_GROUP_FORM",
-      payload: form as ClassroomGroupForm,
-    });
+
+  const saveLevel = async () =>
+
+    saveEntity(
+
+      state.levelForm.id,
+
+      state.levelForm,
+
+      levelService,
+
+      "RESET_LEVEL_FORM"
+
+    );
+
+
+  const deleteLevel = async (
+    id: string
+  ) =>
+
+    deleteEntity(
+      id,
+      levelService
+    );
+
+
+  const editLevel = (
+    level: ClassroomLevel
+  ) => {
+
+    openLevelForm(level);
+
   };
+
 
   /* ==========================================================
-   * Lifecycle
+   * CLASSROOM
+   * ========================================================== */
+
+  const openClassroomForm = (
+    classroom: Classroom
+  ) => {
+
+    dispatch({
+
+      type: "SET_CLASSROOM_FORM",
+
+      payload: {
+
+        id:
+          classroom.id,
+
+        classroom_level:
+          classroom.classroom_level,
+
+        name:
+          classroom.name,
+
+
+        /* ================================================
+         * FRAIS ÉLÈVE AFFECTÉ
+         * ================================================ */
+
+        annual_tuition_fee_assigned:
+          Number(
+            classroom.annual_tuition_fee_assigned
+          ),
+
+
+        /* ================================================
+         * FRAIS ÉLÈVE NON AFFECTÉ
+         * ================================================ */
+
+        annual_tuition_fee_unassigned:
+          Number(
+            classroom.annual_tuition_fee_unassigned
+          ),
+
+
+        next_classroom:
+          classroom.next_classroom,
+
+      },
+
+    });
+
+  };
+
+
+  const resetClassroomForm = () => {
+
+    dispatch({
+      type: "RESET_CLASSROOM_FORM",
+    });
+
+  };
+
+
+  const saveClassroom = async () =>
+
+    saveEntity(
+
+      state.classroomForm.id,
+
+      state.classroomForm,
+
+      classroomService,
+
+      "RESET_CLASSROOM_FORM"
+
+    );
+
+
+  const deleteClassroom = async (
+    id: string
+  ) =>
+
+    deleteEntity(
+      id,
+      classroomService
+    );
+
+
+  const editClassroom = (
+    classroom: Classroom
+  ) => {
+
+    openClassroomForm(
+      classroom
+    );
+
+  };
+
+
+  /* ==========================================================
+   * CLASSROOM GROUP
+   * ========================================================== */
+
+  const openGroupForm = (
+    group: ClassroomGroup
+  ) => {
+
+    dispatch({
+
+      type: "SET_GROUP_FORM",
+
+      payload: {
+
+        id:
+          group.id,
+
+        classroom:
+          group.classroom,
+
+        name:
+          group.name,
+
+        code:
+          group.code,
+
+        description:
+          group.description ?? "",
+
+        display_order:
+          group.display_order,
+
+        is_active:
+          group.is_active,
+
+      },
+
+    });
+
+  };
+
+
+  const resetGroupForm = () => {
+
+    dispatch({
+      type: "RESET_GROUP_FORM",
+    });
+
+  };
+
+
+  const saveGroup = async () =>
+
+    saveEntity(
+
+      state.groupForm.id,
+
+      state.groupForm,
+
+      groupService,
+
+      "RESET_GROUP_FORM"
+
+    );
+
+
+  const deleteGroup = async (
+    id: string
+  ) =>
+
+    deleteEntity(
+      id,
+      groupService
+    );
+
+
+  const editGroup = (
+    group: ClassroomGroup
+  ) => {
+
+    openGroupForm(
+      group
+    );
+
+  };
+
+
+  /* ==========================================================
+   * SELECTION
+   * ========================================================== */
+
+  const selectLevel = (
+    levelId: string | null
+  ) => {
+
+    dispatch({
+
+      type: "SET_SELECTED_LEVEL",
+
+      payload:
+        levelId,
+
+    });
+
+  };
+
+
+  const selectClassroom = (
+    classroomId: string | null
+  ) => {
+
+    dispatch({
+
+      type:
+        "SET_SELECTED_CLASSROOM",
+
+      payload:
+        classroomId,
+
+    });
+
+  };
+
+
+  /* ==========================================================
+   * FORMS
+   * ========================================================== */
+
+  const setLevelForm = (
+    form: Partial<ClassroomLevelForm>
+  ) => {
+
+    dispatch({
+
+      type:
+        "SET_LEVEL_FORM",
+
+      payload:
+        form,
+
+    });
+
+  };
+
+
+  const setClassroomForm = (
+    form: Partial<ClassroomForm>
+  ) => {
+
+    dispatch({
+
+      type:
+        "SET_CLASSROOM_FORM",
+
+      payload:
+        form,
+
+    });
+
+  };
+
+
+  const setGroupForm = (
+    form: Partial<ClassroomGroupForm>
+  ) => {
+
+    dispatch({
+
+      type:
+        "SET_GROUP_FORM",
+
+      payload:
+        form,
+
+    });
+
+  };
+
+
+  /* ==========================================================
+   * LIFECYCLE
    * ========================================================== */
 
   useEffect(() => {
+
     loadAll();
-  }, [loadAll]);
+
+  }, [
+    loadAll,
+  ]);
+
 
   /* ==========================================================
-   * Public API
+   * PUBLIC API
    * ========================================================== */
 
   const actions = {
+
+    /* ------------------------------------------------------
+     * LOAD
+     * ------------------------------------------------------ */
+
     loadAll,
 
-    // Sélection
-  
+
+    /* ------------------------------------------------------
+     * SELECTION
+     * ------------------------------------------------------ */
+
     selectLevel,
+
     selectClassroom,
 
-   
-    // Niveau
+
+    /* ------------------------------------------------------
+     * LEVEL
+     * ------------------------------------------------------ */
+
     openLevelForm,
+
+    editLevel,
+
     resetLevelForm,
+
     setLevelForm,
+
     saveLevel,
+
     deleteLevel,
 
-    // Classe
+
+    /* ------------------------------------------------------
+     * CLASSROOM
+     * ------------------------------------------------------ */
+
     openClassroomForm,
+
+    editClassroom,
+
     resetClassroomForm,
+
     setClassroomForm,
+
     saveClassroom,
+
     deleteClassroom,
 
-    // Groupe
+
+    /* ------------------------------------------------------
+     * GROUP
+     * ------------------------------------------------------ */
+
     openGroupForm,
+
+    editGroup,
+
     resetGroupForm,
+
     setGroupForm,
+
     saveGroup,
+
     deleteGroup,
-};
+
+  };
+
 
   return {
+
     ...state,
+
     actions,
+
   };
+
 }

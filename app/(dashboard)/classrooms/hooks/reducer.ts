@@ -27,7 +27,8 @@ import {
     classroom_level: "",
     next_classroom: null,
     name: "",
-    annual_tuition_fee: 0,
+    annual_tuition_fee_assigned: 0,
+    annual_tuition_fee_unassigned: 0,
   };
   
   export const initialGroupForm: ClassroomGroupForm = {

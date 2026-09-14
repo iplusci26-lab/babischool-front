@@ -1,7 +1,9 @@
 "use client";
 
 import EntityModal from "@/components/ui/EntityModal";
+
 import Input from "@/components/ui/Input";
+
 import Select from "@/components/ui/Select";
 
 import {
@@ -10,19 +12,15 @@ import {
   ClassroomLevel,
 } from "../types";
 
+
 interface ClassroomModalProps {
   open: boolean;
-
   saving: boolean;
-
   form: ClassroomForm;
-
   levels: ClassroomLevel[];
-
   classrooms: Classroom[];
 
   onClose: () => void;
-
   onSave: () => void;
 
   onChange: (
@@ -30,17 +28,22 @@ interface ClassroomModalProps {
   ) => void;
 }
 
+
 export default function ClassroomModal({
   open,
   saving,
   form,
   levels,
   classrooms,
+
   onClose,
   onSave,
   onChange,
+
 }: ClassroomModalProps) {
+
   return (
+
     <EntityModal
       open={open}
       title={
@@ -52,25 +55,41 @@ export default function ClassroomModal({
       onClose={onClose}
       onSave={onSave}
     >
+
+      {/* ======================================================
+       * NIVEAU
+       * ====================================================== */}
+
       <Select
         label="Niveau"
-        value={String(form.classroom_level)}
+        value={String(
+          form.classroom_level
+        )}
         options={[
           {
             label: "Sélectionner...",
             value: "",
           },
-          ...levels.map((level) => ({
-            label: level.name,
-            value: String(level.id),
-          })),
+
+          ...levels.map(
+            (level) => ({
+              label: level.name,
+              value: String(level.id),
+            })
+          ),
         ]}
         onChange={(e) =>
           onChange({
-            classroom_level: e.target.value,
+            classroom_level:
+              e.target.value,
           })
         }
       />
+
+
+      {/* ======================================================
+       * CLASSE
+       * ====================================================== */}
 
       <Input
         label="Classe"
@@ -78,50 +97,96 @@ export default function ClassroomModal({
         value={form.name}
         onChange={(e) =>
           onChange({
-            name: e.target.value,
+            name:
+              e.target.value,
           })
         }
       />
 
+
+      {/* ======================================================
+       * FRAIS ÉLÈVE AFFECTÉ
+       * ====================================================== */}
+
       <Input
         type="number"
-        label="Frais d'écolage (FCFA)"
+        label="Frais d'écolage  - Élève affecté (FCFA)"
         placeholder="0"
-        value={form.annual_tuition_fee}
+        value={
+          form.annual_tuition_fee_assigned
+        }
         onChange={(e) =>
           onChange({
-            annual_tuition_fee:
+            annual_tuition_fee_assigned:
               Number(e.target.value),
           })
         }
       />
 
-      {/*<Select
+
+      {/* ======================================================
+       * FRAIS ÉLÈVE NON AFFECTÉ
+       * ====================================================== */}
+
+      <Input
+        type="number"
+        label="Frais d'écolage  - Élève non affecté (FCFA)"
+        placeholder="0"
+        value={
+          form.annual_tuition_fee_unassigned
+        }
+        onChange={(e) =>
+          onChange({
+            annual_tuition_fee_unassigned:
+              Number(e.target.value),
+          })
+        }
+      />
+
+
+      {/* ======================================================
+       * CLASSE SUIVANTE
+       * ====================================================== */}
+
+      {/*
+      <Select
         label="Classe suivante"
-        value={String(form.next_classroom ?? "")}
+        value={String(
+          form.next_classroom ?? ""
+        )}
         options={[
           {
             label: "Aucune",
             value: "",
           },
+
           ...classrooms
             .filter(
               (classroom) =>
                 classroom.id !== form.id
             )
-            .map((classroom) => ({
-              label: classroom.name,
-              value: String(classroom.id),
-            })),
+            .map(
+              (classroom) => ({
+                label: classroom.name,
+                value: String(
+                  classroom.id
+                ),
+              })
+            ),
         ]}
         onChange={(e) =>
           onChange({
-            next_classroom: e.target.value
-              ? e.target.value
-              : null,
+            next_classroom:
+              e.target.value
+                ? e.target.value
+                : null,
           })
         }
-      />*/}
+      />
+      */}
+
     </EntityModal>
+
   );
+
 }

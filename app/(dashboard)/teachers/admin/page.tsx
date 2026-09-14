@@ -94,8 +94,7 @@ export default function TeachersPage() {
     if (
       !form.first_name ||
       !form.last_name ||
-      !form.phone ||
-      !form.date_of_birth
+      !form.phone 
     ) {
       toast.error(
         "Tous les champs sont obligatoires"
@@ -145,8 +144,7 @@ export default function TeachersPage() {
     if (
       !form.first_name ||
       !form.last_name ||
-      !form.phone ||
-      !form.date_of_birth
+      !form.phone 
     ) {
       toast.error(
         "Tous les champs sont obligatoires"

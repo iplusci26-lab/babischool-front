@@ -424,7 +424,7 @@ export default function EditPaymentModal({
              * REFERENCE
              * ============================================== */}
 
-            <div>
+            {/*<div>
               <label
                 className="
                   mb-2
@@ -460,7 +460,8 @@ export default function EditPaymentModal({
                 "
                 placeholder="Référence du paiement"
               />
-            </div>
+            </div> 
+            */}
 
             {/* ==============================================
              * NOTES
@@ -475,7 +476,7 @@ export default function EditPaymentModal({
                   font-medium
                 "
               >
-                Notes
+                Motif
               </label>
 
               <textarea

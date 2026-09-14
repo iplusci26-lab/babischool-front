@@ -425,7 +425,7 @@ export default function StaffResponsibilityModal({
         <Modal
             open={true}
             onClose={onClose}
-            title="Responsabilités du personnel"
+            title="Responsabilités agent"
         >
 
             <div className="space-y-6">
@@ -584,7 +584,7 @@ export default function StaffResponsibilityModal({
 
                                             <p className="text-sm text-gray-500">
 
-                                                Le personnel sera responsable de toutes les classes de ce niveau.
+                                                L'agent sera responsable de toutes les classes de ce niveau.
 
                                             </p>
 
