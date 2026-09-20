@@ -64,23 +64,28 @@ export default function Home() {
         </p>
 
         {/* Buttons */}
-        <div className="flex flex-col gap-4 sm:flex-row">
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <Link
+              href="/register"
+              className="rounded-2xl bg-white px-10 py-4 text-lg font-semibold text-[#6214BE] shadow-xl transition hover:scale-105 hover:bg-gray-100"
+            >
+              Inscription
+            </Link>
 
-          <Link
-            href="/register"
-            className="rounded-2xl bg-white px-10 py-4 text-lg font-semibold text-[#6214BE] shadow-xl transition hover:scale-105 hover:bg-gray-100"
-          >
-            Inscription
-          </Link>
+            <Link
+              href="/login"
+              className="rounded-2xl border border-white/30 bg-white/10 px-10 py-4 text-lg font-semibold text-white backdrop-blur-md transition hover:scale-105 hover:bg-white/20"
+            >
+              Connexion
+            </Link>
 
-          <Link
-            href="/login"
-            className="rounded-2xl border border-white/30 bg-white/10 px-10 py-4 text-lg font-semibold text-white backdrop-blur-md transition hover:scale-105 hover:bg-white/20"
-          >
-            Connexion
-          </Link>
-
-        </div>
+            <Link
+              href="/contact"
+              className="rounded-2xl border border-white/30 bg-[#6214BE] px-10 py-4 text-lg font-semibold text-white backdrop-blur-md transition hover:scale-105 hover:bg-white/20"
+            >
+              Nous contacter
+            </Link>
+          </div>
       </div>
     </main>
   );
