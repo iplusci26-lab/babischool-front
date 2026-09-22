@@ -44,9 +44,10 @@ export default function ContactPage() {
             </h1>
 
             <p className="mt-4 text-base leading-7 text-gray-600 md:text-lg">
-              Vous souhaitez équiper votre établissement avec BabiSchool ?<br></br>
-              Notre équipe vous accompagne dans la création et la configuration
-              de votre espace scolaire.
+              Vous souhaitez intégrer BABISCHOOL dans le dispositif d'encadrement 
+              <br></br> des élèves de votre établissement ?<br></br>
+              Notre équipe vous accompagne dans la création et 
+              la configuration de votre espace établissement.
             </p>
           </div>
 
@@ -58,15 +59,14 @@ export default function ContactPage() {
               </h2>
 
               <p className="mt-2 leading-6 text-gray-500">
-                Contactez-nous directement pour obtenir des informations sur
-                BabiSchool, demander une démonstration ou créer votre espace
-                établissement.
+              Contactez-nous directement pour obtenir des informations sur BABISCHOOL;
+              Profitez d'une présentation démo et créez botre espace établissement.
               </p>
 
               <div className="mt-8 space-y-5">
                 {/* Téléphone */}
                 <a
-                  href="tel:+2250749200389"
+                  href="tel:+2250716667205"
                   className="flex items-center gap-4 rounded-2xl border border-gray-100 p-4 transition hover:border-[#6214BE]/20 hover:bg-[#6214BE]/5"
                 >
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#6214BE]/10">
@@ -76,14 +76,14 @@ export default function ContactPage() {
                   <div>
                     <p className="text-sm text-gray-500">Téléphone</p>
                     <p className="font-semibold text-gray-900">
-                      +225 07 09 59 26 62
+                      +225 07 16 66 72 05
                     </p>
                   </div>
                 </a>
 
                 {/* WhatsApp */}
                 <a
-                  href="https://wa.me/2250749200389"
+                  href="https://wa.me/2250716667205"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-4 rounded-2xl border border-gray-100 p-4 transition hover:border-green-200 hover:bg-green-50"
@@ -95,7 +95,7 @@ export default function ContactPage() {
                   <div>
                     <p className="text-sm text-gray-500">WhatsApp</p>
                     <p className="font-semibold text-gray-900">
-                      +225 07 09 59 26 62
+                      +225 07 68 67 69 58
                     </p>
                   </div>
                 </a>
@@ -134,7 +134,7 @@ export default function ContactPage() {
 
               {/* CTA WhatsApp */}
               <a
-                href="https://wa.me/2250749200389?text=Bonjour%20BabiSchool%2C%20je%20souhaite%20obtenir%20des%20informations%20pour%20mon%20%C3%A9tablissement."
+                href="https://wa.me/2250768676958?text=Bonjour%20BabiSchool%2C%20je%20souhaite%20obtenir%20des%20informations%20pour%20mon%20%C3%A9tablissement."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#6214BE] px-6 py-4 font-semibold text-white shadow-lg transition hover:scale-[1.02] hover:bg-[#5310a5]"
