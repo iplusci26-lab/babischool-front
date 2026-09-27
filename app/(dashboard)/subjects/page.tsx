@@ -14,7 +14,6 @@ import {
 
 import { api } from "@/lib/api";
 
-
 // ==========================================================
 // TYPES
 // ==========================================================
@@ -47,61 +46,54 @@ interface AcademicYear {
 
 interface ClassroomSubject {
   id: string;
-
   school: string;
-
   classroom: string;
   classroom_name: string;
-
   subject: string;
   subject_name: string;
   subject_code: string;
-
   academic_year: string;
   academic_year_name: string;
-
   coefficient: number | string;
   pass_mark: number | string;
-
   is_active: boolean;
-
   created_at: string;
   updated_at: string;
 }
-
 
 // ==========================================================
 // PAGE
 // ==========================================================
 
 export default function SubjectsPage() {
-
   // ========================================================
   // SUBJECTS
   // ========================================================
 
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loadingSubjects, setLoadingSubjects] = useState(false);
 
-  const [loadingSubjects, setLoadingSubjects] =
-    useState(false);
-
-  const [creatingSubject, setCreatingSubject] =
-    useState(false);
-
+  const [creatingSubject, setCreatingSubject] = useState(false);
   const [deletingSubjectId, setDeletingSubjectId] =
     useState<string | null>(null);
 
+  // Modification d'une matière
+  const [editingSubject, setEditingSubject] =
+    useState<Subject | null>(null);
+
+  const [updatingSubject, setUpdatingSubject] = useState(false);
+
+  const [subjectEditForm, setSubjectEditForm] = useState({
+    name: "",
+    code: "",
+  });
 
   // ========================================================
   // CLASSROOMS
   // ========================================================
 
-  const [classrooms, setClassrooms] =
-    useState<Classroom[]>([]);
-
-  const [loadingClassrooms, setLoadingClassrooms] =
-    useState(false);
-
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [loadingClassrooms, setLoadingClassrooms] = useState(false);
 
   // ========================================================
   // ACADEMIC YEARS
@@ -113,7 +105,6 @@ export default function SubjectsPage() {
   const [loadingAcademicYears, setLoadingAcademicYears] =
     useState(false);
 
-
   // ========================================================
   // CLASSROOM SUBJECTS
   // ========================================================
@@ -124,7 +115,6 @@ export default function SubjectsPage() {
   const [loadingConfigurations, setLoadingConfigurations] =
     useState(false);
 
-
   // ========================================================
   // CREATION MATIERE
   // ========================================================
@@ -133,7 +123,6 @@ export default function SubjectsPage() {
     name: "",
     code: "",
   });
-
 
   // ========================================================
   // CONFIGURATION
@@ -154,132 +143,82 @@ export default function SubjectsPage() {
   const [deletingConfigurationId, setDeletingConfigurationId] =
     useState<string | null>(null);
 
-
-  const [configurationForm, setConfigurationForm] =
-    useState({
-      classroom: "",
-      academic_year: "",
-      coefficient: "1",
-      pass_mark: "10",
-    });
-
+  const [configurationForm, setConfigurationForm] = useState({
+    classroom: "",
+    academic_year: "",
+    coefficient: "1",
+    pass_mark: "10",
+  });
 
   // ========================================================
   // LOAD SUBJECTS
   // ========================================================
 
   const loadSubjects = async () => {
-
     try {
-
       setLoadingSubjects(true);
 
-      const response = await api.get(
-        "/academics/subjects/"
-      );
+      const response = await api.get("/academics/subjects/");
 
-      setSubjects(
-        response.data.results || response.data
-      );
-
+      setSubjects(response.data.results || response.data);
     } catch (error) {
+      console.error("Erreur chargement matières :", error);
 
-      console.error(
-        "Erreur chargement matières :",
-        error
-      );
-
-      toast.error(
-        "Impossible de charger les matières."
-      );
-
+      toast.error("Impossible de charger les matières.");
     } finally {
-
       setLoadingSubjects(false);
-
     }
-
   };
-
 
   // ========================================================
   // LOAD CLASSROOMS
   // ========================================================
 
   const loadClassrooms = async () => {
-
     try {
-
       setLoadingClassrooms(true);
 
-      const response = await api.get(
-        "/students/classrooms/"
-      );
+      const response = await api.get("/students/classrooms/");
 
-      setClassrooms(
-        response.data.results || response.data
-      );
-
+      setClassrooms(response.data.results || response.data);
     } catch (error) {
+      console.error("Erreur chargement classes :", error);
 
-      console.error(
-        "Erreur chargement classes :",
-        error
-      );
-
-      toast.error(
-        "Impossible de charger les classes."
-      );
-
+      toast.error("Impossible de charger les classes.");
     } finally {
-
       setLoadingClassrooms(false);
-
     }
-
   };
-
 
   // ========================================================
   // LOAD ACADEMIC YEARS
   // ========================================================
 
   const loadAcademicYears = async () => {
-
     try {
-
       setLoadingAcademicYears(true);
 
       const response = await api.get(
         "/academics/academic-years/"
       );
 
-      const years =
-        response.data.results || response.data;
+      const years = response.data.results || response.data;
 
       setAcademicYears(years);
 
       // Sélection automatique de l'année active
       const activeYear = years.find(
-        (year: AcademicYear) =>
-          year.is_active
+        (year: AcademicYear) => year.is_active
       );
 
       if (activeYear) {
-
-        setConfigurationForm(
-          (current) => ({
-            ...current,
-            academic_year:
-              current.academic_year ||
-              activeYear.id,
-          })
-        );
-
+        setConfigurationForm((current) => ({
+          ...current,
+          academic_year:
+            current.academic_year || activeYear.id,
+        }));
       }
-
     } catch (error) {
-
       console.error(
         "Erreur chargement années scolaires :",
         error
@@ -288,39 +227,27 @@ export default function SubjectsPage() {
       toast.error(
         "Impossible de charger les années scolaires."
       );
-
     } finally {
-
       setLoadingAcademicYears(false);
-
     }
-
   };
-
 
   // ========================================================
   // INITIALISATION
   // ========================================================
 
   useEffect(() => {
-
     loadSubjects();
     loadClassrooms();
     loadAcademicYears();
-
   }, []);
-
 
   // ========================================================
   // LOAD CLASSROOM SUBJECTS
   // ========================================================
 
-  const loadConfigurations = async (
-    subjectId: string
-  ) => {
-
+  const loadConfigurations = async (subjectId: string) => {
     try {
-
       setLoadingConfigurations(true);
 
       const response = await api.get(
@@ -335,9 +262,7 @@ export default function SubjectsPage() {
       setClassroomSubjects(
         response.data.results || response.data
       );
-
     } catch (error) {
-
       console.error(
         "Erreur chargement configurations :",
         error
@@ -346,117 +271,79 @@ export default function SubjectsPage() {
       toast.error(
         "Impossible de charger les configurations."
       );
-
     } finally {
-
       setLoadingConfigurations(false);
-
     }
-
   };
-
 
   // ========================================================
   // OPEN CONFIGURATION
   // ========================================================
 
-  const openConfiguration = async (
-    subject: Subject
-  ) => {
-
+  const openConfiguration = async (subject: Subject) => {
     setSelectedSubject(subject);
-
     setEditingConfiguration(null);
 
-    const activeYear =
-      academicYears.find(
-        (year) => year.is_active
-      );
+    const activeYear = academicYears.find(
+      (year) => year.is_active
+    );
 
     setConfigurationForm({
       classroom: "",
       academic_year:
-        activeYear?.id ||
-        academicYears[0]?.id ||
-        "",
+        activeYear?.id || academicYears[0]?.id || "",
       coefficient: "1",
       pass_mark: "10",
     });
 
     setConfigurationOpen(true);
 
-    await loadConfigurations(
-      subject.id
-    );
-
+    await loadConfigurations(subject.id);
   };
-
 
   // ========================================================
   // CLOSE CONFIGURATION
   // ========================================================
 
   const closeConfiguration = () => {
-
     if (savingConfiguration) {
       return;
     }
 
     setConfigurationOpen(false);
-
     setSelectedSubject(null);
-
     setEditingConfiguration(null);
-
     setClassroomSubjects([]);
-
   };
-
 
   // ========================================================
   // CREATE SUBJECT
   // ========================================================
 
   const handleCreateSubject = async () => {
-
     if (!subjectForm.name.trim()) {
-
       toast.error(
         "Veuillez renseigner le nom de la matière."
       );
-
       return;
-
     }
 
     if (!subjectForm.code.trim()) {
-
       toast.error(
         "Veuillez renseigner l'abréviation de la matière."
       );
-
       return;
-
     }
 
     try {
-
       setCreatingSubject(true);
 
-      await api.post(
-        "/academics/subjects/",
-        {
-          name: subjectForm.name.trim(),
+      await api.post("/academics/subjects/", {
+        name: subjectForm.name.trim(),
+        code: subjectForm.code.trim().toUpperCase(),
+      });
 
-          code: subjectForm.code
-            .trim()
-            .toUpperCase(),
-        }
-      );
-
-      toast.success(
-        "Matière ajoutée avec succès."
-      );
+      toast.success("Matière ajoutée avec succès.");
 
       setSubjectForm({
         name: "",
@@ -464,80 +351,161 @@ export default function SubjectsPage() {
       });
 
       await loadSubjects();
-
     } catch (error: any) {
-
       console.error(
         "Erreur création matière :",
         error?.response?.data || error
       );
 
-      const data =
-        error?.response?.data;
+      const data = error?.response?.data;
 
       if (data?.name) {
-
         toast.error(
           Array.isArray(data.name)
             ? data.name[0]
             : data.name
         );
-
       } else if (data?.code) {
-
         toast.error(
           Array.isArray(data.code)
             ? data.code[0]
             : data.code
         );
-
       } else if (data?.detail) {
-
-        toast.error(
-          data.detail
-        );
-
+        toast.error(data.detail);
       } else {
-
         toast.error(
           "Impossible d'ajouter la matière."
         );
-
       }
-
     } finally {
-
       setCreatingSubject(false);
-
     }
-
   };
 
+  // ========================================================
+  // OPEN EDIT SUBJECT
+  // ========================================================
+
+  const handleOpenEditSubject = (subject: Subject) => {
+    setEditingSubject(subject);
+
+    setSubjectEditForm({
+      name: subject.name,
+      code: subject.code,
+    });
+  };
+
+  // ========================================================
+  // CLOSE EDIT SUBJECT
+  // ========================================================
+
+  const handleCloseEditSubject = () => {
+    if (updatingSubject) {
+      return;
+    }
+
+    setEditingSubject(null);
+
+    setSubjectEditForm({
+      name: "",
+      code: "",
+    });
+  };
+
+  // ========================================================
+  // UPDATE SUBJECT
+  // ========================================================
+
+  const handleUpdateSubject = async () => {
+    if (!editingSubject) {
+      return;
+    }
+
+    const name = subjectEditForm.name.trim();
+    const code = subjectEditForm.code.trim().toUpperCase();
+
+    if (!name) {
+      toast.error(
+        "Veuillez renseigner le nom de la matière."
+      );
+      return;
+    }
+
+    if (!code) {
+      toast.error(
+        "Veuillez renseigner l'abréviation de la matière."
+      );
+      return;
+    }
+
+    try {
+      setUpdatingSubject(true);
+
+      await api.patch(
+        `/academics/subjects/${editingSubject.id}/`,
+        {
+          name,
+          code,
+        }
+      );
+
+      toast.success("Matière modifiée avec succès.");
+
+      setEditingSubject(null);
+
+      setSubjectEditForm({
+        name: "",
+        code: "",
+      });
+
+      await loadSubjects();
+    } catch (error: any) {
+      console.error(
+        "Erreur modification matière :",
+        error?.response?.data || error
+      );
+
+      const data = error?.response?.data;
+
+      if (data?.name) {
+        toast.error(
+          Array.isArray(data.name)
+            ? data.name[0]
+            : data.name
+        );
+      } else if (data?.code) {
+        toast.error(
+          Array.isArray(data.code)
+            ? data.code[0]
+            : data.code
+        );
+      } else if (data?.detail) {
+        toast.error(data.detail);
+      } else {
+        toast.error(
+          "Impossible de modifier cette matière."
+        );
+      }
+    } finally {
+      setUpdatingSubject(false);
+    }
+  };
 
   // ========================================================
   // DELETE SUBJECT
   // ========================================================
 
-  const handleDeleteSubject = async (
-    id: string
-  ) => {
-
+  const handleDeleteSubject = async (id: string) => {
     try {
-
       setDeletingSubjectId(id);
 
-      await api.delete(
-        `/academics/subjects/${id}/`
-      );
+      await api.delete(`/academics/subjects/${id}/`);
 
-      toast.success(
-        "Matière supprimée avec succès."
-      );
+      toast.success("Matière supprimée avec succès.");
 
       await loadSubjects();
-
     } catch (error: any) {
-
       console.error(
         "Erreur suppression matière :",
         error?.response?.data || error
@@ -545,121 +513,82 @@ export default function SubjectsPage() {
 
       toast.error(
         error?.response?.data?.detail ||
-        "Impossible de supprimer cette matière."
+          "Impossible de supprimer cette matière."
       );
-
     } finally {
-
       setDeletingSubjectId(null);
-
     }
-
   };
-
 
   // ========================================================
   // VALIDATE CONFIGURATION
   // ========================================================
 
   const validateConfiguration = () => {
-
     if (!configurationForm.academic_year) {
-
       toast.error(
         "Veuillez sélectionner une année scolaire."
       );
-
       return false;
-
     }
 
     if (!configurationForm.classroom) {
-
-      toast.error(
-        "Veuillez sélectionner une classe."
-      );
-
+      toast.error("Veuillez sélectionner une classe.");
       return false;
-
     }
 
     if (!configurationForm.coefficient.trim()) {
-
-      toast.error(
-        "Veuillez renseigner le coefficient."
-      );
-
+      toast.error("Veuillez renseigner le coefficient.");
       return false;
-
     }
 
     const coefficient = Number(
-      configurationForm.coefficient
-        .replace(",", ".")
+      configurationForm.coefficient.replace(",", ".")
     );
 
     if (
       !Number.isFinite(coefficient) ||
       coefficient <= 0
     ) {
-
       toast.error(
         "Le coefficient doit être supérieur à 0."
       );
-
       return false;
-
     }
 
     if (coefficient > 999.99) {
-
       toast.error(
         "Le coefficient ne peut pas dépasser 999.99."
       );
-
       return false;
-
     }
 
     if (!configurationForm.pass_mark.trim()) {
-
       toast.error(
         "Veuillez renseigner la note de passage."
       );
-
       return false;
-
     }
 
     const passMark = Number(
-      configurationForm.pass_mark
-        .replace(",", ".")
+      configurationForm.pass_mark.replace(",", ".")
     );
 
-    if (
-      !Number.isFinite(passMark) ||
-      passMark < 0
-    ) {
-
+    if (!Number.isFinite(passMark) || passMark < 0) {
       toast.error(
         "La note de passage doit être supérieure ou égale à 0."
       );
-
       return false;
-
     }
 
     return true;
-
   };
-
 
   // ========================================================
   // SAVE CONFIGURATION
   // ========================================================
 
   const handleSaveConfiguration = async () => {
-
     if (!selectedSubject) {
       return;
     }
@@ -669,36 +598,22 @@ export default function SubjectsPage() {
     }
 
     const payload = {
-
-      classroom:
-        configurationForm.classroom,
-
-      subject:
-        selectedSubject.id,
-
-      academic_year:
-        configurationForm.academic_year,
-
+      classroom: configurationForm.classroom,
+      subject: selectedSubject.id,
+      academic_year: configurationForm.academic_year,
       coefficient: Number(
-        configurationForm.coefficient
-          .replace(",", ".")
+        configurationForm.coefficient.replace(",", ".")
       ),
-
       pass_mark: Number(
-        configurationForm.pass_mark
-          .replace(",", ".")
+        configurationForm.pass_mark.replace(",", ".")
       ),
-
       is_active: true,
-
     };
 
     try {
-
       setSavingConfiguration(true);
 
       if (editingConfiguration) {
-
         await api.patch(
           `/academics/classroom-subjects/${editingConfiguration.id}/`,
           payload
@@ -707,9 +622,7 @@ export default function SubjectsPage() {
         toast.success(
           "Configuration modifiée avec succès."
         );
-
       } else {
-
         await api.post(
           "/academics/classroom-subjects/",
           payload
@@ -718,102 +631,72 @@ export default function SubjectsPage() {
         toast.success(
           "Configuration enregistrée avec succès."
         );
-
       }
 
       setEditingConfiguration(null);
 
-      const activeYear =
-        academicYears.find(
-          (year) => year.is_active
-        );
+      const activeYear = academicYears.find(
+        (year) => year.is_active
+      );
 
       setConfigurationForm({
         classroom: "",
         academic_year:
-          activeYear?.id ||
-          academicYears[0]?.id ||
-          "",
+          activeYear?.id || academicYears[0]?.id || "",
         coefficient: "1",
         pass_mark: "10",
       });
 
-      await loadConfigurations(
-        selectedSubject.id
-      );
-
+      await loadConfigurations(selectedSubject.id);
     } catch (error: any) {
-
       console.error(
         "Erreur configuration matière :",
         error?.response?.data || error
       );
 
-      const data =
-        error?.response?.data;
+      const data = error?.response?.data;
 
       if (data?.classroom) {
-
         toast.error(
           Array.isArray(data.classroom)
             ? data.classroom[0]
             : data.classroom
         );
-
       } else if (data?.subject) {
-
         toast.error(
           Array.isArray(data.subject)
             ? data.subject[0]
             : data.subject
         );
-
       } else if (data?.academic_year) {
-
         toast.error(
           Array.isArray(data.academic_year)
             ? data.academic_year[0]
             : data.academic_year
         );
-
       } else if (data?.coefficient) {
-
         toast.error(
           Array.isArray(data.coefficient)
             ? data.coefficient[0]
             : data.coefficient
         );
-
       } else if (data?.pass_mark) {
-
         toast.error(
           Array.isArray(data.pass_mark)
             ? data.pass_mark[0]
             : data.pass_mark
         );
-
       } else if (data?.detail) {
-
-        toast.error(
-          data.detail
-        );
-
+        toast.error(data.detail);
       } else {
-
         toast.error(
           "Impossible d'enregistrer la configuration."
         );
-
       }
-
     } finally {
-
       setSavingConfiguration(false);
-
     }
-
   };
-
 
   // ========================================================
   // EDIT CONFIGURATION
@@ -822,91 +705,54 @@ export default function SubjectsPage() {
   const handleEditConfiguration = (
     configuration: ClassroomSubject
   ) => {
-
-    setEditingConfiguration(
-      configuration
-    );
+    setEditingConfiguration(configuration);
 
     setConfigurationForm({
-
-      classroom:
-        configuration.classroom,
-
-      academic_year:
-        configuration.academic_year,
-
-      coefficient:
-        String(configuration.coefficient),
-
-      pass_mark:
-        String(configuration.pass_mark),
-
+      classroom: configuration.classroom,
+      academic_year: configuration.academic_year,
+      coefficient: String(configuration.coefficient),
+      pass_mark: String(configuration.pass_mark),
     });
-
   };
 
-
   // ========================================================
-  // CANCEL EDIT
+  // CANCEL EDIT CONFIGURATION
   // ========================================================
 
   const cancelEdit = () => {
-
     setEditingConfiguration(null);
 
-    const activeYear =
-      academicYears.find(
-        (year) => year.is_active
-      );
+    const activeYear = academicYears.find(
+      (year) => year.is_active
+    );
 
     setConfigurationForm({
-
       classroom: "",
-
       academic_year:
-        activeYear?.id ||
-        academicYears[0]?.id ||
-        "",
-
+        activeYear?.id || academicYears[0]?.id || "",
       coefficient: "1",
-
       pass_mark: "10",
-
     });
-
   };
-
 
   // ========================================================
   // DELETE CONFIGURATION
   // ========================================================
 
-  const handleDeleteConfiguration = async (
-    id: string
-  ) => {
-
+  const handleDeleteConfiguration = async (id: string) => {
     try {
-
       setDeletingConfigurationId(id);
 
       await api.delete(
         `/academics/classroom-subjects/${id}/`
       );
 
-      toast.success(
-        "Configuration supprimée."
-      );
+      toast.success("Configuration supprimée.");
 
       if (selectedSubject) {
-
-        await loadConfigurations(
-          selectedSubject.id
-        );
-
+        await loadConfigurations(selectedSubject.id);
       }
-
     } catch (error: any) {
-
       console.error(
         "Erreur suppression configuration :",
         error?.response?.data || error
@@ -914,61 +760,36 @@ export default function SubjectsPage() {
 
       toast.error(
         error?.response?.data?.detail ||
-        "Impossible de supprimer cette configuration."
+          "Impossible de supprimer cette configuration."
       );
-
     } finally {
-
       setDeletingConfigurationId(null);
-
     }
-
   };
-
 
   // ========================================================
   // CONFIGURATION COUNT
   // ========================================================
 
-  const configurationCountBySubject =
-    useMemo(() => {
+  const configurationCountBySubject = useMemo(() => {
+    const result: Record<string, number> = {};
 
-      const result: Record<
-        string,
-        number
-      > = {};
+    classroomSubjects.forEach((configuration) => {
+      result[configuration.subject] =
+        (result[configuration.subject] || 0) + 1;
+    });
 
-      classroomSubjects.forEach(
-        (configuration) => {
-
-          result[
-            configuration.subject
-          ] =
-            (result[
-              configuration.subject
-            ] || 0) + 1;
-
-        }
-      );
-
-      return result;
-
-    }, [classroomSubjects]);
-
+    return result;
+  }, [classroomSubjects]);
 
   // ========================================================
   // FORMAT COEFFICIENT
   // ========================================================
 
-  const formatCoefficient = (
-    value: number | string
-  ) => {
-
-    const number =
-      Number(
-        String(value)
-          .replace(",", ".")
-      );
+  const formatCoefficient = (value: number | string) => {
+    const number = Number(
+      String(value).replace(",", ".")
+    );
 
     if (!Number.isFinite(number)) {
       return value;
@@ -978,24 +799,17 @@ export default function SubjectsPage() {
       .toFixed(2)
       .replace(/\.00$/, "")
       .replace(/(\.\d)0$/, "$1");
-
   };
-
 
   // ========================================================
   // UI
   // ========================================================
 
   return (
-
     <div className="min-h-screen space-y-6 bg-gray-50 p-6">
-
-      {/* ================================================== */}
       {/* HEADER */}
-      {/* ================================================== */}
 
       <div>
-
         <h1 className="text-2xl font-bold text-gray-900">
           Gestion des matières
         </h1>
@@ -1005,34 +819,23 @@ export default function SubjectsPage() {
           puis configurez leur coefficient et leur note
           de passage pour chaque classe.
         </p>
-
       </div>
 
-
-      {/* ================================================== */}
       {/* CREATION MATIERE */}
-      {/* ================================================== */}
 
       <div className="rounded-2xl border bg-white p-6 shadow-sm">
-
         <h2 className="mb-5 flex items-center gap-2 text-lg font-semibold">
-
           <Plus
             size={20}
             className="text-[#6214BE]"
           />
-
           Nouvelle matière
-
         </h2>
 
-
         <div className="grid gap-5 lg:grid-cols-3">
-
           {/* NOM */}
 
           <div>
-
             <label className="mb-2 block text-sm font-medium text-gray-700">
               Nom de la matière
             </label>
@@ -1049,28 +852,18 @@ export default function SubjectsPage() {
               }
               disabled={creatingSubject}
               className="
-                w-full
-                rounded-xl
-                border
-                border-gray-300
-                px-4
-                py-3
-                outline-none
-                transition
+                w-full rounded-xl border border-gray-300
+                px-4 py-3 outline-none transition
                 focus:border-[#6214BE]
-                focus:ring-2
-                focus:ring-[#6214BE]/10
+                focus:ring-2 focus:ring-[#6214BE]/10
                 disabled:bg-gray-100
               "
             />
-
           </div>
-
 
           {/* CODE */}
 
           <div>
-
             <label className="mb-2 block text-sm font-medium text-gray-700">
               Abréviation
             </label>
@@ -1082,58 +875,36 @@ export default function SubjectsPage() {
               onChange={(event) =>
                 setSubjectForm({
                   ...subjectForm,
-                  code:
-                    event.target.value.toUpperCase(),
+                  code: event.target.value.toUpperCase(),
                 })
               }
               disabled={creatingSubject}
               className="
-                w-full
-                rounded-xl
-                border
-                border-gray-300
-                px-4
-                py-3
-                uppercase
-                outline-none
-                transition
+                w-full rounded-xl border border-gray-300
+                px-4 py-3 uppercase outline-none transition
                 focus:border-[#6214BE]
-                focus:ring-2
-                focus:ring-[#6214BE]/10
+                focus:ring-2 focus:ring-[#6214BE]/10
                 disabled:bg-gray-100
               "
             />
-
           </div>
-
 
           {/* BOUTON */}
 
           <div className="flex items-end">
-
             <button
               type="button"
               onClick={handleCreateSubject}
               disabled={creatingSubject}
               className="
-                flex
-                w-full
-                items-center
-                justify-center
-                gap-2
-                rounded-xl
-                bg-[#6214BE]
-                px-5
-                py-3
-                font-medium
-                text-white
-                transition
+                flex w-full items-center justify-center gap-2
+                rounded-xl bg-[#6214BE] px-5 py-3
+                font-medium text-white transition
                 hover:bg-[#4d0fa0]
                 disabled:cursor-not-allowed
                 disabled:bg-gray-400
               "
             >
-
               {creatingSubject && (
                 <Loader2
                   size={18}
@@ -1144,1021 +915,831 @@ export default function SubjectsPage() {
               {creatingSubject
                 ? "Ajout..."
                 : "Ajouter matière"}
-
             </button>
-
           </div>
-
         </div>
-
       </div>
 
-
-      {/* ================================================== */}
       {/* TABLEAU */}
-      {/* ================================================== */}
 
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-
         <div className="border-b bg-gray-50 px-6 py-4">
-
           <h2 className="font-semibold text-gray-800">
             Matières enregistrées
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-
             {subjects.length} matière
             {subjects.length > 1 ? "s" : ""}
-
           </p>
-
         </div>
 
-
         <div className="overflow-x-auto">
-
           <table className="w-full">
-
             <thead className="bg-gray-50">
-
               <tr className="text-left text-sm font-semibold text-gray-600">
-
-                <th className="px-6 py-4">
-                  Matière
-                </th>
-
-                <th className="px-6 py-4">
-                  Abréviation
-                </th>
-
-                <th className="px-6 py-4">
-                  Configuration
-                </th>
-
+                <th className="px-6 py-4">Matière</th>
+                <th className="px-6 py-4">Abréviation</th>
+                <th className="px-6 py-4">Configuration</th>
                 <th className="px-6 py-4 text-right">
                   Actions
                 </th>
-
               </tr>
-
             </thead>
 
-
             <tbody>
-
               {loadingSubjects ? (
-
                 <tr>
-
                   <td
                     colSpan={4}
                     className="py-12 text-center text-gray-500"
                   >
-
                     <div className="flex items-center justify-center gap-2">
-
                       <Loader2
                         size={18}
                         className="animate-spin"
                       />
-
                       Chargement des matières...
-
                     </div>
-
                   </td>
-
                 </tr>
-
               ) : subjects.length === 0 ? (
-
                 <tr>
-
                   <td
                     colSpan={4}
                     className="py-12 text-center text-gray-500"
                   >
-
                     <div className="flex flex-col items-center gap-3">
-
                       <BookOpen
                         size={32}
                         className="text-gray-300"
                       />
-
                       <span>
                         Aucune matière enregistrée.
                       </span>
-
                     </div>
-
                   </td>
-
                 </tr>
-
               ) : (
-
                 subjects.map((subject) => (
-
                   <tr
                     key={subject.id}
                     className="
-                      border-t
-                      transition-colors
+                      border-t transition-colors
                       hover:bg-gray-50
                     "
                   >
-
                     {/* MATIERE */}
 
                     <td className="px-6 py-4">
-
                       <div className="flex items-center gap-3">
-
                         <div className="rounded-xl bg-[#6214BE]/10 p-2">
-
                           <BookOpen
                             size={18}
                             className="text-[#6214BE]"
                           />
-
                         </div>
 
                         <span className="font-medium text-gray-800">
-
                           {subject.name}
-
                         </span>
-
                       </div>
-
                     </td>
-
 
                     {/* CODE */}
 
                     <td className="px-6 py-4">
-
                       <span className="rounded-lg bg-gray-100 px-3 py-1 text-sm font-medium">
-
                         {subject.code}
-
                       </span>
-
                     </td>
-
 
                     {/* CONFIGURATION */}
 
                     <td className="px-6 py-4">
-
                       <button
                         type="button"
                         onClick={() =>
-                          openConfiguration(
-                            subject
-                          )
+                          openConfiguration(subject)
                         }
                         className="
-                          inline-flex
-                          items-center
-                          gap-2
-                          rounded-lg
-                          border
-                          border-[#6214BE]/20
-                          bg-[#6214BE]/5
-                          px-3
-                          py-2
-                          text-sm
-                          font-medium
-                          text-[#6214BE]
-                          transition
-                          hover:bg-[#6214BE]/10
+                          inline-flex items-center gap-2
+                          rounded-lg border border-[#6214BE]/20
+                          bg-[#6214BE]/5 px-3 py-2
+                          text-sm font-medium text-[#6214BE]
+                          transition hover:bg-[#6214BE]/10
                         "
                       >
-
-                        <Settings2
-                          size={16}
-                        />
-
+                        <Settings2 size={16} />
                         Configurer
-
                       </button>
-
                     </td>
-
 
                     {/* ACTIONS */}
 
                     <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        {/* MODIFIER */}
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleDeleteSubject(
-                            subject.id
-                          )
-                        }
-                        disabled={
-                          deletingSubjectId ===
-                          subject.id
-                        }
-                        className="
-                          inline-flex
-                          items-center
-                          gap-2
-                          rounded-lg
-                          border
-                          border-red-200
-                          px-3
-                          py-2
-                          text-sm
-                          font-medium
-                          text-red-600
-                          transition
-                          hover:bg-red-50
-                          disabled:cursor-not-allowed
-                          disabled:opacity-50
-                        "
-                      >
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleOpenEditSubject(subject)
+                          }
+                          disabled={
+                            deletingSubjectId === subject.id
+                          }
+                          className="
+                            inline-flex items-center gap-2
+                            rounded-lg border border-[#6214BE]/20
+                            px-3 py-2 text-sm font-medium
+                            text-[#6214BE] transition
+                            hover:bg-[#6214BE]/5
+                            disabled:cursor-not-allowed
+                            disabled:opacity-50
+                          "
+                          title="Modifier la matière"
+                        >
+                          <Pencil size={16} />
+                          Modifier
+                        </button>
 
-                        <Trash2
-                          size={16}
-                        />
+                        {/* SUPPRIMER */}
 
-                        {deletingSubjectId ===
-                        subject.id
-                          ? "Suppression..."
-                          : "Supprimer"}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDeleteSubject(subject.id)
+                          }
+                          disabled={
+                            deletingSubjectId === subject.id
+                          }
+                          className="
+                            inline-flex items-center gap-2
+                            rounded-lg border border-red-200
+                            px-3 py-2 text-sm font-medium
+                            text-red-600 transition
+                            hover:bg-red-50
+                            disabled:cursor-not-allowed
+                            disabled:opacity-50
+                          "
+                        >
+                          {deletingSubjectId === subject.id ? (
+                            <Loader2
+                              size={16}
+                              className="animate-spin"
+                            />
+                          ) : (
+                            <Trash2 size={16} />
+                          )}
 
-                      </button>
-
+                          {deletingSubjectId === subject.id
+                            ? "Suppression..."
+                            : "Supprimer"}
+                        </button>
+                      </div>
                     </td>
-
                   </tr>
-
                 ))
-
               )}
-
             </tbody>
-
           </table>
-
         </div>
-
       </div>
-
 
       {/* ================================================== */}
       {/* MODAL CONFIGURATION */}
       {/* ================================================== */}
 
-      {configurationOpen &&
-        selectedSubject && (
-
+      {configurationOpen && selectedSubject && (
+        <div
+          className="
+            fixed inset-0 z-50 flex items-center
+            justify-center bg-black/40 p-4
+          "
+        >
           <div
             className="
-              fixed
-              inset-0
-              z-50
-              flex
-              items-center
-              justify-center
-              bg-black/40
-              p-4
+              flex max-h-[90vh] w-full max-w-5xl
+              flex-col overflow-hidden rounded-2xl
+              bg-white shadow-2xl
             "
           >
+            {/* MODAL HEADER */}
 
-            <div
-              className="
-                flex
-                max-h-[90vh]
-                w-full
-                max-w-5xl
-                flex-col
-                overflow-hidden
-                rounded-2xl
-                bg-white
-                shadow-2xl
-              "
-            >
-
-              {/* ================================================== */}
-              {/* MODAL HEADER */}
-              {/* ================================================== */}
-
-              <div className="flex items-center justify-between border-b px-6 py-5">
+            <div className="flex items-center justify-between border-b px-6 py-5">
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-[#6214BE]/10 p-2">
+                  <Settings2
+                    size={20}
+                    className="text-[#6214BE]"
+                  />
+                </div>
 
                 <div>
+                  <h2 className="text-lg font-bold text-gray-900">
+                    Configuration de {selectedSubject.name}
+                  </h2>
 
-                  <div className="flex items-center gap-3">
-
-                    <div className="rounded-xl bg-[#6214BE]/10 p-2">
-
-                      <Settings2
-                        size={20}
-                        className="text-[#6214BE]"
-                      />
-
-                    </div>
-
-                    <div>
-
-                      <h2 className="text-lg font-bold text-gray-900">
-
-                        Configuration de{" "}
-
-                        {selectedSubject.name}
-
-                      </h2>
-
-                      <p className="mt-1 text-sm text-gray-500">
-
-                        {selectedSubject.code}
-
-                      </p>
-
-                    </div>
-
-                  </div>
-
+                  <p className="mt-1 text-sm text-gray-500">
+                    {selectedSubject.code}
+                  </p>
                 </div>
-
-
-                <button
-                  type="button"
-                  onClick={closeConfiguration}
-                  disabled={savingConfiguration}
-                  className="
-                    rounded-lg
-                    p-2
-                    text-gray-500
-                    transition
-                    hover:bg-gray-100
-                    hover:text-gray-700
-                  "
-                >
-
-                  <X size={20} />
-
-                </button>
-
               </div>
 
-
-              {/* ================================================== */}
-              {/* MODAL BODY */}
-              {/* ================================================== */}
-
-              <div className="overflow-y-auto p-6">
-
-                <div className="grid gap-6 lg:grid-cols-2">
-
-
-                  {/* ================================================== */}
-                  {/* FORMULAIRE */}
-                  {/* ================================================== */}
-
-                  <div className="rounded-2xl border bg-gray-50 p-5">
-
-                    <div className="mb-5">
-
-                      <h3 className="font-semibold text-gray-900">
-
-                        {editingConfiguration
-                          ? "Modifier la configuration"
-                          : "Nouvelle configuration"}
-
-                      </h3>
-
-                      <p className="mt-1 text-sm text-gray-500">
-
-                        Définissez les paramètres de cette
-                        matière pour une classe.
-
-                      </p>
-
-                    </div>
-
-
-                    <div className="space-y-5">
-
-
-                      {/* ANNEE */}
-
-                      <div>
-
-                        <label className="mb-2 block text-sm font-medium text-gray-700">
-
-                          Année scolaire
-
-                        </label>
-
-                        <select
-                          value={
-                            configurationForm.academic_year
-                          }
-                          onChange={(event) =>
-                            setConfigurationForm({
-                              ...configurationForm,
-                              academic_year:
-                                event.target.value,
-                            })
-                          }
-                          disabled={
-                            savingConfiguration ||
-                            loadingAcademicYears
-                          }
-                          className="
-                            w-full
-                            rounded-xl
-                            border
-                            border-gray-300
-                            bg-white
-                            px-4
-                            py-3
-                            outline-none
-                            transition
-                            focus:border-[#6214BE]
-                            focus:ring-2
-                            focus:ring-[#6214BE]/10
-                          "
-                        >
-
-                          <option value="">
-                            Sélectionner une année
-                          </option>
-
-                          {academicYears.map(
-                            (year) => (
-
-                              <option
-                                key={year.id}
-                                value={year.id}
-                              >
-
-                                {year.name}
-
-                                {year.is_active
-                                  ? " — Année active"
-                                  : ""}
-
-                              </option>
-
-                            )
-                          )}
-
-                        </select>
-
-                      </div>
-
-
-                      {/* CLASSE */}
-
-                      <div>
-
-                        <label className="mb-2 block text-sm font-medium text-gray-700">
-
-                          Classe
-
-                        </label>
-
-                        <select
-                          value={
-                            configurationForm.classroom
-                          }
-                          onChange={(event) =>
-                            setConfigurationForm({
-                              ...configurationForm,
-                              classroom:
-                                event.target.value,
-                            })
-                          }
-                          disabled={
-                            savingConfiguration ||
-                            loadingClassrooms
-                          }
-                          className="
-                            w-full
-                            rounded-xl
-                            border
-                            border-gray-300
-                            bg-white
-                            px-4
-                            py-3
-                            outline-none
-                            transition
-                            focus:border-[#6214BE]
-                            focus:ring-2
-                            focus:ring-[#6214BE]/10
-                          "
-                        >
-
-                          <option value="">
-                            Sélectionner une classe
-                          </option>
-
-                          {classrooms.map(
-                            (classroom) => (
-
-                              <option
-                                key={classroom.id}
-                                value={classroom.id}
-                              >
-
-                                {classroom.name}
-
-                                {classroom.classroom_level_name
-                                  ? ` — ${classroom.classroom_level_name}`
-                                  : ""}
-
-                              </option>
-
-                            )
-                          )}
-
-                        </select>
-
-                      </div>
-
-
-                      {/* COEFFICIENT */}
-
-                      <div>
-
-                        <label className="mb-2 block text-sm font-medium text-gray-700">
-
-                          Coefficient
-
-                        </label>
-
-                        <input
-                          type="number"
-                          min="0.01"
-                          max="999.99"
-                          step="0.01"
-                          inputMode="decimal"
-                          value={
-                            configurationForm.coefficient
-                          }
-                          onChange={(event) =>
-                            setConfigurationForm({
-                              ...configurationForm,
-                              coefficient:
-                                event.target.value,
-                            })
-                          }
-                          disabled={
-                            savingConfiguration
-                          }
-                          className="
-                            w-full
-                            rounded-xl
-                            border
-                            border-gray-300
-                            bg-white
-                            px-4
-                            py-3
-                            outline-none
-                            transition
-                            focus:border-[#6214BE]
-                            focus:ring-2
-                            focus:ring-[#6214BE]/10
-                          "
-                        />
-
-                      </div>
-
-
-                      {/* NOTE DE PASSAGE */}
-
-                      <div>
-
-                        <label className="mb-2 block text-sm font-medium text-gray-700">
-
-                          Note de passage
-
-                        </label>
-
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          inputMode="decimal"
-                          value={
-                            configurationForm.pass_mark
-                          }
-                          onChange={(event) =>
-                            setConfigurationForm({
-                              ...configurationForm,
-                              pass_mark:
-                                event.target.value,
-                            })
-                          }
-                          disabled={
-                            savingConfiguration
-                          }
-                          className="
-                            w-full
-                            rounded-xl
-                            border
-                            border-gray-300
-                            bg-white
-                            px-4
-                            py-3
-                            outline-none
-                            transition
-                            focus:border-[#6214BE]
-                            focus:ring-2
-                            focus:ring-[#6214BE]/10
-                          "
-                        />
-
-                      </div>
-
-
-                      {/* BOUTONS */}
-
-                      <div className="flex gap-3 pt-2">
-
-                        {editingConfiguration && (
-
-                          <button
-                            type="button"
-                            onClick={cancelEdit}
-                            disabled={
-                              savingConfiguration
-                            }
-                            className="
-                              flex-1
-                              rounded-xl
-                              border
-                              border-gray-300
-                              bg-white
-                              px-4
-                              py-3
-                              font-medium
-                              text-gray-700
-                              transition
-                              hover:bg-gray-100
-                            "
-                          >
-
-                            Annuler
-
-                          </button>
-
-                        )}
-
-
-                        <button
-                          type="button"
-                          onClick={
-                            handleSaveConfiguration
-                          }
-                          disabled={
-                            savingConfiguration
-                          }
-                          className="
-                            flex
-                            flex-1
-                            items-center
-                            justify-center
-                            gap-2
-                            rounded-xl
-                            bg-[#6214BE]
-                            px-4
-                            py-3
-                            font-medium
-                            text-white
-                            transition
-                            hover:bg-[#4d0fa0]
-                            disabled:cursor-not-allowed
-                            disabled:bg-gray-400
-                          "
-                        >
-
-                          {savingConfiguration && (
-
-                            <Loader2
-                              size={17}
-                              className="animate-spin"
-                            />
-
-                          )}
-
-                          {savingConfiguration
-                            ? "Enregistrement..."
-                            : editingConfiguration
-                              ? "Modifier"
-                              : "Enregistrer"}
-
-                        </button>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-
-                  {/* ================================================== */}
-                  {/* CONFIGURATIONS EXISTANTES */}
-                  {/* ================================================== */}
-
-                  <div>
-
-                    <div className="mb-4">
-
-                      <h3 className="font-semibold text-gray-900">
-
-                        Configurations existantes
-
-                      </h3>
-
-                      <p className="mt-1 text-sm text-gray-500">
-
-                        Paramètres de cette matière par
-                        classe et année scolaire.
-
-                      </p>
-
-                    </div>
-
-
-                    {loadingConfigurations ? (
-
-                      <div className="flex min-h-[250px] items-center justify-center rounded-2xl border">
-
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-
-                          <Loader2
-                            size={18}
-                            className="animate-spin"
-                          />
-
-                          Chargement...
-
-                        </div>
-
-                      </div>
-
-                    ) : classroomSubjects.length === 0 ? (
-
-                      <div className="flex min-h-[250px] flex-col items-center justify-center rounded-2xl border bg-gray-50 p-6 text-center">
-
-                        <Settings2
-                          size={32}
-                          className="mb-3 text-gray-300"
-                        />
-
-                        <p className="font-medium text-gray-700">
-
-                          Aucune configuration
-
-                        </p>
-
-                        <p className="mt-1 text-sm text-gray-500">
-
-                          Configurez cette matière pour
-                          commencer à l'utiliser.
-
-                        </p>
-
-                      </div>
-
-                    ) : (
-
-                      <div className="overflow-hidden rounded-2xl border">
-
-                        <div className="max-h-[450px] overflow-y-auto">
-
-                          <table className="w-full">
-
-                            <thead className="sticky top-0 bg-gray-50">
-
-                              <tr className="text-left text-xs font-semibold uppercase text-gray-500">
-
-                                <th className="px-4 py-3">
-                                  Année
-                                </th>
-
-                                <th className="px-4 py-3">
-                                  Classe
-                                </th>
-
-                                <th className="px-4 py-3">
-                                  Coef.
-                                </th>
-
-                                <th className="px-4 py-3">
-                                  Passage
-                                </th>
-
-                                <th className="px-4 py-3 text-right">
-                                  Actions
-                                </th>
-
-                              </tr>
-
-                            </thead>
-
-
-                            <tbody>
-
-                              {classroomSubjects.map(
-                                (configuration) => (
-
-                                  <tr
-                                    key={
-                                      configuration.id
-                                    }
-                                    className="
-                                      border-t
-                                      hover:bg-gray-50
-                                    "
-                                  >
-
-                                    <td className="px-4 py-3 text-sm">
-
-                                      {
-                                        configuration.academic_year_name
-                                      }
-
-                                    </td>
-
-
-                                    <td className="px-4 py-3">
-
-                                      <span className="font-medium text-gray-800">
-
-                                        {
-                                          configuration.classroom_name
-                                        }
-
-                                      </span>
-
-                                    </td>
-
-
-                                    <td className="px-4 py-3">
-
-                                      <span className="rounded-full bg-[#6214BE]/10 px-2.5 py-1 text-xs font-semibold text-[#6214BE]">
-
-                                        {formatCoefficient(
-                                          configuration.coefficient
-                                        )}
-
-                                      </span>
-
-                                    </td>
-
-
-                                    <td className="px-4 py-3 text-sm text-gray-600">
-
-                                      {
-                                        configuration.pass_mark
-                                      }
-
-                                    </td>
-
-
-                                    <td className="px-4 py-3 text-right">
-
-                                      <div className="flex justify-end gap-2">
-
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            handleEditConfiguration(
-                                              configuration
-                                            )
-                                          }
-                                          className="
-                                            rounded-lg
-                                            p-2
-                                            text-gray-500
-                                            transition
-                                            hover:bg-[#6214BE]/10
-                                            hover:text-[#6214BE]
-                                          "
-                                          title="Modifier"
-                                        >
-
-                                          <Pencil
-                                            size={16}
-                                          />
-
-                                        </button>
-
-
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            handleDeleteConfiguration(
-                                              configuration.id
-                                            )
-                                          }
-                                          disabled={
-                                            deletingConfigurationId ===
-                                            configuration.id
-                                          }
-                                          className="
-                                            rounded-lg
-                                            p-2
-                                            text-red-500
-                                            transition
-                                            hover:bg-red-50
-                                            disabled:opacity-50
-                                          "
-                                          title="Supprimer"
-                                        >
-
-                                          {deletingConfigurationId ===
-                                          configuration.id ? (
-
-                                            <Loader2
-                                              size={16}
-                                              className="animate-spin"
-                                            />
-
-                                          ) : (
-
-                                            <Trash2
-                                              size={16}
-                                            />
-
-                                          )}
-
-                                        </button>
-
-                                      </div>
-
-                                    </td>
-
-                                  </tr>
-
-                                )
-                              )}
-
-                            </tbody>
-
-                          </table>
-
-                        </div>
-
-                      </div>
-
-                    )}
-
-                  </div>
-
-                </div>
-
-              </div>
-
-
-              {/* ================================================== */}
-              {/* MODAL FOOTER */}
-              {/* ================================================== */}
-
-              <div className="flex justify-end border-t bg-gray-50 px-6 py-4">
-
-                <button
-                  type="button"
-                  onClick={closeConfiguration}
-                  disabled={savingConfiguration}
-                  className="
-                    rounded-xl
-                    border
-                    border-gray-300
-                    bg-white
-                    px-5
-                    py-2.5
-                    text-sm
-                    font-medium
-                    text-gray-700
-                    transition
-                    hover:bg-gray-100
-                  "
-                >
-
-                  Fermer
-
-                </button>
-
-              </div>
-
+              <button
+                type="button"
+                onClick={closeConfiguration}
+                disabled={savingConfiguration}
+                className="
+                  rounded-lg p-2 text-gray-500
+                  transition hover:bg-gray-100
+                  hover:text-gray-700
+                "
+              >
+                <X size={20} />
+              </button>
             </div>
 
+            {/* MODAL BODY */}
+
+            <div className="overflow-y-auto p-6">
+              <div className="grid gap-6 lg:grid-cols-2">
+                {/* FORMULAIRE */}
+
+                <div className="rounded-2xl border bg-gray-50 p-5">
+                  <div className="mb-5">
+                    <h3 className="font-semibold text-gray-900">
+                      {editingConfiguration
+                        ? "Modifier la configuration"
+                        : "Nouvelle configuration"}
+                    </h3>
+
+                    <p className="mt-1 text-sm text-gray-500">
+                      Définissez les paramètres de cette
+                      matière pour une classe.
+                    </p>
+                  </div>
+
+                  <div className="space-y-5">
+                    {/* ANNEE */}
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Année scolaire
+                      </label>
+
+                      <select
+                        value={configurationForm.academic_year}
+                        onChange={(event) =>
+                          setConfigurationForm({
+                            ...configurationForm,
+                            academic_year: event.target.value,
+                          })
+                        }
+                        disabled={
+                          savingConfiguration ||
+                          loadingAcademicYears
+                        }
+                        className="
+                          w-full rounded-xl border border-gray-300
+                          bg-white px-4 py-3 outline-none transition
+                          focus:border-[#6214BE]
+                          focus:ring-2 focus:ring-[#6214BE]/10
+                        "
+                      >
+                        <option value="">
+                          Sélectionner une année
+                        </option>
+
+                        {academicYears.map((year) => (
+                          <option
+                            key={year.id}
+                            value={year.id}
+                          >
+                            {year.name}
+                            {year.is_active
+                              ? " — Année active"
+                              : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* CLASSE */}
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Classe
+                      </label>
+
+                      <select
+                        value={configurationForm.classroom}
+                        onChange={(event) =>
+                          setConfigurationForm({
+                            ...configurationForm,
+                            classroom: event.target.value,
+                          })
+                        }
+                        disabled={
+                          savingConfiguration ||
+                          loadingClassrooms
+                        }
+                        className="
+                          w-full rounded-xl border border-gray-300
+                          bg-white px-4 py-3 outline-none transition
+                          focus:border-[#6214BE]
+                          focus:ring-2 focus:ring-[#6214BE]/10
+                        "
+                      >
+                        <option value="">
+                          Sélectionner une classe
+                        </option>
+
+                        {classrooms.map((classroom) => (
+                          <option
+                            key={classroom.id}
+                            value={classroom.id}
+                          >
+                            {classroom.name}
+                            {classroom.classroom_level_name
+                              ? ` — ${classroom.classroom_level_name}`
+                              : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* COEFFICIENT */}
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Coefficient
+                      </label>
+
+                      <input
+                        type="number"
+                        min="0.01"
+                        max="999.99"
+                        step="0.01"
+                        inputMode="decimal"
+                        value={configurationForm.coefficient}
+                        onChange={(event) =>
+                          setConfigurationForm({
+                            ...configurationForm,
+                            coefficient: event.target.value,
+                          })
+                        }
+                        disabled={savingConfiguration}
+                        className="
+                          w-full rounded-xl border border-gray-300
+                          bg-white px-4 py-3 outline-none transition
+                          focus:border-[#6214BE]
+                          focus:ring-2 focus:ring-[#6214BE]/10
+                        "
+                      />
+                    </div>
+
+                    {/* NOTE DE PASSAGE */}
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Note de passage
+                      </label>
+
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        inputMode="decimal"
+                        value={configurationForm.pass_mark}
+                        onChange={(event) =>
+                          setConfigurationForm({
+                            ...configurationForm,
+                            pass_mark: event.target.value,
+                          })
+                        }
+                        disabled={savingConfiguration}
+                        className="
+                          w-full rounded-xl border border-gray-300
+                          bg-white px-4 py-3 outline-none transition
+                          focus:border-[#6214BE]
+                          focus:ring-2 focus:ring-[#6214BE]/10
+                        "
+                      />
+                    </div>
+
+                    {/* BOUTONS */}
+
+                    <div className="flex gap-3 pt-2">
+                      {editingConfiguration && (
+                        <button
+                          type="button"
+                          onClick={cancelEdit}
+                          disabled={savingConfiguration}
+                          className="
+                            flex-1 rounded-xl border border-gray-300
+                            bg-white px-4 py-3 font-medium
+                            text-gray-700 transition hover:bg-gray-100
+                          "
+                        >
+                          Annuler
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handleSaveConfiguration}
+                        disabled={savingConfiguration}
+                        className="
+                          flex flex-1 items-center justify-center gap-2
+                          rounded-xl bg-[#6214BE] px-4 py-3
+                          font-medium text-white transition
+                          hover:bg-[#4d0fa0]
+                          disabled:cursor-not-allowed
+                          disabled:bg-gray-400
+                        "
+                      >
+                        {savingConfiguration && (
+                          <Loader2
+                            size={17}
+                            className="animate-spin"
+                          />
+                        )}
+
+                        {savingConfiguration
+                          ? "Enregistrement..."
+                          : editingConfiguration
+                            ? "Modifier"
+                            : "Enregistrer"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CONFIGURATIONS EXISTANTES */}
+
+                <div>
+                  <div className="mb-4">
+                    <h3 className="font-semibold text-gray-900">
+                      Configurations existantes
+                    </h3>
+
+                    <p className="mt-1 text-sm text-gray-500">
+                      Paramètres de cette matière par
+                      classe et année scolaire.
+                    </p>
+                  </div>
+
+                  {loadingConfigurations ? (
+                    <div className="flex min-h-[250px] items-center justify-center rounded-2xl border">
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Loader2
+                          size={18}
+                          className="animate-spin"
+                        />
+                        Chargement...
+                      </div>
+                    </div>
+                  ) : classroomSubjects.length === 0 ? (
+                    <div className="flex min-h-[250px] flex-col items-center justify-center rounded-2xl border bg-gray-50 p-6 text-center">
+                      <Settings2
+                        size={32}
+                        className="mb-3 text-gray-300"
+                      />
+
+                      <p className="font-medium text-gray-700">
+                        Aucune configuration
+                      </p>
+
+                      <p className="mt-1 text-sm text-gray-500">
+                        Configurez cette matière pour
+                        commencer à l'utiliser.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="overflow-hidden rounded-2xl border">
+                      <div className="max-h-[450px] overflow-y-auto">
+                        <table className="w-full">
+                          <thead className="sticky top-0 bg-gray-50">
+                            <tr className="text-left text-xs font-semibold uppercase text-gray-500">
+                              <th className="px-4 py-3">
+                                Année
+                              </th>
+
+                              <th className="px-4 py-3">
+                                Classe
+                              </th>
+
+                              <th className="px-4 py-3">
+                                Coef.
+                              </th>
+
+                              <th className="px-4 py-3">
+                                Passage
+                              </th>
+
+                              <th className="px-4 py-3 text-right">
+                                Actions
+                              </th>
+                            </tr>
+                          </thead>
+
+                          <tbody>
+                            {classroomSubjects.map(
+                              (configuration) => (
+                                <tr
+                                  key={configuration.id}
+                                  className="border-t hover:bg-gray-50"
+                                >
+                                  <td className="px-4 py-3 text-sm">
+                                    {configuration.academic_year_name}
+                                  </td>
+
+                                  <td className="px-4 py-3">
+                                    <span className="font-medium text-gray-800">
+                                      {configuration.classroom_name}
+                                    </span>
+                                  </td>
+
+                                  <td className="px-4 py-3">
+                                    <span className="rounded-full bg-[#6214BE]/10 px-2.5 py-1 text-xs font-semibold text-[#6214BE]">
+                                      {formatCoefficient(
+                                        configuration.coefficient
+                                      )}
+                                    </span>
+                                  </td>
+
+                                  <td className="px-4 py-3 text-sm text-gray-600">
+                                    {configuration.pass_mark}
+                                  </td>
+
+                                  <td className="px-4 py-3 text-right">
+                                    <div className="flex justify-end gap-2">
+                                      {/* MODIFIER */}
+
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleEditConfiguration(
+                                            configuration
+                                          )
+                                        }
+                                        className="
+                                          rounded-lg p-2 text-gray-500
+                                          transition hover:bg-[#6214BE]/10
+                                          hover:text-[#6214BE]
+                                        "
+                                        title="Modifier"
+                                      >
+                                        <Pencil size={16} />
+                                      </button>
+
+                                      {/* SUPPRIMER */}
+
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleDeleteConfiguration(
+                                            configuration.id
+                                          )
+                                        }
+                                        disabled={
+                                          deletingConfigurationId ===
+                                          configuration.id
+                                        }
+                                        className="
+                                          rounded-lg p-2 text-red-500
+                                          transition hover:bg-red-50
+                                          disabled:opacity-50
+                                        "
+                                        title="Supprimer"
+                                      >
+                                        {deletingConfigurationId ===
+                                        configuration.id ? (
+                                          <Loader2
+                                            size={16}
+                                            className="animate-spin"
+                                          />
+                                        ) : (
+                                          <Trash2 size={16} />
+                                        )}
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* MODAL FOOTER */}
+
+            <div className="flex justify-end border-t bg-gray-50 px-6 py-4">
+              <button
+                type="button"
+                onClick={closeConfiguration}
+                disabled={savingConfiguration}
+                className="
+                  rounded-xl border border-gray-300 bg-white
+                  px-5 py-2.5 text-sm font-medium
+                  text-gray-700 transition hover:bg-gray-100
+                "
+              >
+                Fermer
+              </button>
+            </div>
           </div>
+        </div>
+      )}
 
-        )}
+      {/* ================================================== */}
+      {/* MODAL MODIFICATION MATIERE */}
+      {/* ================================================== */}
 
+      {editingSubject && (
+        <div
+          className="
+            fixed inset-0 z-[60] flex items-center
+            justify-center bg-black/40 p-4
+          "
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              handleCloseEditSubject();
+            }
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-subject-title"
+            className="
+              w-full max-w-lg overflow-hidden
+              rounded-2xl bg-white shadow-2xl
+            "
+          >
+            {/* HEADER */}
+
+            <div className="flex items-center justify-between border-b px-6 py-5">
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-[#6214BE]/10 p-2">
+                  <Pencil
+                    size={20}
+                    className="text-[#6214BE]"
+                  />
+                </div>
+
+                <div>
+                  <h2
+                    id="edit-subject-title"
+                    className="text-lg font-bold text-gray-900"
+                  >
+                    Modifier la matière
+                  </h2>
+
+                  <p className="mt-1 text-sm text-gray-500">
+                    Modifiez le nom ou l’abréviation.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCloseEditSubject}
+                disabled={updatingSubject}
+                className="
+                  rounded-lg p-2 text-gray-500
+                  transition hover:bg-gray-100
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                "
+                aria-label="Fermer"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* FORMULAIRE */}
+
+            <div className="space-y-5 p-6">
+              {/* NOM */}
+
+              <div>
+                <label
+                  htmlFor="edit-subject-name"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  Nom de la matière
+                </label>
+
+                <input
+                  id="edit-subject-name"
+                  type="text"
+                  placeholder="Ex : Mathématiques"
+                  value={subjectEditForm.name}
+                  onChange={(event) =>
+                    setSubjectEditForm((current) => ({
+                      ...current,
+                      name: event.target.value,
+                    }))
+                  }
+                  disabled={updatingSubject}
+                  autoFocus
+                  className="
+                    w-full rounded-xl border border-gray-300
+                    px-4 py-3 outline-none transition
+                    focus:border-[#6214BE]
+                    focus:ring-2 focus:ring-[#6214BE]/10
+                    disabled:bg-gray-100
+                  "
+                />
+              </div>
+
+              {/* ABREVIATION */}
+
+              <div>
+                <label
+                  htmlFor="edit-subject-code"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  Abréviation
+                </label>
+
+                <input
+                  id="edit-subject-code"
+                  type="text"
+                  placeholder="Ex : MATH"
+                  value={subjectEditForm.code}
+                  onChange={(event) =>
+                    setSubjectEditForm((current) => ({
+                      ...current,
+                      code: event.target.value.toUpperCase(),
+                    }))
+                  }
+                  disabled={updatingSubject}
+                  className="
+                    w-full rounded-xl border border-gray-300
+                    px-4 py-3 uppercase outline-none transition
+                    focus:border-[#6214BE]
+                    focus:ring-2 focus:ring-[#6214BE]/10
+                    disabled:bg-gray-100
+                  "
+                />
+              </div>
+
+              {/* BOUTONS */}
+
+              <div className="flex justify-end gap-3 border-t pt-5">
+                <button
+                  type="button"
+                  onClick={handleCloseEditSubject}
+                  disabled={updatingSubject}
+                  className="
+                    rounded-xl border border-gray-300
+                    bg-white px-5 py-3 text-sm font-medium
+                    text-gray-700 transition hover:bg-gray-100
+                    disabled:cursor-not-allowed
+                    disabled:opacity-50
+                  "
+                >
+                  Annuler
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleUpdateSubject}
+                  disabled={updatingSubject}
+                  className="
+                    flex items-center justify-center gap-2
+                    rounded-xl bg-[#6214BE] px-5 py-3
+                    text-sm font-medium text-white transition
+                    hover:bg-[#4d0fa0]
+                    disabled:cursor-not-allowed
+                    disabled:bg-gray-400
+                  "
+                >
+                  {updatingSubject && (
+                    <Loader2
+                      size={17}
+                      className="animate-spin"
+                    />
+                  )}
+
+                  {updatingSubject
+                    ? "Enregistrement..."
+                    : "Enregistrer"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-
   );
-
 }
