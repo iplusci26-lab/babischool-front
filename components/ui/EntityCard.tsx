@@ -1,29 +1,24 @@
+
 "use client";
 
-import { Edit, Trash2 } from "lucide-react";
-import { ReactNode } from "react";
+import { Edit, Trash2, Loader2 } from "lucide-react";
+import { ReactNode, useRef, useState } from "react";
 
 interface EntityCardProps {
   title: string;
-
   subtitle?: string;
-
   description?: string;
-
   badge?: ReactNode;
-
   footer?: ReactNode;
-
   selected?: boolean;
-
   children?: ReactNode;
 
   onClick?: () => void;
-
-  onEdit?: () => void;
-
-  onDelete?: () => void;
+  onEdit?: () => void | Promise<void>;
+  onDelete?: () => void | Promise<void>;
 }
+
+type Action = "edit" | "delete";
 
 export default function EntityCard({
   title,
@@ -37,6 +32,39 @@ export default function EntityCard({
   onEdit,
   onDelete,
 }: EntityCardProps) {
+  const [loadingAction, setLoadingAction] =
+    useState<Action | null>(null);
+
+  // Empêche les doubles clics avant même le prochain rendu React.
+  const actionLock = useRef(false);
+
+  const handleAction = async (
+    action: Action,
+    callback: (() => void | Promise<void>) | undefined,
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e.stopPropagation();
+
+    if (!callback || actionLock.current) return;
+
+    actionLock.current = true;
+    setLoadingAction(action);
+
+    try {
+      await callback();
+    } catch (error) {
+      console.error(
+        `Erreur lors de l'action ${action} :`,
+        error
+      );
+    } finally {
+      actionLock.current = false;
+      setLoadingAction(null);
+    }
+  };
+
+  const isBusy = loadingAction !== null;
+
   return (
     <div
       onClick={onClick}
@@ -49,11 +77,7 @@ export default function EntityCard({
         shadow-sm
         transition-all
         duration-200
-
-        ${
-          onClick ? "cursor-pointer" : ""
-        }
-
+        ${onClick ? "cursor-pointer" : ""}
         ${
           selected
             ? "border-violet-600 ring-2 ring-violet-100"
@@ -62,11 +86,8 @@ export default function EntityCard({
       `}
     >
       {/* Header */}
-
       <div className="flex items-start justify-between gap-4">
-
-        <div className="flex-1 min-w-0">
-
+        <div className="min-w-0 flex-1">
           <h3 className="truncate text-lg font-semibold text-gray-900">
             {title}
           </h3>
@@ -82,79 +103,104 @@ export default function EntityCard({
               {description}
             </p>
           )}
-
         </div>
 
         {badge && (
-          <div className="shrink-0">
-            {badge}
-          </div>
+          <div className="shrink-0">{badge}</div>
         )}
-
       </div>
 
       {/* Content */}
-
       {children && (
-        <div className="mt-4">
-          {children}
-        </div>
+        <div className="mt-4">{children}</div>
       )}
 
-      {/* Footer */}
-
+      {/* Footer and actions */}
       {(footer || onEdit || onDelete) && (
         <div className="mt-5 flex items-center justify-between border-t pt-4">
-
-          <div>
-            {footer}
-          </div>
+          <div>{footer}</div>
 
           <div className="flex items-center gap-2">
-
+            {/* Edit button */}
             {onEdit && (
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit();
-                }}
+                disabled={isBusy}
+                aria-label={
+                  loadingAction === "edit"
+                    ? "Modification en cours"
+                    : "Modifier"
+                }
+                title={
+                  loadingAction === "edit"
+                    ? "Modification en cours..."
+                    : "Modifier"
+                }
+                onClick={(e) =>
+                  void handleAction("edit", onEdit, e)
+                }
                 className="
                   rounded-lg
                   p-2
                   text-blue-600
                   transition-colors
                   hover:bg-blue-50
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
                 "
               >
-                <Edit size={18} />
+                {loadingAction === "edit" ? (
+                  <Loader2
+                    size={18}
+                    className="animate-spin"
+                  />
+                ) : (
+                  <Edit size={18} />
+                )}
               </button>
             )}
 
+            {/* Delete button */}
             {onDelete && (
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
+                disabled={isBusy}
+                aria-label={
+                  loadingAction === "delete"
+                    ? "Suppression en cours"
+                    : "Supprimer"
+                }
+                title={
+                  loadingAction === "delete"
+                    ? "Suppression en cours..."
+                    : "Supprimer"
+                }
+                onClick={(e) =>
+                  void handleAction("delete", onDelete, e)
+                }
                 className="
                   rounded-lg
                   p-2
                   text-red-600
                   transition-colors
                   hover:bg-red-50
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
                 "
               >
-                <Trash2 size={18} />
+                {loadingAction === "delete" ? (
+                  <Loader2
+                    size={18}
+                    className="animate-spin"
+                  />
+                ) : (
+                  <Trash2 size={18} />
+                )}
               </button>
             )}
-
           </div>
-
         </div>
       )}
-
     </div>
   );
 }

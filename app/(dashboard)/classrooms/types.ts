@@ -12,7 +12,9 @@
   
     display_order: number;
     is_active: boolean;
-  
+    
+    cycle_name: string;
+    
     created_at: string;
     updated_at: string;
   }
