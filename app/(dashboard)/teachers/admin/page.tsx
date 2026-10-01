@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -44,6 +43,9 @@ export default function TeachersPage() {
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState<TeacherForm>(INITIAL_FORM);
+
+  // Référence vers le formulaire
+  const formRef = useRef<HTMLDivElement>(null);
 
   // ============================================================
   // EXTRACTION DES DONNÉES
@@ -140,7 +142,7 @@ export default function TeachersPage() {
     last_name: form.last_name.trim(),
     phone: form.phone.trim(),
 
-    // Le champ date est facultatif.
+    // La date de naissance est facultative.
     // Une chaîne vide devient null.
     date_of_birth: form.date_of_birth || null,
   });
@@ -287,9 +289,12 @@ export default function TeachersPage() {
       date_of_birth: teacher.date_of_birth || "",
     });
 
-    window.scrollTo({
-      top: 0,
+    // Faire défiler la page jusqu'au formulaire.
+    // Le défilement est fluide et le formulaire
+    // se positionne en haut de la zone visible.
+    formRef.current?.scrollIntoView({
       behavior: "smooth",
+      block: "start",
     });
   };
 
@@ -315,7 +320,17 @@ export default function TeachersPage() {
 
       {/* FORMULAIRE */}
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div
+        ref={formRef}
+        className="
+          scroll-mt-24
+          rounded-2xl
+          border border-gray-200
+          bg-white
+          p-6
+          shadow-sm
+        "
+      >
         <div className="mb-6 flex items-center gap-2">
           <UserPlus
             className="text-[#6214BE]"
