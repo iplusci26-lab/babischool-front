@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import AssignmentModal from "./components/AssignmentModal";
 import { getAcademicYears } from "@/lib/api/academicYears";
 import { getClassrooms } from "@/lib/api/classrooms";
-import { getTeachingAssignments } from "@/lib/api/teachingAssignments";
+import { getTeachingAssignments, deleteTeachingAssignment } from "@/lib/api/teachingAssignments";
 
 import { AcademicYear } from "@/types/academicYear";
 import { Classroom } from "@/types/classroom";
@@ -24,6 +24,14 @@ export default function AssignmentsPage() {
 
     const [selectedAcademicYear, setSelectedAcademicYear] =
         useState("");
+
+    
+    const [deletingAssignmentId, setDeletingAssignmentId] =
+        useState<string | null>(null);
+    
+    const [deletingCourseGroupId, setDeletingCourseGroupId] =
+        useState<string | null>(null);
+
 
     const [classrooms, setClassrooms] =
         useState<Classroom[]>([]);
@@ -199,6 +207,74 @@ export default function AssignmentsPage() {
       );
   
   };
+
+  const handleDeleteAssignment = async (
+    assignment: TeachingAssignment
+) => {
+    if (deletingAssignmentId !== null) return;
+
+    const confirmed = window.confirm(
+        `Voulez-vous vraiment supprimer l'affectation de ${assignment.teacher_name} pour la classe ${assignment.classroom_name} ?`
+    );
+
+    if (!confirmed) return;
+
+    setDeletingAssignmentId(assignment.id);
+
+    try {
+        await deleteTeachingAssignment(assignment.id);
+
+        await refreshAssignments();
+
+        window.alert("L'affectation a été supprimée avec succès.");
+    } catch (error) {
+        console.error(
+            "Erreur lors de la suppression de l'affectation :",
+            error
+        );
+
+        window.alert(
+            "Impossible de supprimer cette affectation. Veuillez réessayer."
+        );
+    } finally {
+        setDeletingAssignmentId(null);
+    }
+};
+
+    const handleDeleteCourseGroup = async (
+        courseGroup: CourseGroup
+    ) => {
+        if (deletingCourseGroupId !== null) return;
+
+        const confirmed = window.confirm(
+            `Voulez-vous vraiment supprimer le cours commun « ${courseGroup.name} » ?`
+        );
+
+        if (!confirmed) return;
+
+        setDeletingCourseGroupId(courseGroup.id);
+
+        try {
+            await deleteCourseGroup(courseGroup.id);
+
+            await loadCourseGroups(selectedAcademicYear);
+
+            window.alert("Le cours commun a été supprimé avec succès.");
+        } catch (error) {
+            console.error(
+                "Erreur lors de la suppression du cours commun :",
+                error
+            );
+
+            window.alert(
+                "Impossible de supprimer ce cours commun. Veuillez réessayer."
+            );
+        } finally {
+            setDeletingCourseGroupId(null);
+        }
+    };
+
+
     return (
 
       <div className="space-y-6">
@@ -578,14 +654,39 @@ export default function AssignmentsPage() {
                         
                         
                                         <button
-                                            className="rounded-lg border p-2 text-red-600 cursor-pointer hover:bg-red-50"
-                                            title="Supprimer"
+                                            type="button"
+                                            onClick={() => handleDeleteAssignment(assignment)}
+                                            disabled={deletingAssignmentId !== null}
+                                            className="
+                                                rounded-lg
+                                                border
+                                                p-2
+                                                text-red-600
+                                                cursor-pointer
+                                                hover:bg-red-50
+                                                disabled:cursor-not-allowed
+                                                disabled:opacity-50
+                                            "
+                                            title={
+                                                deletingAssignmentId === assignment.id
+                                                    ? "Suppression en cours..."
+                                                    : "Supprimer"
+                                            }
+                                            aria-label={
+                                                deletingAssignmentId === assignment.id
+                                                    ? "Suppression en cours"
+                                                    : "Supprimer l'affectation"
+                                            }
                                         >
-                        
-                                            <Trash2 size={16} />
-                        
+                                            {deletingAssignmentId === assignment.id ? (
+                                                <Loader2
+                                                    size={16}
+                                                    className="animate-spin"
+                                                />
+                                            ) : (
+                                                <Trash2 size={16} />
+                                            )}
                                         </button>
-                        
                                     </div>
                         
                                 </td>
@@ -809,39 +910,38 @@ export default function AssignmentsPage() {
                                         </button>
 
                                         <button
-                                            onClick={async () => {
-
-                                                if (
-                                                    !window.confirm(
-                                                        `Voulez-vous vraiment supprimer le cours commun « ${courseGroup.name} » ?`
-                                                    )
-                                                ) {
-                                                    return;
-                                                }
-
-                                                try {
-
-                                                    await deleteCourseGroup(
-                                                        courseGroup.id
-                                                    );
-
-                                                    await loadCourseGroups(
-                                                        selectedAcademicYear
-                                                    );
-
-                                                } catch (error) {
-
-                                                    console.error(error);
-
-                                                }
-
-                                            }}
-                                            className="cursor-pointer rounded-lg border p-2 text-red-600 hover:bg-red-50"
-                                            title="Supprimer"
+                                            type="button"
+                                            onClick={() => handleDeleteCourseGroup(courseGroup)}
+                                            disabled={deletingCourseGroupId !== null}
+                                            className="
+                                                cursor-pointer
+                                                rounded-lg
+                                                border
+                                                p-2
+                                                text-red-600
+                                                hover:bg-red-50
+                                                disabled:cursor-not-allowed
+                                                disabled:opacity-50
+                                            "
+                                            title={
+                                                deletingCourseGroupId === courseGroup.id
+                                                    ? "Suppression en cours..."
+                                                    : "Supprimer"
+                                            }
+                                            aria-label={
+                                                deletingCourseGroupId === courseGroup.id
+                                                    ? "Suppression en cours"
+                                                    : "Supprimer le cours commun"
+                                            }
                                         >
-
-                                            <Trash2 size={16} />
-
+                                            {deletingCourseGroupId === courseGroup.id ? (
+                                                <Loader2
+                                                    size={16}
+                                                    className="animate-spin"
+                                                />
+                                            ) : (
+                                                <Trash2 size={16} />
+                                            )}
                                         </button>
 
                                     </div>
