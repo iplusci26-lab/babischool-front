@@ -1,18 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 
 import { TeachingAssignment } from "@/types/teachingAssignment";
 import { Subject } from "@/types/subject";
 import { Teacher } from "@/types/teachers";
 import { CourseGroup } from "@/types/courseGroup";
+import { ClassroomGroup } from "@/types/classroomGroup";
 
 import { toast } from "sonner";
 
 import { getSubjects } from "@/lib/api/subjects";
 import { getTeachers } from "@/lib/api/teachers";
 import { getCourseGroups } from "@/lib/api/courseGroups";
-import { ClassroomGroup } from "@/types/classroomGroup";
 import { getClassroomGroups } from "@/lib/api/classroomGroups";
 
 import {
@@ -20,6 +24,17 @@ import {
     updateTeachingAssignment,
 } from "@/lib/api/teachingAssignments";
 
+import {
+    Check,
+    ChevronDown,
+    Search,
+    X,
+} from "lucide-react";
+
+
+// ==========================================================
+// TYPES
+// ==========================================================
 
 type AssignmentModalProps = {
     open: boolean;
@@ -30,6 +45,530 @@ type AssignmentModalProps = {
     onSaved: () => void;
 };
 
+type SearchableOption = {
+    value: string;
+    label: string;
+    searchText?: string;
+};
+
+type SearchableSelectProps = {
+    label: string;
+    value: string;
+    options: SearchableOption[];
+    onChange: (value: string) => void;
+
+    placeholder?: string;
+    disabled?: boolean;
+    loading?: boolean;
+    error?: string;
+
+    emptyMessage?: string;
+    searchPlaceholder?: string;
+
+    allowEmpty?: boolean;
+    emptyLabel?: string;
+
+    className?: string;
+};
+
+
+// ==========================================================
+// SEARCHABLE SELECT
+// ==========================================================
+
+function SearchableSelect({
+    label,
+    value,
+    options,
+    onChange,
+    placeholder = "Sélectionner...",
+    disabled = false,
+    loading = false,
+    error,
+    emptyMessage = "Aucun résultat.",
+    searchPlaceholder = "Rechercher...",
+    allowEmpty = true,
+    emptyLabel = "Aucune sélection",
+    className = "",
+}: SearchableSelectProps) {
+
+    const containerRef =
+        useRef<HTMLDivElement>(null);
+
+    const inputRef =
+        useRef<HTMLInputElement>(null);
+
+    const [open, setOpen] =
+        useState(false);
+
+    const [search, setSearch] =
+        useState("");
+
+
+    // ======================================================
+    // OPTION SÉLECTIONNÉE
+    // ======================================================
+
+    const selectedOption =
+        options.find(
+            (option) =>
+                option.value === value
+        );
+
+
+    // ======================================================
+    // FILTRAGE
+    // ======================================================
+
+    const normalizedSearch =
+        search.trim().toLowerCase();
+
+    const filteredOptions =
+        options.filter((option) => {
+
+            if (!normalizedSearch) {
+                return true;
+            }
+
+            const text =
+                option.searchText ||
+                option.label;
+
+            return text
+                .toLowerCase()
+                .includes(normalizedSearch);
+        });
+
+
+    // ======================================================
+    // FERMETURE AU CLIC EXTÉRIEUR
+    // ======================================================
+
+    useEffect(() => {
+
+        const handleClickOutside = (
+            event: MouseEvent
+        ) => {
+
+            if (
+                containerRef.current &&
+                !containerRef.current.contains(
+                    event.target as Node
+                )
+            ) {
+                setOpen(false);
+                setSearch("");
+            }
+        };
+
+        document.addEventListener(
+            "mousedown",
+            handleClickOutside
+        );
+
+        return () => {
+            document.removeEventListener(
+                "mousedown",
+                handleClickOutside
+            );
+        };
+
+    }, []);
+
+
+    // ======================================================
+    // OUVERTURE
+    // ======================================================
+
+    const handleOpen = () => {
+
+        if (disabled) {
+            return;
+        }
+
+        setOpen((previous) => !previous);
+
+        setTimeout(() => {
+            inputRef.current?.focus();
+        }, 50);
+    };
+
+
+    // ======================================================
+    // SÉLECTION
+    // ======================================================
+
+    const handleSelect = (
+        optionValue: string
+    ) => {
+
+        onChange(optionValue);
+
+        setOpen(false);
+
+        setSearch("");
+    };
+
+
+    // ======================================================
+    // CLEAR
+    // ======================================================
+
+    const handleClear = (
+        event: React.MouseEvent<HTMLButtonElement>
+    ) => {
+
+        event.stopPropagation();
+
+        onChange("");
+
+        setSearch("");
+    };
+
+
+    return (
+        <div
+            ref={containerRef}
+            className={`relative ${className}`}
+        >
+
+            {/* LABEL */}
+
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+                {label}
+            </label>
+
+
+            {/* TRIGGER */}
+
+            <button
+                type="button"
+                onClick={handleOpen}
+                disabled={disabled}
+                className={`
+                    flex
+                    w-full
+                    items-center
+                    justify-between
+                    rounded-lg
+                    border
+                    bg-white
+                    px-3
+                    py-3
+                    text-left
+                    transition
+
+                    ${
+                        error
+                            ? "border-red-400"
+                            : "border-gray-300"
+                    }
+
+                    ${
+                        open
+                            ? "border-[#6214BE] ring-2 ring-[#6214BE]/20"
+                            : ""
+                    }
+
+                    ${
+                        disabled
+                            ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                            : "cursor-pointer hover:border-gray-400"
+                    }
+                `}
+            >
+
+                <span
+                    className={
+                        selectedOption
+                            ? "text-gray-800"
+                            : "text-gray-400"
+                    }
+                >
+                    {loading
+                        ? "Chargement..."
+                        : selectedOption?.label ||
+                          placeholder}
+                </span>
+
+
+                <ChevronDown
+                    size={18}
+                    className={`
+                        text-gray-400
+                        transition-transform
+                        ${
+                            open
+                                ? "rotate-180"
+                                : ""
+                        }
+                    `}
+                />
+
+            </button>
+
+
+            {/* CLEAR BUTTON */}
+
+            {value && !disabled && !open && (
+                <button
+                    type="button"
+                    onClick={handleClear}
+                    className="
+                        absolute
+                        right-9
+                        top-[38px]
+                        z-10
+                        rounded-full
+                        p-1
+                        text-gray-400
+                        transition
+                        hover:bg-gray-100
+                        hover:text-gray-600
+                    "
+                    aria-label="Effacer la sélection"
+                >
+                    <X size={15} />
+                </button>
+            )}
+
+
+            {/* DROPDOWN */}
+
+            {open && !disabled && (
+
+                <div
+                    className="
+                        absolute
+                        left-0
+                        right-0
+                        z-[70]
+                        mt-2
+                        overflow-hidden
+                        rounded-xl
+                        border
+                        border-gray-200
+                        bg-white
+                        shadow-xl
+                    "
+                >
+
+                    {/* RECHERCHE */}
+
+                    <div
+                        className="
+                            border-b
+                            border-gray-100
+                            bg-white
+                            p-2
+                        "
+                    >
+
+                        <div
+                            className="
+                                flex
+                                items-center
+                                gap-2
+                                rounded-lg
+                                border
+                                border-gray-200
+                                px-3
+                            "
+                        >
+
+                            <Search
+                                size={17}
+                                className="shrink-0 text-gray-400"
+                            />
+
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                value={search}
+                                onChange={(event) =>
+                                    setSearch(
+                                        event.target.value
+                                    )
+                                }
+                                placeholder={
+                                    searchPlaceholder
+                                }
+                                className="
+                                    w-full
+                                    border-0
+                                    bg-transparent
+                                    py-2.5
+                                    text-sm
+                                    outline-none
+                                "
+                            />
+
+                            {search && (
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setSearch("")
+                                    }
+                                    className="
+                                        text-gray-400
+                                        hover:text-gray-600
+                                    "
+                                    aria-label="Effacer la recherche"
+                                >
+                                    <X size={15} />
+                                </button>
+                            )}
+
+                        </div>
+
+                    </div>
+
+
+                    {/* OPTIONS */}
+
+                    <div
+                        className="
+                            max-h-60
+                            overflow-y-auto
+                            p-1
+                        "
+                    >
+
+                        {/* OPTION VIDE */}
+
+                        {allowEmpty && (
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    handleSelect("")
+                                }
+                                className={`
+                                    flex
+                                    w-full
+                                    items-center
+                                    justify-between
+                                    rounded-lg
+                                    px-3
+                                    py-2.5
+                                    text-left
+                                    text-sm
+                                    transition
+
+                                    ${
+                                        value === ""
+                                            ? "bg-purple-50 text-[#6214BE]"
+                                            : "text-gray-500 hover:bg-gray-50"
+                                    }
+                                `}
+                            >
+
+                                <span>
+                                    {emptyLabel}
+                                </span>
+
+                                {value === "" && (
+                                    <Check
+                                        size={17}
+                                        className="text-[#6214BE]"
+                                    />
+                                )}
+
+                            </button>
+                        )}
+
+
+                        {/* OPTIONS FILTRÉES */}
+
+                        {filteredOptions.length > 0 ? (
+
+                            filteredOptions.map(
+                                (option) => (
+
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        onClick={() =>
+                                            handleSelect(
+                                                option.value
+                                            )
+                                        }
+                                        className={`
+                                            flex
+                                            w-full
+                                            items-center
+                                            justify-between
+                                            rounded-lg
+                                            px-3
+                                            py-2.5
+                                            text-left
+                                            text-sm
+                                            transition
+
+                                            ${
+                                                value ===
+                                                option.value
+                                                    ? "bg-purple-50 text-[#6214BE]"
+                                                    : "text-gray-700 hover:bg-gray-50"
+                                            }
+                                        `}
+                                    >
+
+                                        <span>
+                                            {option.label}
+                                        </span>
+
+                                        {value ===
+                                            option.value && (
+                                            <Check
+                                                size={17}
+                                                className="text-[#6214BE]"
+                                            />
+                                        )}
+
+                                    </button>
+
+                                )
+                            )
+
+                        ) : (
+
+                            <div
+                                className="
+                                    px-3
+                                    py-6
+                                    text-center
+                                    text-sm
+                                    text-gray-500
+                                "
+                            >
+                                {emptyMessage}
+                            </div>
+
+                        )}
+
+                    </div>
+
+                </div>
+
+            )}
+
+
+            {/* ERROR */}
+
+            {error && (
+                <p className="mt-2 text-sm text-red-600">
+                    {error}
+                </p>
+            )}
+
+        </div>
+    );
+}
+
+
+// ==========================================================
+// MAIN COMPONENT
+// ==========================================================
 
 export default function AssignmentModal({
     open,
@@ -56,8 +595,10 @@ export default function AssignmentModal({
     const [classroomGroups, setClassroomGroups] =
         useState<ClassroomGroup[]>([]);
 
-    const [loadingClassroomGroups, setLoadingClassroomGroups] =
-        useState(false);
+    const [
+        loadingClassroomGroups,
+        setLoadingClassroomGroups,
+    ] = useState(false);
 
 
     // ==========================================================
@@ -67,8 +608,10 @@ export default function AssignmentModal({
     const [saving, setSaving] =
         useState(false);
 
-    const [loadingCourseGroups, setLoadingCourseGroups] =
-        useState(false);
+    const [
+        loadingCourseGroups,
+        setLoadingCourseGroups,
+    ] = useState(false);
 
     const [form, setForm] = useState({
 
@@ -103,7 +646,9 @@ export default function AssignmentModal({
             const data =
                 await getSubjects();
 
-            setSubjects(data.results);
+            setSubjects(
+                data.results
+            );
 
         } catch (error) {
 
@@ -112,8 +657,10 @@ export default function AssignmentModal({
                 error
             );
 
+            toast.error(
+                "Impossible de charger les matières."
+            );
         }
-
     };
 
 
@@ -129,7 +676,6 @@ export default function AssignmentModal({
                 await getTeachers();
 
             setTeachers(data);
-           
 
         } catch (error) {
 
@@ -138,8 +684,10 @@ export default function AssignmentModal({
                 error
             );
 
+            toast.error(
+                "Impossible de charger les enseignants."
+            );
         }
-
     };
 
 
@@ -150,13 +698,12 @@ export default function AssignmentModal({
     const loadCourseGroups = async (
         subjectId?: string
     ) => {
-           
+
         if (!academicYearId) {
 
             setCourseGroups([]);
 
             return;
-
         }
 
         try {
@@ -165,12 +712,10 @@ export default function AssignmentModal({
 
             const data =
                 await getCourseGroups({
-
                     academicYearId,
-
                     subjectId:
-                        subjectId || undefined,
-
+                        subjectId ||
+                        undefined,
                 });
 
             setCourseGroups(data);
@@ -187,64 +732,66 @@ export default function AssignmentModal({
         } finally {
 
             setLoadingCourseGroups(false);
-
-        }
-
-    };
-
-
-    const loadClassroomGroups = async () => {
-
-        if (!classroomId) {
-    
-            setClassroomGroups([]);
-    
-            return;
-        }
-    
-        try {
-    
-            setLoadingClassroomGroups(true);
-    
-            const data =
-                await getClassroomGroups(
-                    classroomId
-                );
-                console.log(
-                    "CLASSROOM GROUPS RESPONSE:",
-                    data
-                );
-                
-                console.log(
-                    "CLASSROOM GROUPS TYPE:",
-                    Array.isArray(data.results),
-                    typeof data
-                );
-            setClassroomGroups(data.results);
-    
-        } catch (error) {
-    
-            console.error(
-                "Erreur lors du chargement des groupes de classe :",
-                error
-            );
-    
-            setClassroomGroups([]);
-    
-        } finally {
-    
-            setLoadingClassroomGroups(false);
-    
         }
     };
+
+
+    // ==========================================================
+    // LOAD CLASSROOM GROUPS
+    // ==========================================================
+
+    const loadClassroomGroups =
+        async () => {
+
+            if (!classroomId) {
+
+                setClassroomGroups([]);
+
+                return;
+            }
+
+            try {
+
+                setLoadingClassroomGroups(
+                    true
+                );
+
+                const data =
+                    await getClassroomGroups(
+                        classroomId
+                    );
+
+                setClassroomGroups(
+                    data.results
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Erreur lors du chargement des groupes de classe :",
+                    error
+                );
+
+                setClassroomGroups([]);
+
+            } finally {
+
+                setLoadingClassroomGroups(
+                    false
+                );
+            }
+        };
+
+
     // ==========================================================
     // INITIAL LOAD
     // ==========================================================
 
     useEffect(() => {
 
-        if (!open)
+        if (!open) {
             return;
+        }
 
         loadSubjects();
 
@@ -252,28 +799,30 @@ export default function AssignmentModal({
 
         loadClassroomGroups();
 
-    }, [open,
+    }, [
+        open,
         classroomId,
     ]);
 
 
     // ==========================================================
-    // LOAD COURSE GROUPS WHEN SUBJECT CHANGES
+    // LOAD COURSE GROUPS
     // ==========================================================
 
     useEffect(() => {
 
-        if (!open)
+        if (!open) {
             return;
+        }
 
         if (
-            form.assignment_type !== "SUBJECT"
+            form.assignment_type !==
+            "SUBJECT"
         ) {
 
             setCourseGroups([]);
 
             return;
-
         }
 
         if (!form.subject_id) {
@@ -281,7 +830,6 @@ export default function AssignmentModal({
             setCourseGroups([]);
 
             return;
-
         }
 
         loadCourseGroups(
@@ -302,13 +850,9 @@ export default function AssignmentModal({
 
     useEffect(() => {
 
-        if (!open)
+        if (!open) {
             return;
-
-
-        // ------------------------------------------------------
-        // Nouvelle affectation
-        // ------------------------------------------------------
+        }
 
         if (!assignment) {
 
@@ -333,36 +877,36 @@ export default function AssignmentModal({
             setErrors({});
 
             return;
-
         }
-
-
-        // ------------------------------------------------------
-        // Modification
-        // ------------------------------------------------------
 
         setForm({
 
             subject_id:
-                assignment.subject_id ?? "",
+                assignment.subject_id ??
+                "",
 
             teacher_id:
-                assignment.teacher_id ?? "",
+                assignment.teacher_id ??
+                "",
 
             classroom_group_id:
-                assignment.classroom_group_id ?? "",
+                assignment.classroom_group_id ??
+                "",
 
             course_group_id:
-                assignment.course_group_id ?? "",
+                assignment.course_group_id ??
+                "",
 
             assignment_type:
                 assignment.assignment_type,
 
             start_date:
-                assignment.start_date ?? "",
+                assignment.start_date ??
+                "",
 
             end_date:
-                assignment.end_date ?? "",
+                assignment.end_date ??
+                "",
 
         });
 
@@ -381,12 +925,13 @@ export default function AssignmentModal({
     useEffect(() => {
 
         if (
-            form.assignment_type === "PRIMARY"
+            form.assignment_type ===
+            "PRIMARY"
         ) {
 
-            setForm((prev) => ({
+            setForm((previous) => ({
 
-                ...prev,
+                ...previous,
 
                 subject_id: "",
 
@@ -395,7 +940,6 @@ export default function AssignmentModal({
             }));
 
             setCourseGroups([]);
-
         }
 
     }, [
@@ -411,20 +955,17 @@ export default function AssignmentModal({
         subjectId: string
     ) => {
 
-        setForm((prev) => ({
+        setForm((previous) => ({
 
-            ...prev,
+            ...previous,
 
-            subject_id: subjectId,
+            subject_id:
+                subjectId,
 
-            // Un ancien cours commun ne doit pas
-            // rester sélectionné lorsqu'on change
-            // de matière.
-
-            course_group_id: "",
+            course_group_id:
+                "",
 
         }));
-
     };
 
 
@@ -436,15 +977,14 @@ export default function AssignmentModal({
         courseGroupId: string
     ) => {
 
-        setForm((prev) => ({
+        setForm((previous) => ({
 
-            ...prev,
+            ...previous,
 
             course_group_id:
                 courseGroupId,
 
         }));
-
     };
 
 
@@ -464,11 +1004,6 @@ export default function AssignmentModal({
 
             setSaving(true);
 
-
-            // --------------------------------------------------
-            // PAYLOAD
-            // --------------------------------------------------
-
             const payload = {
 
                 academic_year_id:
@@ -484,36 +1019,40 @@ export default function AssignmentModal({
                     form.assignment_type,
 
                 start_date:
-                    form.start_date || null,
+                    form.start_date ||
+                    null,
 
                 end_date:
-                    form.end_date || null,
+                    form.end_date ||
+                    null,
 
                 subject_id:
-                    form.assignment_type === "SUBJECT"
-                        ? form.subject_id || null
+                    form.assignment_type ===
+                    "SUBJECT"
+                        ? form.subject_id ||
+                          null
                         : null,
 
                 course_group_id:
-                    form.assignment_type === "SUBJECT"
-                        ? form.course_group_id || null
+                    form.assignment_type ===
+                    "SUBJECT"
+                        ? form.course_group_id ||
+                          null
                         : null,
 
-                    
                 classroom_group_id:
-                    form.assignment_type === "SUBJECT"
-                        ? form.classroom_group_id || null
+                    form.assignment_type ===
+                    "SUBJECT"
+                        ? form.classroom_group_id ||
+                          null
                         : null,
 
                 is_homeroom_teacher:
-                    form.assignment_type === "PRIMARY",
+                    form.assignment_type ===
+                    "PRIMARY",
 
             };
 
-
-            // --------------------------------------------------
-            // CREATE
-            // --------------------------------------------------
 
             if (!assignment) {
 
@@ -521,26 +1060,14 @@ export default function AssignmentModal({
                     payload
                 );
 
-            }
-
-
-            // --------------------------------------------------
-            // UPDATE
-            // --------------------------------------------------
-
-            else {
+            } else {
 
                 await updateTeachingAssignment(
                     assignment.id,
                     payload
                 );
-
             }
 
-
-            // --------------------------------------------------
-            // SUCCESS
-            // --------------------------------------------------
 
             toast.success(
                 assignment
@@ -556,11 +1083,6 @@ export default function AssignmentModal({
 
             console.error(error);
 
-
-            // --------------------------------------------------
-            // BACKEND VALIDATION ERRORS
-            // --------------------------------------------------
-
             if (
                 error.response?.data
             ) {
@@ -572,25 +1094,27 @@ export default function AssignmentModal({
                     backendErrors
                 );
 
-
-                // Afficher la première erreur disponible
-
                 const firstError =
                     Object.values(
                         backendErrors
                     )[0];
 
                 if (
-                    Array.isArray(firstError)
-                    && firstError.length > 0
+                    Array.isArray(
+                        firstError
+                    ) &&
+                    firstError.length > 0
                 ) {
 
                     toast.error(
-                        String(firstError[0])
+                        String(
+                            firstError[0]
+                        )
                     );
 
                 } else if (
-                    typeof firstError === "string"
+                    typeof firstError ===
+                    "string"
                 ) {
 
                     toast.error(
@@ -602,7 +1126,6 @@ export default function AssignmentModal({
                     toast.error(
                         "Impossible d'enregistrer l'affectation."
                     );
-
                 }
 
             } else {
@@ -610,15 +1133,12 @@ export default function AssignmentModal({
                 toast.error(
                     "Une erreur est survenue."
                 );
-
             }
 
         } finally {
 
             setSaving(false);
-
         }
-
     };
 
 
@@ -627,12 +1147,101 @@ export default function AssignmentModal({
     // ==========================================================
 
     const isFormValid =
-        Boolean(form.teacher_id)
-        &&
+        Boolean(form.teacher_id) &&
         (
-            form.assignment_type === "PRIMARY"
-            ||
+            form.assignment_type ===
+                "PRIMARY" ||
             Boolean(form.subject_id)
+        );
+
+
+    // ==========================================================
+    // SEARCHABLE OPTIONS
+    // ==========================================================
+
+    const subjectOptions:
+        SearchableOption[] =
+        subjects.map(
+            (subject) => ({
+
+                value:
+                    String(subject.id),
+
+                label:
+                    subject.name,
+
+                searchText:
+                    `${subject.name} ${
+                        subject.code || ""
+                    }`,
+            })
+        );
+
+
+    const teacherOptions:
+        SearchableOption[] =
+        teachers.map(
+            (teacher) => {
+
+                const fullName =
+                    `${teacher.first_name} ${teacher.last_name}`;
+
+                return {
+
+                    value:
+                        String(teacher.id),
+
+                    label:
+                        fullName,
+
+                    searchText:
+                        `${fullName} ${
+                            teacher.phone || ""
+                        }`,
+                };
+            }
+        );
+
+
+    const classroomGroupOptions:
+        SearchableOption[] =
+        classroomGroups.map(
+            (group) => ({
+
+                value:
+                    String(group.id),
+
+                label:
+                    group.name,
+
+                searchText:
+                    group.name,
+
+            })
+        );
+
+
+    const courseGroupOptions:
+        SearchableOption[] =
+        courseGroups.map(
+            (courseGroup) => ({
+
+                value:
+                    String(courseGroup.id),
+
+                label:
+                    `${courseGroup.name}${
+                        courseGroup.code
+                            ? ` (${courseGroup.code})`
+                            : ""
+                    }`,
+
+                searchText:
+                    `${courseGroup.name} ${
+                        courseGroup.code || ""
+                    }`,
+
+            })
         );
 
 
@@ -640,17 +1249,29 @@ export default function AssignmentModal({
     // RENDER
     // ==========================================================
 
-    if (!open)
+    if (!open) {
         return null;
+    }
 
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-    
-            {/* ======================================================
+        <div
+            className="
+                fixed
+                inset-0
+                z-50
+                flex
+                items-center
+                justify-center
+                bg-black/50
+                p-4
+            "
+        >
+
+            {/* ==================================================
                 MODAL
-            ====================================================== */}
-    
+            ================================================== */}
+
             <div
                 className="
                     flex
@@ -664,34 +1285,41 @@ export default function AssignmentModal({
                     shadow-xl
                 "
             >
-    
+
                 {/* ==================================================
-                    HEADER FIXE
+                    HEADER
                 ================================================== */}
-    
-                <div className="shrink-0 border-b px-6 py-4">
-    
-                    <h2 className="text-xl font-semibold">
-    
+
+                <div
+                    className="
+                        shrink-0
+                        border-b
+                        px-6
+                        py-4
+                    "
+                >
+
+                    <h2 className="text-xl font-semibold text-gray-900">
+
                         {assignment
                             ? "Modifier une affectation"
                             : "Nouvelle affectation"}
-    
+
                     </h2>
-    
+
                     <p className="mt-1 text-sm text-gray-500">
-    
+
                         Affectez un enseignant à cette classe.
-    
+
                     </p>
-    
+
                 </div>
-    
-    
+
+
                 {/* ==================================================
                     FORM
                 ================================================== */}
-    
+
                 <form
                     onSubmit={handleSubmit}
                     className="
@@ -701,11 +1329,11 @@ export default function AssignmentModal({
                         flex-col
                     "
                 >
-    
-                    {/* ==============================================
-                        BODY SCROLLABLE
-                    ============================================== */}
-    
+
+                    {/* ==================================================
+                        BODY
+                    ================================================== */}
+
                     <div
                         className="
                             min-h-0
@@ -715,469 +1343,357 @@ export default function AssignmentModal({
                             p-6
                         "
                     >
-    
-                        {/* ==========================================
-                            TYPE
-                        ========================================== */}
-    
+
+                        {/* ==================================================
+                            TYPE D'ENSEIGNANT
+                            SELECT SIMPLE
+                        ================================================== */}
+
                         <div>
-    
-                            <label className="mb-2 block text-sm font-medium">
-    
+
+                            <label
+                                className="
+                                    mb-2
+                                    block
+                                    text-sm
+                                    font-medium
+                                    text-gray-700
+                                "
+                            >
                                 Type d'enseignant
-    
                             </label>
-    
+
                             <select
                                 value={
                                     form.assignment_type
                                 }
                                 onChange={(e) =>
-                                    setForm({
-                                        ...form,
-    
-                                        assignment_type:
-                                            e.target.value,
-                                    })
+                                    setForm(
+                                        (previous) => ({
+                                            ...previous,
+                                            assignment_type:
+                                                e.target.value,
+                                        })
+                                    )
                                 }
-                                className="w-full rounded-lg border p-3"
+                                className="
+                                    w-full
+                                    rounded-lg
+                                    border
+                                    border-gray-300
+                                    bg-white
+                                    p-3
+                                    text-gray-800
+                                    outline-none
+                                    transition
+                                    focus:border-[#6214BE]
+                                    focus:ring-2
+                                    focus:ring-[#6214BE]/20
+                                "
                             >
-                                
-                                <option >
-    
-                                    Selectionnez le type d'enseignant
-    
+
+                                <option value="">
+                                    Sélectionnez le type d'enseignant
                                 </option>
 
                                 <option value="PRIMARY">
-    
                                     Enseignant primaire
-    
                                 </option>
-    
+
                                 <option value="SUBJECT">
-    
                                     Enseignant secondaire / supérieur
-    
                                 </option>
-    
+
                             </select>
-    
-    
-                            {form.assignment_type === "PRIMARY" && (
-    
-                                <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700">
-    
-                                    ℹ️ L'enseignant titulaire est
-                                    responsable de toute la classe.
-                                    Aucune matière ni aucun cours
-                                    commun ne sont nécessaires.
-    
-                                </div>
-    
-                            )}
-    
+
                         </div>
-    
-    
-                        {/* ==========================================
-                            MATIÈRE
-                        ========================================== */}
-    
-                        {form.assignment_type === "SUBJECT" && (
-    
-                            <div>
-    
-                                <label className="mb-2 block text-sm font-medium">
-    
-                                    Matière
-    
-                                </label>
-    
-                                <select
-                                    value={
-                                        form.subject_id
-                                    }
-                                    onChange={(e) =>
-                                        handleSubjectChange(
-                                            e.target.value
-                                        )
-                                    }
-                                    className="w-full rounded-lg border p-3"
-                                >
-    
-                                    <option value="">
-    
-                                        Sélectionner une matière
-    
-                                    </option>
-    
-                                    {subjects.map(
-                                        (subject) => (
-    
-                                            <option
-                                                key={subject.id}
-                                                value={subject.id}
-                                            >
-    
-                                                {subject.name}
-    
-                                            </option>
-    
-                                        )
-                                    )}
-    
-                                </select>
-    
-    
-                                {errors.subject && (
-    
-                                    <p className="mt-2 text-sm text-red-600">
-    
-                                        {errors.subject[0]}
-    
-                                    </p>
-    
-                                )}
-    
-                            </div>
-    
-                        )}
-    
-    
-                        {/* ==========================================
-                            GROUPE DE CLASSE
-                        ========================================== */}
-    
-                        {form.assignment_type === "SUBJECT" && (
-    
-                            <div>
-    
-                                <label className="mb-2 block text-sm font-medium">
-    
-                                    Groupe
-    
-                                </label>
-    
-                                <select
-                                    value={form.classroom_group_id}
-                                    onChange={(e) =>
-                                        setForm({
-                                            ...form,
-    
-                                            classroom_group_id:
-                                                e.target.value,
-                                        })
-                                    }
-                                    disabled={
-                                        loadingClassroomGroups
-                                    }
-                                    className="
-                                        w-full
-                                        rounded-lg
-                                        border
-                                        p-3
-                                        disabled:cursor-not-allowed
-                                        disabled:bg-gray-100
-                                    "
-                                >
-    
-                                    <option value="">
-    
-                                        Classe entière
-    
-                                    </option>
-    
-                                    {classroomGroups.map(
-                                        (group) => (
-    
-                                            <option
-                                                key={group.id}
-                                                value={group.id}
-                                            >
-    
-                                                {group.name}
-    
-                                            </option>
-    
-                                        )
-                                    )}
-    
-                                </select>
-    
-    
-                                {loadingClassroomGroups && (
-    
-                                    <p className="mt-2 text-xs text-gray-500">
-    
-                                        Chargement des groupes...
-    
-                                    </p>
-    
-                                )}
-    
-    
-                                {!loadingClassroomGroups &&
-                                    classroomGroups.length === 0 && (
-    
-                                        <p className="mt-2 text-xs text-gray-500">
-    
-                                            Aucun groupe dans cette classe.
-                                            L'affectation concerne toute
-                                            la classe.
-    
-                                        </p>
-    
-                                    )}
-    
-    
-                                {errors.classroom_group && (
-    
-                                    <p className="mt-2 text-sm text-red-600">
-    
-                                        {errors.classroom_group[0]}
-    
-                                    </p>
-    
-                                )}
-    
-                            </div>
-    
-                        )}
-    
-    
-                        {/* ==========================================
-                            ENSEIGNANT
-                        ========================================== */}
-    
-                        <div>
-    
-                            <label className="mb-2 block text-sm font-medium">
-    
-                                Enseignant
-    
-                            </label>
-    
-                            <select
-                                value={
-                                    form.teacher_id
-                                }
-                                onChange={(e) =>
-                                    setForm({
-                                        ...form,
-    
-                                        teacher_id:
-                                            e.target.value,
-                                    })
-                                }
-                                className="w-full rounded-lg border p-3"
+
+
+                        {/* ==================================================
+                            INFO PRIMARY
+                        ================================================== */}
+
+                        {form.assignment_type ===
+                            "PRIMARY" && (
+
+                            <div
+                                className="
+                                    rounded-lg
+                                    border
+                                    border-blue-200
+                                    bg-blue-50
+                                    p-3
+                                    text-sm
+                                    text-blue-700
+                                "
                             >
-    
-                                <option value="">
-    
-                                    Sélectionner un enseignant
-    
-                                </option>
-    
-                                {teachers.map(
-                                    (teacher) => (
-    
-                                        <option
-                                            key={teacher.id}
-                                            value={teacher.id}
-                                        >
-    
-                                            {teacher.first_name}{" "}
-                                            {teacher.last_name}
-    
-                                        </option>
-    
-                                    )
-                                )}
-    
-                            </select>
-    
-    
-                            {errors.teacher && (
-    
-                                <p className="mt-2 text-sm text-red-600">
-    
-                                    {errors.teacher[0]}
-    
-                                </p>
-    
-                            )}
-    
-                        </div>
-    
-    
-                        {/* ==========================================
-                            COURS COMMUN
-                        ========================================== */}
-    
-                        {form.assignment_type === "SUBJECT" && (
-    
-                            <div>
-    
-                                <div className="mb-2 flex items-center justify-between">
-    
-                                    <label className="block text-sm font-medium">
-    
-                                        Cours commun
-    
-                                    </label>
-    
-    
-                                    {!form.subject_id && (
-    
-                                        <span className="text-xs text-gray-400">
-    
-                                            Sélectionnez d'abord
-                                            une matière
-    
-                                        </span>
-    
-                                    )}
-    
-                                </div>
-    
-    
-                                <select
-                                    value={
-                                        form.course_group_id
-                                    }
-                                    onChange={(e) =>
-                                        handleCourseGroupChange(
-                                            e.target.value
-                                        )
-                                    }
-                                    disabled={
-                                        !form.subject_id
-                                        ||
-                                        loadingCourseGroups
-                                    }
-                                    className="
-                                        w-full
-                                        rounded-lg
-                                        border
-                                        p-3
-                                        disabled:cursor-not-allowed
-                                        disabled:bg-gray-100
-                                    "
-                                >
-    
-                                    <option value="">
-    
-                                        Classe entière
-    
-                                    </option>
-    
-    
-                                    {courseGroups.map(
-                                        (courseGroup) => (
-    
-                                            <option
-                                                key={
-                                                    courseGroup.id
-                                                }
-                                                value={
-                                                    courseGroup.id
-                                                }
-                                            >
-    
-                                                {courseGroup.name}
-    
-                                                {courseGroup.code
-                                                    ? ` (${courseGroup.code})`
-                                                    : ""}
-    
-                                            </option>
-    
-                                        )
-                                    )}
-    
-                                </select>
-    
-    
-                                {loadingCourseGroups && (
-    
-                                    <p className="mt-2 text-xs text-gray-500">
-    
-                                        Chargement des cours
-                                        communs...
-    
-                                    </p>
-    
-                                )}
-    
-    
-                                {!loadingCourseGroups
-                                    &&
+
+                                ℹ️ L'enseignant titulaire est
+                                responsable de toute la classe.
+                                Aucune matière ni aucun cours
+                                commun ne sont nécessaires.
+
+                            </div>
+
+                        )}
+
+
+                        {/* ==================================================
+                            MATIÈRE
+                        ================================================== */}
+
+                        {form.assignment_type ===
+                            "SUBJECT" && (
+
+                            <SearchableSelect
+                                label="Matière"
+                                value={
                                     form.subject_id
-                                    &&
-                                    courseGroups.length === 0 && (
-    
-                                        <p className="mt-2 text-xs text-gray-500">
-    
-                                            Aucun cours commun pour
-                                            cette matière.
-    
-                                        </p>
-    
+                                }
+                                options={
+                                    subjectOptions
+                                }
+                                onChange={
+                                    handleSubjectChange
+                                }
+                                placeholder="Sélectionner une matière"
+                                searchPlaceholder="Rechercher une matière..."
+                                emptyMessage="Aucune matière trouvée."
+                                error={
+                                    errors.subject?.[0]
+                                }
+                            />
+
+                        )}
+
+
+                        {/* ==================================================
+                            GROUPE DE CLASSE
+                        ================================================== */}
+
+                        {form.assignment_type ===
+                            "SUBJECT" && (
+
+                            <SearchableSelect
+                                label="Groupe"
+                                value={
+                                    form.classroom_group_id
+                                }
+                                options={
+                                    classroomGroupOptions
+                                }
+                                onChange={(value) =>
+                                    setForm(
+                                        (previous) => ({
+                                            ...previous,
+                                            classroom_group_id:
+                                                value,
+                                        })
                                     )
                                 }
-    
-    
-                                {errors.course_group && (
-    
-                                    <p className="mt-2 text-sm text-red-600">
-    
-                                        {errors.course_group[0]}
-    
-                                    </p>
-    
-                                )}
-    
-                            </div>
-    
+                                disabled={
+                                    loadingClassroomGroups
+                                }
+                                loading={
+                                    loadingClassroomGroups
+                                }
+                                placeholder="Classe entière"
+                                searchPlaceholder="Rechercher un groupe..."
+                                emptyLabel="Classe entière"
+                                emptyMessage="Aucun groupe trouvé."
+                                error={
+                                    errors.classroom_group?.[0]
+                                }
+                            />
+
                         )}
-    
-    
-                        {/* ==========================================
-                            INFORMATION COURS COMMUN
-                        ========================================== */}
-    
-                        {form.assignment_type === "SUBJECT"
-                            &&
-                            form.course_group_id
-                            && (
-    
-                                <div className="rounded-lg border border-purple-200 bg-purple-50 p-3 text-sm text-purple-700">
-    
-                                    <strong>
-    
-                                        Cours commun :
-    
-                                    </strong>{" "}
-    
-                                    Cette affectation sera liée
-                                    au cours commun sélectionné.
-                                    Les autres classes membres
-                                    de ce cours pourront utiliser
-                                    la même affectation pédagogique.
-    
-                                </div>
-    
-                            )
-                        }
-    
+
+
+                        {!loadingClassroomGroups &&
+                            form.assignment_type ===
+                                "SUBJECT" &&
+                            classroomGroups.length ===
+                                0 && (
+
+                                <p
+                                    className="
+                                        -mt-3
+                                        text-xs
+                                        text-gray-500
+                                    "
+                                >
+
+                                    Aucun groupe dans cette
+                                    classe. L'affectation concerne
+                                    toute la classe.
+
+                                </p>
+
+                            )}
+
+
+                        {/* ==================================================
+                            ENSEIGNANT
+                        ================================================== */}
+
+                        <SearchableSelect
+                            label="Enseignant"
+                            value={
+                                form.teacher_id
+                            }
+                            options={
+                                teacherOptions
+                            }
+                            onChange={(value) =>
+                                setForm(
+                                    (previous) => ({
+                                        ...previous,
+                                        teacher_id:
+                                            value,
+                                    })
+                                )
+                            }
+                            placeholder="Sélectionner un enseignant"
+                            searchPlaceholder="Rechercher par nom, prénom ou téléphone..."
+                            emptyMessage="Aucun enseignant trouvé."
+                            error={
+                                errors.teacher?.[0]
+                            }
+                        />
+
+
+                        {/* ==================================================
+                            COURS COMMUN
+                        ================================================== */}
+
+                        {form.assignment_type ===
+                            "SUBJECT" && (
+
+                            <SearchableSelect
+                                label="Cours commun"
+                                value={
+                                    form.course_group_id
+                                }
+                                options={
+                                    courseGroupOptions
+                                }
+                                onChange={
+                                    handleCourseGroupChange
+                                }
+                                disabled={
+                                    !form.subject_id ||
+                                    loadingCourseGroups
+                                }
+                                loading={
+                                    loadingCourseGroups
+                                }
+                                placeholder={
+                                    !form.subject_id
+                                        ? "Sélectionnez d'abord une matière"
+                                        : "Classe entière"
+                                }
+                                searchPlaceholder="Rechercher un cours commun..."
+                                emptyLabel="Classe entière"
+                                emptyMessage="Aucun cours commun trouvé."
+                                error={
+                                    errors.course_group?.[0]
+                                }
+                            />
+
+                        )}
+
+
+                        {/* ==================================================
+                            LOADING COURS COMMUNS
+                        ================================================== */}
+
+                        {loadingCourseGroups &&
+                            form.subject_id && (
+
+                                <p
+                                    className="
+                                        -mt-3
+                                        text-xs
+                                        text-gray-500
+                                    "
+                                >
+
+                                    Chargement des cours
+                                    communs...
+
+                                </p>
+
+                            )}
+
+
+                        {/* ==================================================
+                            AUCUN COURS COMMUN
+                        ================================================== */}
+
+                        {!loadingCourseGroups &&
+                            form.subject_id &&
+                            courseGroups.length ===
+                                0 &&
+                            form.assignment_type ===
+                                "SUBJECT" && (
+
+                                <p
+                                    className="
+                                        -mt-3
+                                        text-xs
+                                        text-gray-500
+                                    "
+                                >
+
+                                    Aucun cours commun pour
+                                    cette matière.
+
+                                </p>
+
+                            )}
+
+
+                        {/* ==================================================
+                            INFO COURS COMMUN
+                        ================================================== */}
+
+                        {form.assignment_type ===
+                            "SUBJECT" &&
+                            form.course_group_id && (
+
+                            <div
+                                className="
+                                    rounded-lg
+                                    border
+                                    border-purple-200
+                                    bg-purple-50
+                                    p-3
+                                    text-sm
+                                    text-purple-700
+                                "
+                            >
+
+                                <strong>
+                                    Cours commun :
+                                </strong>{" "}
+
+                                Cette affectation sera liée
+                                au cours commun sélectionné.
+                                Les autres classes membres
+                                de ce cours pourront utiliser
+                                la même affectation pédagogique.
+
+                            </div>
+
+                        )}
+
                     </div>
-    
-    
-                    {/* ==============================================
-                        FOOTER FIXE
-                    ============================================== */}
-    
+
+
+                    {/* ==================================================
+                        FOOTER
+                    ================================================== */}
+
                     <div
                         className="
                             shrink-0
@@ -1187,9 +1703,16 @@ export default function AssignmentModal({
                             py-4
                         "
                     >
-    
-                        <div className="flex items-center justify-end gap-3">
-    
+
+                        <div
+                            className="
+                                flex
+                                items-center
+                                justify-end
+                                gap-3
+                            "
+                        >
+
                             <button
                                 type="button"
                                 onClick={onClose}
@@ -1200,22 +1723,22 @@ export default function AssignmentModal({
                                     border
                                     px-4
                                     py-2
+                                    transition
                                     hover:bg-gray-100
                                     disabled:cursor-not-allowed
                                     disabled:opacity-50
                                 "
                             >
-    
+
                                 Annuler
-    
+
                             </button>
-    
-    
+
+
                             <button
                                 type="submit"
                                 disabled={
-                                    saving
-                                    ||
+                                    saving ||
                                     !isFormValid
                                 }
                                 className="
@@ -1225,30 +1748,29 @@ export default function AssignmentModal({
                                     px-5
                                     py-2
                                     text-white
+                                    transition
                                     hover:bg-[#5310a0]
                                     disabled:cursor-not-allowed
                                     disabled:opacity-50
                                 "
                             >
-    
+
                                 {saving
                                     ? "Enregistrement..."
                                     : assignment
                                         ? "Mettre à jour"
-                                        : "Enregistrer"
-                                }
-    
+                                        : "Enregistrer"}
+
                             </button>
-    
+
                         </div>
-    
+
                     </div>
-    
+
                 </form>
-    
+
             </div>
-    
+
         </div>
     );
-
 }

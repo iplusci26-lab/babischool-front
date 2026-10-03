@@ -8,4 +8,6 @@ export interface Teacher {
 
     full_name: string;
 
+    phone: string;
+
 }
