@@ -314,7 +314,7 @@ export default function AnnouncementDetailModal({
               </div>
 
               <a
-                href={`${process.env.NEXT_PUBLIC_API_URL}${announcement.attachment}`}
+                href={announcement.attachment} //{`${process.env.NEXT_PUBLIC_API_URL}$`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl border hover:bg-gray-50"
