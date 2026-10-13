@@ -841,8 +841,10 @@ export default function AssignmentsPage() {
                                                         key={classroom.id}
                                                         className="inline-flex rounded-full bg-purple-100 px-2.5 py-1 text-xs font-medium text-purple-700"
                                                     >
-                                                        {classroom.name}
-                                                    </span>
+                                                        {classroom.classroom_group_name
+                                                        ? `${classroom.name} — ${classroom.classroom_group_name}`
+                                                        : classroom.name}
+                                                                                                            </span>
 
                                                 )
                                             )

@@ -1,6 +1,8 @@
 export interface CourseGroupClassroom {
     id: string;
     name: string;
+    classroom_group_id: string | null;
+    classroom_group_name: string | null;
 }
 
 export interface CourseGroup {

@@ -118,14 +118,16 @@ export default function ClassScheduleModal({
             selectedAssignment.course_group_classrooms
                 .length > 0
         ) {
-            return selectedAssignment
-                .course_group_classrooms
-                .map((classroom) => ({
-                    classroom:
-                        String(classroom.id),
-
-                    classroom_group: null,
-                }));
+            
+            return selectedAssignment.course_group_classrooms.map(
+                (classroom) => ({
+                classroom: String(classroom.id),
+                classroom_group: classroom.classroom_group_id
+                    ? String(classroom.classroom_group_id)
+                    : null,
+                })
+            );
+  
         }
 
         // ======================================================
@@ -194,23 +196,18 @@ export default function ClassScheduleModal({
                                 classroomId
                         );
 
-                    if (
-                        courseGroupClassroom
-                    ) {
+                    
+                    if (courseGroupClassroom) {
                         return {
-                            classroom:
-                                classroomId,
-
-                            classroom_name:
-                                courseGroupClassroom.name,
-
-                            classroom_group:
-                                null,
-
-                            classroom_group_name:
-                                null,
+                        classroom: classroomId,
+                        classroom_name: courseGroupClassroom.name,
+                        classroom_group:
+                            courseGroupClassroom.classroom_group_id ?? null,
+                        classroom_group_name:
+                            courseGroupClassroom.classroom_group_name ?? null,
                         };
                     }
+  
 
                     // ==================================================
                     // CLASSE DE L'AFFECTATION
