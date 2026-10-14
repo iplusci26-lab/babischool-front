@@ -548,7 +548,7 @@ export default function SubjectsPage() {
 
     if (
       !Number.isFinite(coefficient) ||
-      coefficient <= 0
+      coefficient < 0
     ) {
       toast.error(
         "Le coefficient doit être supérieur à 0."
@@ -1279,9 +1279,9 @@ export default function SubjectsPage() {
 
                       <input
                         type="number"
-                        min="0.01"
+                        min="0.0"
                         max="999.99"
-                        step="0.01"
+                        step="0.0"
                         inputMode="decimal"
                         value={configurationForm.coefficient}
                         onChange={(event) =>
