@@ -155,6 +155,9 @@ export default function GradesPage() {
   const [correctionLoading, setCorrectionLoading] = useState(false);
   const [correctionReason, setCorrectionReason] = useState("");
   const [showCorrectionForm, setShowCorrectionForm] = useState(false);
+  const [correctionToken, setCorrectionToken] = useState("");
+  const [correctionPassword, setCorrectionPassword] = useState("");
+  const [correctionUnlocked, setCorrectionUnlocked] = useState(false);
   const [
     homeworkLoading,
     setHomeworkLoading,
@@ -230,6 +233,45 @@ export default function GradesPage() {
       (HTMLInputElement | null)[]
     >([]);
 
+
+    const correctionHeaders = () => {
+      if (!correctionToken) {
+        throw new Error(
+          "Déverrouillez d'abord la section de correction."
+        );
+      }
+    
+      return {
+        headers: {
+          "X-Grade-Correction-Token": correctionToken,
+        },
+      };
+    };
+
+    const unlockCorrection = async () => {
+      if (!selected || !correctionPassword.trim()) {
+        toast.error("Saisissez le mot de passe de correction.");
+        return;
+      }
+    
+      try {
+        const response = await api.post(
+          `/academics/assessments/${selected}/correction/unlock/`,
+          { password: correctionPassword }
+        );
+    
+        setCorrectionToken(response.data.token);
+        setCorrectionUnlocked(true);
+        setCorrectionPassword("");
+    
+        toast.success("Section de correction déverrouillée.");
+      } catch (error: any) {
+        toast.error(
+          error?.response?.data?.detail ||
+            "Impossible de déverrouiller la correction."
+        );
+      }
+    };
 
   // ==========================================================
   // FORMATAGE DATE
@@ -519,14 +561,33 @@ export default function GradesPage() {
       return;
     }
 
+    if (!correctionPassword.trim()) {
+      toast.error("Saisissez le mot de passe de correction.");
+      return;
+    }
+
     try {
       setCorrectionLoading(true);
 
+      const unlockResponse = await api.post(
+        `/academics/assessments/${selected}/correction/unlock/`,
+        { password: correctionPassword }
+      );
+      const token = unlockResponse.data?.token;
+
+      if (!token) {
+        throw new Error("Le serveur n'a pas retourné de jeton de correction.");
+      }
+
       await api.post(
         `/academics/assessments/${selected}/correction/start/`,
-        { reason }
+        { reason },
+        { headers: { "X-Grade-Correction-Token": token } }
       );
 
+      setCorrectionToken(token);
+      setCorrectionUnlocked(true);
+      setCorrectionPassword("");
       await loadGrades(selected);
       setCorrectionReason("");
       setShowCorrectionForm(false);
@@ -536,6 +597,7 @@ export default function GradesPage() {
       toast.error(
         error?.response?.data?.detail ||
           error?.response?.data?.reason?.[0] ||
+          error?.message ||
           "Impossible d'ouvrir la session de correction."
       );
     } finally {
@@ -559,8 +621,13 @@ export default function GradesPage() {
       setCorrectionLoading(true);
 
       await api.post(
-        `/academics/assessments/${selected}/correction/close/`
+        `/academics/assessments/${selected}/correction/close/`,
+        {},
+        correctionHeaders()
       );
+      
+      setCorrectionToken("");
+      setCorrectionUnlocked(false);
 
       await loadGrades(selected);
 
@@ -1255,8 +1322,11 @@ export default function GradesPage() {
       }
 
       if (
-        assessment?.is_locked ||
-        assessment?.can_edit === false
+        !correctionUnlocked &&
+        (
+          assessment?.is_locked ||
+          assessment?.can_edit === false
+        )
       ) {
 
         toast.error(
@@ -1276,10 +1346,11 @@ export default function GradesPage() {
         await api.post(
           `/academics/assessments/${selected}/grades/`,
           {
-
             grades,
-
-          }
+          },
+          assessment?.status === "published" || assessment?.is_locked
+            ? correctionHeaders()
+            : {}
         );
 
         await loadGrades(
@@ -2176,13 +2247,14 @@ export default function GradesPage() {
                   const value =
                     e.target.value;
 
-                  setSelected(
-                    value
-                  );
+                  setSelected(value);
+                  setCorrectionToken("");
+                  setCorrectionUnlocked(false);
+                  setCorrectionPassword("");
+                  setCorrectionReason("");
+                  setShowCorrectionForm(false);
 
-                  loadGrades(
-                    value
-                  );
+                  loadGrades(value);
 
                 }}
               >
@@ -2369,7 +2441,146 @@ export default function GradesPage() {
 
                     </div>
 
-                  </div>
+                    {/* SESSION DE CORRECTION */}
+
+                    {assessment?.status === "published" &&
+                      assessment?.can_manage_correction && (
+                        <div className="mt-6 rounded-2xl border border-purple-200 bg-white p-6 shadow-sm">
+                          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                              <h3 className="font-semibold text-gray-900">
+                                Correction des notes publiées
+                              </h3>
+                              <p className="mt-1 text-sm text-gray-500">
+                                Toute modification est enregistrée dans l'historique de correction.
+                              </p>
+                              <p className="mt-2 text-sm font-medium">
+                                Session :{" "}
+                                <span
+                                  className={
+                                    assessment.correction_session_active
+                                      ? "text-green-600"
+                                      : "text-gray-500"
+                                  }
+                                >
+                                  {assessment.correction_session_active ? "Active" : "Fermée"}
+                                </span>
+                              </p>
+                              {correctionUnlocked && (
+                                <p className="mt-2 text-sm font-medium text-green-700">
+                                  Accès de correction déverrouillé.
+                                </p>
+                              )}
+                            </div>
+
+                            {assessment.correction_session_active && correctionUnlocked && (
+                              <button
+                                type="button"
+                                onClick={closeCorrection}
+                                disabled={correctionLoading}
+                                className="rounded-xl bg-red-600 px-5 py-3 font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+                              >
+                                {correctionLoading ? "Traitement..." : "Clôturer la session"}
+                              </button>
+                            )}
+
+                            {!assessment.correction_session_active && !showCorrectionForm && !correctionUnlocked && (
+                              <button
+                                type="button"
+                                onClick={() => setShowCorrectionForm(true)}
+                                disabled={correctionLoading}
+                                className="rounded-xl bg-[#6214BE] px-5 py-3 font-medium text-white transition hover:bg-[#4e10a0] disabled:opacity-50"
+                              >
+                                Ouvrir une session
+                              </button>
+                            )}
+
+                            {assessment.correction_session_active && !correctionUnlocked && (
+                              <div className="w-full max-w-md space-y-3">
+                                <label htmlFor="correction-password-active" className="block text-sm font-medium text-gray-700">
+                                  Mot de passe de correction
+                                </label>
+                                <input
+                                  id="correction-password-active"
+                                  type="password"
+                                  autoComplete="current-password"
+                                  value={correctionPassword}
+                                  onChange={(e) => setCorrectionPassword(e.target.value)}
+                                  placeholder="Saisissez le mot de passe"
+                                  className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-[#6214BE] focus:ring-2 focus:ring-[#6214BE]/20"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={unlockCorrection}
+                                  disabled={correctionLoading || !correctionPassword.trim()}
+                                  className="w-full rounded-xl bg-[#6214BE] px-5 py-3 font-medium text-white hover:bg-[#4e10a0] disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  {correctionLoading ? "Déverrouillage..." : "Déverrouiller pour clôturer"}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {showCorrectionForm && !assessment.correction_session_active && !correctionUnlocked && (
+                            <div className="mt-5 space-y-4 border-t pt-5">
+                              <div>
+                                <label htmlFor="correction-password" className="mb-1 block text-sm font-medium text-gray-700">
+                                  Mot de passe de correction
+                                </label>
+                                <input
+                                  id="correction-password"
+                                  type="password"
+                                  autoComplete="current-password"
+                                  value={correctionPassword}
+                                  onChange={(e) => setCorrectionPassword(e.target.value)}
+                                  placeholder="Saisissez le mot de passe de correction"
+                                  className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#6214BE] focus:ring-2 focus:ring-[#6214BE]/20"
+                                />
+                              </div>
+
+                              <div>
+                                <label htmlFor="correction-reason" className="mb-1 block text-sm font-medium text-gray-700">
+                                  Motif obligatoire de la correction
+                                </label>
+                                <textarea
+                                  id="correction-reason"
+                                  value={correctionReason}
+                                  onChange={(e) => setCorrectionReason(e.target.value)}
+                                  placeholder="Ex. : erreur de transcription de la note..."
+                                  rows={3}
+                                  maxLength={1000}
+                                  className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#6214BE] focus:ring-2 focus:ring-[#6214BE]/20"
+                                />
+                              </div>
+
+                              <div className="flex flex-wrap justify-end gap-3">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setShowCorrectionForm(false);
+                                    setCorrectionReason("");
+                                    setCorrectionPassword("");
+                                  }}
+                                  disabled={correctionLoading}
+                                  className="rounded-xl border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                                >
+                                  Annuler
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={startCorrection}
+                                  disabled={correctionLoading || !correctionReason.trim() || !correctionPassword.trim()}
+                                  className="rounded-xl bg-[#6214BE] px-5 py-2 font-medium text-white hover:bg-[#4e10a0] disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  {correctionLoading ? "Ouverture..." : "Déverrouiller et ouvrir la session"}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                        </div>
 
 
                   {statistics && (
@@ -2596,10 +2807,13 @@ export default function GradesPage() {
                                       }
                                       placeholder="-"
                                       disabled={
-                                        assessment?.can_edit === false ||
+                                        !correctionUnlocked &&
                                         (
-                                          assessment?.can_edit == null &&
-                                          assessment?.is_locked
+                                          assessment?.can_edit === false ||
+                                          (
+                                            assessment?.can_edit == null &&
+                                            assessment?.is_locked
+                                          )
                                         )
                                       }
                                       onChange={(
@@ -2660,11 +2874,11 @@ export default function GradesPage() {
                     <div className="flex justify-end gap-3">
 
 
-                      {(assessment?.can_edit === true || 
+                      {(correctionUnlocked || assessment?.can_edit === true ||
                       (
                         assessment?.can_edit == null && !assessment?.is_locked
                       )
-                      )&&  (
+                      ) && (
 
                         <button
                           onClick={
@@ -2723,112 +2937,7 @@ export default function GradesPage() {
               )}
 
               
-              {/* SESSION DE CORRECTION */}
-
-              {assessment?.status === "published" &&
-                assessment?.can_manage_correction && (
-                  <div className="rounded-2xl border border-purple-200 bg-white p-6 shadow-sm">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">
-                          Correction des notes publiées
-                        </h3>
-
-                        <p className="mt-1 text-sm text-gray-500">
-                          Toute modification pendant cette session est
-                          enregistrée dans l'historique de correction.
-                        </p>
-
-                        <p className="mt-2 text-sm font-medium">
-                          Session :{" "}
-                          <span
-                            className={
-                              assessment.correction_session_active
-                                ? "text-green-600"
-                                : "text-gray-500"
-                            }
-                          >
-                            {assessment.correction_session_active
-                              ? "Active"
-                              : "Fermée"}
-                          </span>
-                        </p>
-                      </div>
-
-                      {!assessment.correction_session_active && (
-                        <button
-                          type="button"
-                          onClick={() => setShowCorrectionForm((prev) => !prev)}
-                          disabled={correctionLoading}
-                          className="rounded-xl bg-[#6214BE] px-5 py-3 font-medium text-white transition hover:bg-[#4e10a0] disabled:opacity-50"
-                        >
-                          Ouvrir une session
-                        </button>
-                      )}
-
-                      {assessment.correction_session_active && (
-                        <button
-                          type="button"
-                          onClick={closeCorrection}
-                          disabled={correctionLoading}
-                          className="rounded-xl bg-red-600 px-5 py-3 font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
-                        >
-                          {correctionLoading
-                            ? "Traitement..."
-                            : "Clôturer la session"}
-                        </button>
-                      )}
-                    </div>
-
-                    {showCorrectionForm &&
-                      !assessment.correction_session_active && (
-                        <div className="mt-5 space-y-3 border-t pt-5">
-                          <label
-                            htmlFor="correction-reason"
-                            className="block text-sm font-medium text-gray-700"
-                          >
-                            Motif obligatoire de la correction
-                          </label>
-
-                          <textarea
-                            id="correction-reason"
-                            value={correctionReason}
-                            onChange={(e) => setCorrectionReason(e.target.value)}
-                            placeholder="Ex. : erreur de transcription de la note..."
-                            rows={3}
-                            maxLength={1000}
-                            className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-[#6214BE] focus:ring-2 focus:ring-[#6214BE]/20"
-                          />
-
-                          <div className="flex flex-wrap justify-end gap-3">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setShowCorrectionForm(false);
-                                setCorrectionReason("");
-                              }}
-                              className="rounded-xl border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                            >
-                              Annuler
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={startCorrection}
-                              disabled={
-                                correctionLoading || !correctionReason.trim()
-                              }
-                              className="rounded-xl bg-[#6214BE] px-5 py-2 font-medium text-white hover:bg-[#4e10a0] disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              {correctionLoading
-                                ? "Ouverture..."
-                                : "Confirmer l'ouverture"}
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                  </div>
-                )}
+              
 
 
           </>

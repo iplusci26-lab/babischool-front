@@ -1,5 +1,25 @@
 
-  
+  // ===============================
+// Cycle
+// ===============================
+
+export interface Cycle {
+  id: string;
+  name: string;
+  code: string;
+  display_order: number;
+  is_active: boolean;
+}
+
+export interface CycleForm {
+  id?: string;
+  name: string;
+  code: string;
+  codeManuallyEdited?: boolean;
+  display_order: number;
+  is_active: boolean;
+}
+
   // ===============================
   // Classroom Level
   // ===============================

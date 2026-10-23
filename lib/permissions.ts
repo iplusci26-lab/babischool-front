@@ -162,6 +162,12 @@ export const menuPermissions: Record<
     "Accès compta",
   ],
 
+  correctionPassword: [
+    "admin",
+    "Accès Corr.",
+    "Accès A",
+  ],
+
   settings: [
     "admin",
     "Accès A",

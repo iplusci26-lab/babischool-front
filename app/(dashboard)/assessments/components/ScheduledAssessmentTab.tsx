@@ -181,7 +181,7 @@ export default function ScheduledAssessmentTab() {
         assessments={assessments}
 
         loading={loading}
-        onGrade={() => {}}
+        //onGrade={() => {}}
         onView={() => {}}
 
         onEdit={handleEdit}
@@ -193,6 +193,7 @@ export default function ScheduledAssessmentTab() {
           )
 
         }
+        onPublish={() => {}}
 
       />
 

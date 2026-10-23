@@ -31,6 +31,7 @@ import {
   Users2,
   Megaphone,
   MessagesSquare,
+  KeyRound,
 } from "lucide-react";
 
 
@@ -178,6 +179,12 @@ export default function Sidebar() {
           icon: Settings,
         },
         {
+          key: "correctionPassword",
+          label: "Mot de passe de correction",
+          href: "/correction-password",
+          icon: KeyRound,
+        },
+        {
           key: "parents",
           label: "Parents",
           href: "/dashboard/parents",
@@ -203,6 +210,17 @@ export default function Sidebar() {
         },
       ],
     },
+    /*{
+      section: "Sécurité",
+      items: [
+        {
+          key: "correctionPassword",
+          label: "Mot de passe de correction",
+          href: "/correction-password",
+          icon: KeyRound,
+        },
+      ],
+    },*/
   ] 
   
   
