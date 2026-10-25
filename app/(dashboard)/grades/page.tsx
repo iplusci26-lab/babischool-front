@@ -126,6 +126,8 @@ export default function GradesPage() {
     []
   );
 
+  const [studentSearch, setStudentSearch] = useState("");
+
   const [
     statistics,
     setStatistics,
@@ -272,6 +274,35 @@ export default function GradesPage() {
         );
       }
     };
+
+    
+const normalizeSearch = (value: unknown): string =>
+  String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("fr");
+
+const filteredGrades = useMemo(() => {
+  const query = normalizeSearch(studentSearch.trim());
+
+  return [...grades]
+    .sort((a, b) =>
+      String(a.student_name ?? "").localeCompare(
+        String(b.student_name ?? ""),
+        "fr",
+        { sensitivity: "base" }
+      )
+    )
+    .filter((grade) => {
+      if (!query) return true;
+
+      return (
+        normalizeSearch(grade.student_name).includes(query) ||
+        normalizeSearch(grade.student_number).includes(query)
+      );
+    });
+}, [grades, studentSearch]);
+
 
   // ==========================================================
   // FORMATAGE DATE
@@ -2689,11 +2720,51 @@ export default function GradesPage() {
 
                       </h3>
 
+                      
                       <p className="mt-1 text-sm text-gray-500">
-
-                        Saisissez les notes des élèves.
-
+                        Saisissez les notes des élèves, classées par ordre alphabétique.
                       </p>
+
+                      <div className="mt-4">
+                        <label
+                          htmlFor="student-grade-search"
+                          className="mb-2 block text-sm font-medium text-gray-700"
+                        >
+                          Rechercher un élève
+                        </label>
+
+                        <div className="relative max-w-lg">
+                          <Search
+                            size={18}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                          />
+
+                          <input
+                            id="student-grade-search"
+                            type="search"
+                            value={studentSearch}
+                            onChange={(event) => setStudentSearch(event.target.value)}
+                            placeholder="Nom, prénom ou matricule..."
+                            className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-10 outline-none focus:border-[#6214BE] focus:ring-2 focus:ring-purple-100"
+                          />
+
+                          {studentSearch && (
+                            <button
+                              type="button"
+                              onClick={() => setStudentSearch("")}
+                              aria-label="Effacer la recherche"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                            >
+                              <X size={16} />
+                            </button>
+                          )}
+                        </div>
+
+                        <p className="mt-2 text-xs text-gray-500">
+                          {filteredGrades.length} élève(s) affiché(s) sur {grades.length}
+                        </p>
+                      </div>
+
 
                     </div>
 
@@ -2731,7 +2802,7 @@ export default function GradesPage() {
 
                         <tbody>
 
-                          {grades.map(
+                          {filteredGrades.map(
                             (
                               grade,
                               index
@@ -2858,7 +2929,18 @@ export default function GradesPage() {
 
                             }
                           )}
-
+                          {filteredGrades.length === 0 && (
+                            <tr>
+                              <td
+                                colSpan={3}
+                                className="px-6 py-10 text-center text-sm text-gray-500"
+                              >
+                                {studentSearch.trim()
+                                  ? "Aucun élève ne correspond à cette recherche."
+                                  : "Aucun élève à afficher."}
+                              </td>
+                            </tr>
+                          )}
                         </tbody>
 
                       </table>
