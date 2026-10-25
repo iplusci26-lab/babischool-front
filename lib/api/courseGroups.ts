@@ -2,6 +2,14 @@ import { api } from "../api";
 
 import { CourseGroup } from "@/types/courseGroup";
 
+
+
+export interface CourseGroupParticipantPayload {
+    classroom_id: string | number;
+    classroom_group_id: string | number | null;
+}
+
+
 export interface CourseGroupPayload {
     name: string;
 
@@ -15,7 +23,12 @@ export interface CourseGroupPayload {
 
     teacher_id: string;
 
-    classroom_ids: string[];
+     // Ancien format, conservé pour la compatibilité.
+    classroom_ids?: (string | number)[];
+    
+    // Nouveau format : classe entière ou groupes précis.
+    participants?: CourseGroupParticipantPayload[];
+
 
     is_active?: boolean;
 }

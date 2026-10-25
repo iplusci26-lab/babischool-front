@@ -333,13 +333,13 @@ export default function CourseGroupModal({
 
             // Nouveau format attendu par le serializer.
 
-            classroom_ids: [
+            /*classroom_ids: [
                 ...new Set(
                     form.participants.map(
                         (participant) => participant.classroom_id
                     )
                 ),
-            ],
+            ],*/
             
             participants: form.participants.map((participant) => ({
                 classroom_id: participant.classroom_id,
