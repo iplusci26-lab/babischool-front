@@ -2,7 +2,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import type { ReactNode } from "react";
+
+import ParentTransferModal from "../../components/ParentTransferModal";
 import { api } from "@/lib/api";
+
 import {
   Search,
   RefreshCw,
@@ -16,6 +20,7 @@ import {
   UserRound,
   MapPin,
   BriefcaseBusiness,
+  ArrowLeftRight,
 } from "lucide-react";
 
 type Child = {
@@ -68,6 +73,8 @@ export default function SupervisorParentsPage() {
   const [schools, setSchools] = useState<SchoolOption[]>([]);
   const [selectedParent, setSelectedParent] = useState<Parent | null>(null);
 
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
+
   const [search, setSearch] = useState("");
   const [schoolId, setSchoolId] = useState("");
   const [phone, setPhone] = useState("");
@@ -80,16 +87,26 @@ export default function SupervisorParentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // --------------------------------------------------
+  // Chargement des écoles
+  // --------------------------------------------------
+
   const loadSchools = useCallback(async () => {
     try {
       const response = await api.get<SchoolOption[]>(
         "/developer/supervisor/schools/"
       );
+
       setSchools(response.data);
     } catch {
-      // Le chargement des parents reste possible si la liste des écoles échoue.
+      // Le chargement des parents reste possible
+      // même si la liste des écoles échoue.
     }
   }, []);
+
+  // --------------------------------------------------
+  // Chargement des parents
+  // --------------------------------------------------
 
   const loadParents = useCallback(async () => {
     setLoading(true);
@@ -106,6 +123,7 @@ export default function SupervisorParentsPage() {
       if (phone.trim()) params.phone = phone.trim();
       if (parentName.trim()) params.parent_name = parentName.trim();
       if (childName.trim()) params.child_name = childName.trim();
+
       if (studentNumber.trim()) {
         params.student_number = studentNumber.trim();
       }
@@ -136,7 +154,15 @@ export default function SupervisorParentsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, schoolId, phone, parentName, childName, studentNumber]);
+  }, [
+    page,
+    search,
+    schoolId,
+    phone,
+    parentName,
+    childName,
+    studentNumber,
+  ]);
 
   useEffect(() => {
     void loadSchools();
@@ -145,6 +171,10 @@ export default function SupervisorParentsPage() {
   useEffect(() => {
     void loadParents();
   }, [loadParents]);
+
+  // --------------------------------------------------
+  // Filtres
+  // --------------------------------------------------
 
   const resetFilters = () => {
     setSearch("");
@@ -158,24 +188,61 @@ export default function SupervisorParentsPage() {
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
+  // --------------------------------------------------
+  // Formatage
+  // --------------------------------------------------
+
   const formatDate = (value: string) => {
     if (!value) return "—";
 
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "—";
+
     return new Intl.DateTimeFormat("fr-FR", {
       dateStyle: "medium",
-    }).format(new Date(value));
+    }).format(date);
   };
+
+  // --------------------------------------------------
+  // Gestion du transfert
+  // --------------------------------------------------
+
+  const openTransferModal = () => {
+    if (!selectedParent) return;
+
+    setTransferModalOpen(true);
+  };
+
+  const closeTransferModal = () => {
+    setTransferModalOpen(false);
+  };
+
+  const handleTransferSuccess = () => {
+    // Actualiser l'annuaire après le transfert.
+    void loadParents();
+
+    // Fermer la fiche source devenue potentiellement obsolète.
+    setSelectedParent(null);
+  };
+
+  // --------------------------------------------------
+  // Rendu
+  // --------------------------------------------------
 
   return (
     <div className="min-h-full space-y-6 bg-gray-50 p-4 md:p-6">
+      {/* En-tête */}
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wider text-[#6214BE]">
             BabiSchool · Administration centrale
           </p>
+
           <h1 className="mt-1 text-2xl font-bold text-gray-900 md:text-3xl">
             Supervision des parents
           </h1>
+
           <p className="mt-2 text-sm text-gray-500">
             Annuaire transversal des parents et de leurs enfants, toutes écoles confondues.
           </p>
@@ -187,11 +254,15 @@ export default function SupervisorParentsPage() {
           disabled={loading}
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#6214BE] px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-800 disabled:opacity-60"
         >
-          <RefreshCw size={17} className={loading ? "animate-spin" : ""} />
+          <RefreshCw
+            size={17}
+            className={loading ? "animate-spin" : ""}
+          />
           Actualiser
         </button>
       </header>
 
+      {/* Statistiques */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
@@ -201,6 +272,7 @@ export default function SupervisorParentsPage() {
                 {total}
               </p>
             </div>
+
             <div className="rounded-xl bg-purple-100 p-3 text-[#6214BE]">
               <Users size={24} />
             </div>
@@ -215,6 +287,7 @@ export default function SupervisorParentsPage() {
                 {schools.length}
               </p>
             </div>
+
             <div className="rounded-xl bg-blue-100 p-3 text-blue-700">
               <School size={24} />
             </div>
@@ -222,17 +295,25 @@ export default function SupervisorParentsPage() {
         </div>
       </section>
 
+      {/* Filtres */}
       <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
         <div className="mb-4 flex items-center gap-2">
           <Search size={19} className="text-[#6214BE]" />
-          <h2 className="font-semibold text-gray-900">Recherche et filtres</h2>
+          <h2 className="font-semibold text-gray-900">
+            Recherche et filtres
+          </h2>
         </div>
 
         <form
           onSubmit={(event) => {
             event.preventDefault();
             setPage(1);
-            void loadParents();
+
+            // Le chargement est effectué par l'effet lié aux filtres.
+            // Si la page est déjà à 1, on recharge directement.
+            if (page === 1) {
+              void loadParents();
+            }
           }}
           className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
         >
@@ -240,6 +321,7 @@ export default function SupervisorParentsPage() {
             <span className="text-sm font-medium text-gray-700">
               Recherche générale
             </span>
+
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -249,7 +331,10 @@ export default function SupervisorParentsPage() {
           </label>
 
           <label className="space-y-1.5">
-            <span className="text-sm font-medium text-gray-700">École</span>
+            <span className="text-sm font-medium text-gray-700">
+              École
+            </span>
+
             <select
               value={schoolId}
               onChange={(event) => {
@@ -259,9 +344,11 @@ export default function SupervisorParentsPage() {
               className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#6214BE]"
             >
               <option value="">Toutes les écoles</option>
+
               {schools.map((school) => (
                 <option key={school.id} value={school.id}>
-                  {school.name} {school.city ? `— ${school.city}` : ""}
+                  {school.name}
+                  {school.city ? ` — ${school.city}` : ""}
                 </option>
               ))}
             </select>
@@ -271,6 +358,7 @@ export default function SupervisorParentsPage() {
             <span className="text-sm font-medium text-gray-700">
               Téléphone du parent
             </span>
+
             <input
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
@@ -283,6 +371,7 @@ export default function SupervisorParentsPage() {
             <span className="text-sm font-medium text-gray-700">
               Nom du parent
             </span>
+
             <input
               value={parentName}
               onChange={(event) => setParentName(event.target.value)}
@@ -295,6 +384,7 @@ export default function SupervisorParentsPage() {
             <span className="text-sm font-medium text-gray-700">
               Nom de l'enfant
             </span>
+
             <input
               value={childName}
               onChange={(event) => setChildName(event.target.value)}
@@ -307,6 +397,7 @@ export default function SupervisorParentsPage() {
             <span className="text-sm font-medium text-gray-700">
               Matricule
             </span>
+
             <input
               value={studentNumber}
               onChange={(event) => setStudentNumber(event.target.value)}
@@ -334,12 +425,14 @@ export default function SupervisorParentsPage() {
         </form>
       </section>
 
+      {/* Erreurs */}
       {error && (
         <div
           role="alert"
           className="flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 sm:flex-row sm:items-center sm:justify-between"
         >
           <span>{error}</span>
+
           <button
             type="button"
             onClick={() => void loadParents()}
@@ -350,9 +443,13 @@ export default function SupervisorParentsPage() {
         </div>
       )}
 
+      {/* Tableau des parents */}
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <div className="flex flex-col gap-2 border-b border-gray-200 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="font-semibold text-gray-900">Annuaire des parents</h2>
+          <h2 className="font-semibold text-gray-900">
+            Annuaire des parents
+          </h2>
+
           <p className="text-sm text-gray-500">
             {total === 0
               ? "Aucun résultat"
@@ -379,29 +476,41 @@ export default function SupervisorParentsPage() {
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-14 text-center text-gray-500">
+                  <td
+                    colSpan={6}
+                    className="px-5 py-14 text-center text-gray-500"
+                  >
                     <RefreshCw className="mx-auto mb-3 animate-spin text-[#6214BE]" />
                     Chargement des parents…
                   </td>
                 </tr>
               ) : parents.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-14 text-center text-gray-500">
+                  <td
+                    colSpan={6}
+                    className="px-5 py-14 text-center text-gray-500"
+                  >
                     Aucun parent ne correspond à ces critères.
                   </td>
                 </tr>
               ) : (
                 parents.map((parent) => {
                   const schoolNames = Array.from(
-                    new Set(parent.children.map((child) => child.school_name))
+                    new Set(
+                      parent.children.map((child) => child.school_name)
+                    )
                   );
 
                   return (
-                    <tr key={parent.id} className="transition hover:bg-purple-50/40">
+                    <tr
+                      key={parent.id}
+                      className="transition hover:bg-purple-50/40"
+                    >
                       <td className="px-5 py-4">
                         <div className="font-semibold text-gray-900">
                           {parent.display_name || "Nom non renseigné"}
                         </div>
+
                         <div className="mt-1 text-xs text-gray-500">
                           {parent.email || "Aucun e-mail"}
                         </div>
@@ -424,7 +533,10 @@ export default function SupervisorParentsPage() {
                       <td className="px-5 py-4">
                         <div className="max-w-56 space-y-1">
                           {schoolNames.map((name) => (
-                            <div key={name} className="truncate text-gray-700">
+                            <div
+                              key={name}
+                              className="truncate text-gray-700"
+                            >
                               {name}
                             </div>
                           ))}
@@ -452,6 +564,7 @@ export default function SupervisorParentsPage() {
           </table>
         </div>
 
+        {/* Pagination */}
         <div className="flex items-center justify-between border-t border-gray-200 px-5 py-4">
           <span className="text-sm text-gray-500">
             Page {page} sur {totalPages}
@@ -481,6 +594,7 @@ export default function SupervisorParentsPage() {
         </div>
       </section>
 
+      {/* Drawer : fiche parent */}
       {selectedParent && (
         <div
           className="fixed inset-0 z-50 flex justify-end bg-black/40"
@@ -491,15 +605,17 @@ export default function SupervisorParentsPage() {
           }}
         >
           <aside className="h-full w-full max-w-xl overflow-y-auto bg-white shadow-2xl">
-            <div className="sticky top-0 flex items-center justify-between border-b border-gray-200 bg-white p-5">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white p-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-[#6214BE]">
                   Fiche parent
                 </p>
+
                 <h2 className="mt-1 text-xl font-bold text-gray-900">
                   {selectedParent.display_name}
                 </h2>
               </div>
+
               <button
                 type="button"
                 onClick={() => setSelectedParent(null)}
@@ -511,27 +627,32 @@ export default function SupervisorParentsPage() {
             </div>
 
             <div className="space-y-6 p-5">
+              {/* Informations parent */}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <InfoItem
                   icon={<Phone size={17} />}
                   label="Téléphone"
                   value={selectedParent.phone}
                 />
+
                 <InfoItem
                   icon={<Phone size={17} />}
                   label="Téléphone secondaire"
                   value={selectedParent.alternate_phone}
                 />
+
                 <InfoItem
                   icon={<UserRound size={17} />}
                   label="E-mail"
                   value={selectedParent.email}
                 />
+
                 <InfoItem
                   icon={<BriefcaseBusiness size={17} />}
                   label="Profession"
                   value={selectedParent.occupation}
                 />
+
                 <InfoItem
                   icon={<MapPin size={17} />}
                   label="Adresse"
@@ -539,71 +660,134 @@ export default function SupervisorParentsPage() {
                 />
               </div>
 
+              {/* Action de transfert */}
+              <div className="rounded-xl border border-purple-200 bg-purple-50 p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">
+                      Transfert des enfants
+                    </h3>
+
+                    <p className="mt-1 text-sm text-gray-600">
+                      Transférer les rattachements vers un autre parent,
+                      toutes écoles confondues.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={openTransferModal}
+                    className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#6214BE] px-4 py-3 text-sm font-semibold text-white transition hover:bg-purple-800"
+                  >
+                    <ArrowLeftRight size={17} />
+                    Transférer
+                  </button>
+                </div>
+              </div>
+
+              {/* Liste des enfants */}
               <div>
                 <h3 className="mb-3 font-semibold text-gray-900">
                   Enfants ({selectedParent.children_count})
                 </h3>
 
                 <div className="space-y-3">
-                  {selectedParent.children.map((child) => (
-                    <article
-                      key={`${child.student_id}-${child.school_id}`}
-                      className="rounded-xl border border-gray-200 p-4"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="rounded-xl bg-purple-100 p-2 text-[#6214BE]">
-                          <GraduationCap size={22} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="font-semibold text-gray-900">
-                            {child.first_name} {child.last_name}
-                          </h4>
-                          <p className="mt-1 text-sm text-gray-500">
-                            Matricule : {child.student_number || "—"}
-                          </p>
-                          <p className="mt-1 text-sm text-gray-700">
-                            {child.school_name}
-                          </p>
-                          <div className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-                            <div className="rounded-lg bg-gray-50 p-2">
-                              <span className="block text-xs text-gray-500">Classe</span>
-                              <span className="font-medium text-gray-800">
-                                {child.classroom || "Non affecté"}
-                              </span>
-                            </div>
-                            <div className="rounded-lg bg-gray-50 p-2">
-                              <span className="block text-xs text-gray-500">Année scolaire</span>
-                              <span className="font-medium text-gray-800">
-                                {child.academic_year || "—"}
-                              </span>
-                            </div>
+                  {selectedParent.children.length === 0 ? (
+                    <div className="rounded-xl border border-gray-200 p-5 text-center text-sm text-gray-500">
+                      Aucun enfant rattaché à ce parent.
+                    </div>
+                  ) : (
+                    selectedParent.children.map((child) => (
+                      <article
+                        key={`${child.student_id}-${child.school_id}`}
+                        className="rounded-xl border border-gray-200 p-4"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="rounded-xl bg-purple-100 p-2 text-[#6214BE]">
+                            <GraduationCap size={22} />
                           </div>
-                          <p className="mt-3 text-xs text-gray-500">
-                            Relation : {child.relationship_type}
-                            {child.enrollment_status
-                              ? ` · Statut : ${child.enrollment_status}`
-                              : ""}
-                          </p>
+
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-semibold text-gray-900">
+                              {child.first_name} {child.last_name}
+                            </h4>
+
+                            <p className="mt-1 text-sm text-gray-500">
+                              Matricule : {child.student_number || "—"}
+                            </p>
+
+                            <p className="mt-1 text-sm text-gray-700">
+                              {child.school_name}
+                            </p>
+
+                            <div className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+                              <div className="rounded-lg bg-gray-50 p-2">
+                                <span className="block text-xs text-gray-500">
+                                  Classe
+                                </span>
+
+                                <span className="font-medium text-gray-800">
+                                  {child.classroom || "Non affecté"}
+                                </span>
+                              </div>
+
+                              <div className="rounded-lg bg-gray-50 p-2">
+                                <span className="block text-xs text-gray-500">
+                                  Année scolaire
+                                </span>
+
+                                <span className="font-medium text-gray-800">
+                                  {child.academic_year || "—"}
+                                </span>
+                              </div>
+                            </div>
+
+                            <p className="mt-3 text-xs text-gray-500">
+                              Relation : {child.relationship_type}
+                              {child.enrollment_status
+                                ? ` · Statut : ${child.enrollment_status}`
+                                : ""}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </article>
-                  ))}
+                      </article>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
           </aside>
         </div>
       )}
+
+      {/* Modale de transfert */}
+      {selectedParent && (
+        <ParentTransferModal
+          isOpen={transferModalOpen}
+          onClose={closeTransferModal}
+          sourceParent={{
+            id: selectedParent.id,
+            display_name: selectedParent.display_name,
+            phone: selectedParent.phone,
+            children_count: selectedParent.children_count,
+          }}
+          onSuccess={handleTransferSuccess}
+        />
+      )}
     </div>
   );
 }
+
+// --------------------------------------------------
+// Composant d'affichage des informations
+// --------------------------------------------------
 
 function InfoItem({
   icon,
   label,
   value,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value?: string | null;
 }) {
@@ -613,6 +797,7 @@ function InfoItem({
         {icon}
         <span className="text-xs font-medium">{label}</span>
       </div>
+
       <p className="break-words text-sm font-medium text-gray-900">
         {value || "Non renseigné"}
       </p>
