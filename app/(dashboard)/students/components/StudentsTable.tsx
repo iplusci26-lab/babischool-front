@@ -38,6 +38,8 @@ interface StudentTableProps {
   onEdit: (
     student: Student
   ) => void;
+
+  onDelete: (student: Student) => void;
 }
 
 
@@ -55,6 +57,7 @@ export default function StudentTable({
   onSelectAll,
   onView,
   onEdit,
+  onDelete,
 }: StudentTableProps) {
 
 
@@ -491,6 +494,7 @@ export default function StudentTable({
                       )
                     }
                     onEdit={onEdit}
+                    onDelete={() => onDelete(student)}
                   />
 
                 );

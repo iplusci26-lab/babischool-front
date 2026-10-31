@@ -5,6 +5,7 @@ import {
   Pencil,
   User,
   UsersRound,
+  Trash2 
 } from "lucide-react";
 
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -29,6 +30,8 @@ interface StudentRowProps {
   onEdit: (
     student: Student
   ) => void;
+
+  onDelete: () => void;
 }
 
 // ==========================================================
@@ -93,6 +96,7 @@ export default function StudentRow({
   onToggleSelection,
   onView,
   onEdit,
+  onDelete,
 }: StudentRowProps) {
 
   // ========================================================
@@ -651,6 +655,16 @@ export default function StudentRow({
             aria-label={`Modifier ${displayName}`}
           >
             <Pencil size={18} />
+          </button>
+
+          <button
+            type="button"
+            onClick={onDelete}
+            title="Supprimer l'élève"
+            aria-label="Supprimer l'élève"
+            className="rounded-lg p-2 text-red-500 transition hover:bg-red-50 hover:text-red-700"
+          >
+            <Trash2 size={18} />
           </button>
 
         </div>

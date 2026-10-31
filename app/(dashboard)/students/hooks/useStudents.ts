@@ -23,6 +23,7 @@ import type {
   StudentGroupMember,
   StudentListResponse,
   StudentUpdatePayload,
+  StudentDeletionPreview,
   UUID,
 } from "../types";
 
@@ -275,6 +276,24 @@ export function useStudents() {
     false
   );
 
+// ========================================================
+// STUDENT DELETION
+// ========================================================
+
+const [studentToDelete, setStudentToDelete] =
+  useState<Student | null>(null);
+
+const [deleteDialogOpen, setDeleteDialogOpen] =
+  useState(false);
+
+const [deletionPreview, setDeletionPreview] =
+  useState<StudentDeletionPreview  | null>(null);
+
+const [loadingDeletionPreview, setLoadingDeletionPreview] =
+  useState(false);
+
+const [deletingStudent, setDeletingStudent] =
+  useState(false);
 
 
   // ========================================================
@@ -407,6 +426,63 @@ export function useStudents() {
       []
     );
 
+
+    // ========================================================
+// LOAD STUDENT DELETION PREVIEW
+// ========================================================
+
+const loadDeletionPreview = useCallback(async (studentId: UUID) => {
+  setLoadingDeletionPreview(true);
+  setDeletionPreview(null);
+
+  try {
+    const response = await api.get(
+      `/students/${studentId}/deletion-preview/`
+    );
+
+    console.log("APERÇU SUPPRESSION :", response.data);
+
+    if (!response.data.success || !response.data.preview) {
+      throw new Error("Réponse invalide du serveur.");
+    }
+
+    // IMPORTANT : récupérer preview et non response.data
+    setDeletionPreview(response.data.preview);
+
+  } catch (error) {
+    console.error(
+      "Erreur lors du chargement de l'aperçu de suppression :",
+      error
+    );
+
+    toast.error("Impossible de charger l'aperçu de suppression.");
+  } finally {
+    setLoadingDeletionPreview(false);
+  }
+}, []);
+// ========================================================
+// OPEN DELETE DIALOG
+// ========================================================
+
+const openDeleteDialog = useCallback(
+  (student: Student) => {
+    const normalizedStudent = normalizeStudent(student);
+    setStudentToDelete(normalizeStudent(student));
+    setDeleteDialogOpen(true);
+    void loadDeletionPreview(normalizedStudent.id);
+  },
+  [loadDeletionPreview]
+);
+
+// ========================================================
+// CLOSE DELETE DIALOG
+// ========================================================
+
+const closeDeleteDialog = useCallback(() => {
+  setDeleteDialogOpen(false);
+  setStudentToDelete(null);
+  setDeletionPreview(null);
+}, [deletingStudent]);
 
 
   // ========================================================
@@ -1770,7 +1846,64 @@ export function useStudents() {
       []
     );
 
+// ========================================================
+// DELETE STUDENT COMPLETELY
+// ========================================================
 
+const deleteStudent = useCallback(
+  async () => {
+    if (!studentToDelete || deletingStudent) {
+      return;
+    }
+
+    setDeletingStudent(true);
+
+    try {
+      await api.delete(
+        `/students/${studentToDelete.id}/`,
+        {
+          data: {
+            confirmation: true,
+          },
+        }
+      );
+
+      toast.success(
+        "L'élève a été supprimé avec succès."
+      );
+
+      setDeleteDialogOpen(false);
+      setStudentToDelete(null);
+      setDeletionPreview(null);
+
+      clearSelection();
+
+      await loadStudents();
+
+    } catch (error: any) {
+      console.error(
+        "Erreur lors de la suppression de l'élève :",
+        error
+      );
+
+      const message =
+        error?.response?.data?.detail ||
+        error?.response?.data?.message ||
+        "Une erreur est survenue lors de la suppression de l'élève.";
+
+      toast.error(message);
+
+    } finally {
+      setDeletingStudent(false);
+    }
+  },
+  [
+    studentToDelete,
+    deletingStudent,
+    clearSelection,
+    loadStudents,
+  ]
+);
 
   const selectAllStudents =
     useCallback(
@@ -2240,7 +2373,19 @@ export function useStudents() {
 
     },
 
+    // ======================================================
+    // STUDENT DELETION
+    // ======================================================
 
+    deletionDialog: {
+      open: deleteDialogOpen,
+      student: studentToDelete,
+      preview: deletionPreview,
+      loadingPreview: loadingDeletionPreview,
+      deleting: deletingStudent,
+    },
+
+   
 
     // ======================================================
     // GROUPS
@@ -2349,6 +2494,14 @@ export function useStudents() {
       closeStudentModal,
 
       updateStudent,
+
+      // Student deletion
+
+
+      openDeleteDialog,
+      closeDeleteDialog,
+      loadDeletionPreview,
+      deleteStudent,
 
     },
 

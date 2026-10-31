@@ -484,3 +484,32 @@ export interface StudentListResponse {
   total_E: number;
 
 }
+
+
+export interface StudentDeletionPreview {
+  student: {
+    id: string;
+    student_number: string;
+    full_name: string;
+  };
+
+  counts: {
+    students: number;
+    enrollments: number;
+    classroom_group_memberships: number;
+    payments: number;
+    ledger_entries: number;
+    invoices: number;
+    grades: number;
+    grade_correction_history: number;
+    attendance_records: number;
+    homework_submissions: number;
+    conversations: number;
+    messages: number;
+    parent_links: number;
+  };
+
+  total_related_records: number;
+
+  preserved: string[];
+}
