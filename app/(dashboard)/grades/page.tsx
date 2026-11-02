@@ -185,6 +185,8 @@ export default function GradesPage() {
     setClassroomFilter,
   ] = useState("");
 
+  const [groupFilter, setGroupFilter] = useState("");
+
   const [
     subjectFilter,
     setSubjectFilter,
@@ -234,6 +236,27 @@ export default function GradesPage() {
     useRef<
       (HTMLInputElement | null)[]
     >([]);
+
+const groups = useMemo(() => {
+  return Array.from(
+    new Map(
+      assessments
+        .filter(
+          (item) =>
+            item.classroom_group &&
+            (!classroomFilter ||
+              item.classroom_name === classroomFilter)
+        )
+        .map((item) => [
+          item.classroom_group,
+          {
+            id: item.classroom_group,
+            name: item.classroom_group_name,
+          },
+        ])
+    ).values()
+  );
+}, [assessments, classroomFilter]);
 
 
     const correctionHeaders = () => {
@@ -933,6 +956,10 @@ const filteredGrades = useMemo(() => {
                 .trim()
                 .toLowerCase();
 
+            const matchesGroup =
+                !groupFilter ||
+                String(item.classroom_group) === String(groupFilter);
+
             const matchesSearch =
               !normalizedSearch ||
 
@@ -995,6 +1022,8 @@ const filteredGrades = useMemo(() => {
 
               matchesClassroom &&
 
+              matchesGroup &&
+
               matchesSubject &&
 
               matchesStatus
@@ -1014,6 +1043,8 @@ const filteredGrades = useMemo(() => {
         termFilter,
 
         classroomFilter,
+        
+        groupFilter,
 
         subjectFilter,
 
@@ -1172,6 +1203,8 @@ const filteredGrades = useMemo(() => {
         ""
       );
 
+      setGroupFilter("");
+
     };
 
 
@@ -1196,6 +1229,8 @@ const filteredGrades = useMemo(() => {
     Boolean(
       statusFilter
     );
+
+    Boolean(groupFilter)
 
 
   // ==========================================================
@@ -1368,6 +1403,25 @@ const filteredGrades = useMemo(() => {
 
       }
 
+      // Ne transmettre que les élèves ayant une note renseignée.
+      const gradesToSave = grades
+      .filter(
+        (grade) =>
+          grade.score !== null &&
+          grade.score !== undefined &&
+          String(grade.score).trim() !== ""
+      )
+      .map((grade) => ({
+        enrollment_id: grade.enrollment_id,
+        score: Number(grade.score),
+        remarks: grade.remarks || "",
+      }));
+
+      if (gradesToSave.length === 0) {
+      toast.error("Saisissez au moins une note avant d'enregistrer.");
+      return;
+      }
+
       try {
 
         setSaving(
@@ -1377,7 +1431,7 @@ const filteredGrades = useMemo(() => {
         await api.post(
           `/academics/assessments/${selected}/grades/`,
           {
-            grades,
+            grades:gradesToSave,
           },
           assessment?.status === "published" || assessment?.is_locked
             ? correctionHeaders()
@@ -1628,25 +1682,29 @@ const filteredGrades = useMemo(() => {
     };
 
 
-  // ==========================================================
-  // PROGRESSION ÉVALUATION
-  // ==========================================================
+ // ==========================================================
+// STATISTIQUES ET PROGRESSION ÉVALUATION
+// ==========================================================
 
-  const progress =
+const totalStudents = grades.length;
 
-    statistics &&
-    statistics.total_students >
-      0
+const totalGrades = grades.filter(
+  (item) =>
+    item.score !== null &&
+    item.score !== undefined &&
+    item.score !== ""
+).length;
 
-      ? Math.round(
-          (
-            statistics.total_grades /
-            statistics.total_students
-          ) *
-            100
-        )
+const missingGrades = totalStudents - totalGrades;
 
-      : 0;
+const allGradesEntered =
+  totalStudents > 0 && missingGrades === 0;
+
+const progress  = allGradesEntered
+  ? 100
+  :totalStudents > 0
+    ? Math.round((totalGrades / totalStudents) * 100)
+    : 0;
 
 
   // ==========================================================
@@ -2123,6 +2181,20 @@ const filteredGrades = useMemo(() => {
                     )
                   )}
 
+                </select>
+                  
+                <select
+                  value={groupFilter}
+                  onChange={(e) => setGroupFilter(e.target.value)}
+                  className="h-11 rounded-xl border border-gray-300 px-4 outline-none focus:border-[#6214BE] focus:ring-2 focus:ring-[#6214BE]/20"
+                >
+                  <option value="">Tous les groupes</option>
+
+                  {groups.map((group) => (
+                    <option key={group.id} value={group.id}>
+                      {group.name}
+                    </option>
+                  ))}
                 </select>
 
 
@@ -2630,7 +2702,7 @@ const filteredGrades = useMemo(() => {
                             <div className="text-3xl font-bold">
 
                               {
-                                statistics.total_students
+                                totalStudents
                               }
 
                             </div>
@@ -2659,7 +2731,7 @@ const filteredGrades = useMemo(() => {
                             <div className="text-3xl font-bold">
 
                               {
-                                statistics.total_grades
+                                totalGrades
                               }
 
                             </div>
@@ -2688,7 +2760,7 @@ const filteredGrades = useMemo(() => {
                             <div className="text-3xl font-bold">
 
                               {
-                                statistics.missing_grades
+                                missingGrades
                               }
 
                             </div>
@@ -2986,7 +3058,7 @@ const filteredGrades = useMemo(() => {
 
 
                       {!assessment.is_locked &&
-                        assessment.can_publish && (
+                        allGradesEntered  && (
 
                           <button
                             onClick={
