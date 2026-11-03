@@ -755,33 +755,27 @@ const filteredGrades = useMemo(() => {
           res.data ||
           [];
 
-        setHomeworkSubmissions(
-          Array.isArray(
-            data
-          )
-            ? data.map(
-                (
-                  item: any
-                ) => ({
-
-                  ...item,
-
-                  score:
-                    item.score ===
-                      null ||
-                    item.score ===
-                      undefined
-                      ? ""
-                      : item.score,
-
-                  max_score:
-                    item.max_score ??
-                    20,
-
-                })
-              )
-            : []
-        );
+          setHomeworkSubmissions(
+            Array.isArray(data)
+              ? data
+                  .map((item: any) => ({
+                    ...item,
+                    score:
+                      item.score === null ||
+                      item.score === undefined
+                        ? ""
+                        : item.score,
+                    max_score: item.max_score ?? 20,
+                  }))
+                  .sort((a: any, b: any) =>
+                    String(a.student_name ?? "").localeCompare(
+                      String(b.student_name ?? ""),
+                      "fr",
+                      { sensitivity: "base" }
+                    )
+                  )
+              : []
+          );
 
       } catch (
         error: any
