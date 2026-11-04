@@ -565,160 +565,109 @@ export default function HomeworkForm({
        * DATE LIMITE / PUBLICATION
        * ===================================================== */}
 
-      <div className="grid gap-6 md:grid-cols-2">
+        {/* DATE DE L'EXERCICE / DATE LIMITE / NOTE MAXIMALE */}
+          <div className="grid gap-6 md:grid-cols-2">
+
+          {/* DATE DE L'EXERCICE */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Date de l'exercice
+            </label>
+
+            <input
+              type="date"
+              value={form.assigned_date}
+              onChange={(e) =>
+                onChange({
+                  ...form,
+                  assigned_date: e.target.value,
+                })
+              }
+              className="w-full rounded-2xl border px-4 py-3 outline-none transition focus:border-[#6214BE]"
+            />
+
+            <p className="mt-2 text-xs text-gray-400">
+                Date à laquelle l'exercice a été donné aux élèves.
+              </p>
+            </div>
+
+            {/* DATE LIMITE */}
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                À rendre le
+              </label>
+
+              <input
+                type="date"
+                min={form.assigned_date}
+                value={form.due_date}
+                onChange={(e) =>
+                  onChange({
+                    ...form,
+                    due_date: e.target.value,
+                  })
+                }
+                className="w-full rounded-2xl border px-4 py-3 outline-none transition focus:border-[#6214BE]"
+              />
+
+              <p className="mt-2 text-xs text-gray-400">
+                Date limite de remise de l'exercice.
+              </p>
+            </div>
+
+            {/* NOTE MAXIMALE */}
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                Note maximale
+              </label>
+
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={form.max_score}
+                onChange={(e) =>
+                  onChange({
+                    ...form,
+                    max_score: e.target.value,
+                  })
+                }
+                placeholder="Ex : 20"
+                className="w-full rounded-2xl border px-4 py-3 outline-none transition focus:border-[#6214BE]"
+              />
+
+                <p className="mt-2 text-xs text-gray-400">
+                  Barème maximal de cet exercice.
+                </p>
+              </div>
+
+              {/* PUBLICATION */}
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                  Publication
+                </label>
+
+                <SearchSelect
+                  value={form.is_published ? "published" : "draft"}
+                  options={[
+                    { value: "draft", label: "Brouillon" },
+                    { value: "published", label: "Publier immédiatement" },
+                  ]}
+                  onChange={(value) =>
+                    onChange({
+                      ...form,
+                      is_published: value === "published",
+                    })
+                  }
+                />
+
+              <p className="mt-2 text-xs text-gray-400">
+                Si l'exercice est publié, les élèves et les parents
+                recevront une notification.
+              </p>
+            </div>
 
-
-        {/* ---------------------------------------------------
-         * DATE LIMITE
-         * --------------------------------------------------- */}
-
-        <div>
-
-
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-
-            À rendre le
-
-          </label>
-
-
-          <input
-
-            type="date"
-
-            value={
-              form.due_date
-            }
-
-            onChange={(e) =>
-
-              onChange({
-
-                ...form,
-
-                due_date:
-                  e.target.value,
-
-              })
-
-            }
-
-            className="
-
-              w-full
-
-              rounded-2xl
-
-              border
-
-              px-4
-
-              py-3
-
-              outline-none
-
-              transition
-
-              focus:border-[#6214BE]
-
-            "
-
-          />
-
-
-          <p className="mt-2 text-xs text-gray-400">
-
-            Date à laquelle les élèves devront
-            rendre l'exercice.
-
-          </p>
-
-
-        </div>
-
-
-        {/* ---------------------------------------------------
-         * PUBLICATION
-         * --------------------------------------------------- */}
-
-        <div>
-
-
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-
-            Publication
-
-          </label>
-
-
-          <SearchSelect
-
-            value={
-
-              form.is_published
-
-                ? "published"
-
-                : "draft"
-
-            }
-
-            options={[
-
-              {
-
-                value:
-                  "draft",
-
-                label:
-                  "Brouillon",
-
-              },
-
-              {
-
-                value:
-                  "published",
-
-                label:
-                  "Publier immédiatement",
-
-              },
-
-            ]}
-
-            onChange={(value) =>
-
-              onChange({
-
-                ...form,
-
-                is_published:
-
-                  value ===
-                  "published",
-
-              })
-
-            }
-
-          />
-
-
-          <p className="mt-2 text-xs text-gray-400">
-
-            Si l'exercice est publié,
-            les élèves et les parents
-            recevront une notification.
-
-          </p>
-
-
-        </div>
-
-
-      </div>
-
+            </div>
 
     </div>
 

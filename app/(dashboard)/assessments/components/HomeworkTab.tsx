@@ -151,7 +151,7 @@ export default function HomeworkTab() {
 
   async function handleSave() {
 
-    await saveHomework();
+    const success = await saveHomework();
 
 
     /*
@@ -159,9 +159,12 @@ export default function HomeworkTab() {
      * l'exécution de la sauvegarde.
      */
 
-    setDrawerOpen(
-      false
-    );
+    if (success){
+      setDrawerOpen(
+        false
+      );
+    }
+    
 
   }
 

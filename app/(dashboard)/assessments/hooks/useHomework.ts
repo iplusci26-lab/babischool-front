@@ -8,7 +8,6 @@ import {
 } from "react";
 
 import { toast } from "sonner";
-
 import { api } from "@/lib/api";
 
 import {
@@ -21,10 +20,9 @@ import {
   Term,
 } from "../types";
 
-
-/* ===========================================================
- * FORMULAIRE INITIAL
- * =========================================================== */
+// ===========================================================
+// FORMULAIRE INITIAL
+// ===========================================================
 
 const INITIAL_FORM: HomeworkFormData = {
   classroom: "",
@@ -33,14 +31,15 @@ const INITIAL_FORM: HomeworkFormData = {
   term: "",
   title: "",
   description: "",
+  assigned_date: new Date().toLocaleDateString("en-CA"),
   due_date: "",
+  max_score: "20",
   is_published: false,
 };
 
-
-/* ===========================================================
- * FILTRES INITIAUX
- * =========================================================== */
+// ===========================================================
+// FILTRES INITIAUX
+// ===========================================================
 
 const INITIAL_FILTERS: HomeworkFilters = {
   search: "",
@@ -50,1141 +49,477 @@ const INITIAL_FILTERS: HomeworkFilters = {
   status: "",
 };
 
+// ===========================================================
+// NORMALISATION RÉPONSE API
+// ===========================================================
 
-/* ===========================================================
- * HELPER — NORMALISATION RÉPONSE API
- * =========================================================== */
-
-function normalizeApiList<T>(
-  data: unknown
-): T[] {
-
-  if (
-    Array.isArray(data)
-  ) {
-
+function normalizeApiList<T>(data: unknown): T[] {
+  if (Array.isArray(data)) {
     return data as T[];
-
   }
-
 
   if (
     data &&
     typeof data === "object" &&
     "results" in data
   ) {
+    const results = (data as { results?: unknown }).results;
 
-    const results =
-      (
-        data as {
-          results?: unknown;
-        }
-      ).results;
-
-
-    if (
-      Array.isArray(results)
-    ) {
-
+    if (Array.isArray(results)) {
       return results as T[];
-
     }
-
   }
 
-
   return [];
-
 }
 
-
-/* ===========================================================
- * HELPER — EXTRACTION MESSAGE D'ERREUR API
- * =========================================================== */
+// ===========================================================
+// EXTRACTION MESSAGE ERREUR
+// ===========================================================
 
 function getErrorMessage(
   error: unknown,
   fallback: string
 ): string {
+  const data = (error as any)?.response?.data;
 
-  const data =
-    (
-      error as any
-    )?.response?.data;
-
-
-  /* ---------------------------------------------------------
-   * DETAIL STRING
-   * --------------------------------------------------------- */
-
-  if (
-    typeof data?.detail ===
-    "string"
-  ) {
-
+  if (typeof data?.detail === "string") {
     return data.detail;
-
   }
 
-
-  /* ---------------------------------------------------------
-   * DETAIL ARRAY
-   * --------------------------------------------------------- */
-
-  if (
-    Array.isArray(
-      data?.detail
-    )
-  ) {
-
-    return (
-      data.detail[0] ||
-      fallback
-    );
-
+  if (Array.isArray(data?.detail)) {
+    return data.detail[0] || fallback;
   }
 
+  if (data && typeof data === "object") {
+    const firstKey = Object.keys(data)[0];
 
-  /* ---------------------------------------------------------
-   * ERREURS PAR CHAMP
-   * --------------------------------------------------------- */
+    if (firstKey) {
+      const value = data[firstKey];
 
-  if (
-    data &&
-    typeof data ===
-    "object"
-  ) {
-
-    const firstKey =
-      Object.keys(data)[0];
-
-
-    if (
-      firstKey
-    ) {
-
-      const value =
-        data[firstKey];
-
-
-      if (
-        Array.isArray(value)
-      ) {
-
-        return (
-          value[0] ||
-          fallback
-        );
-
+      if (Array.isArray(value)) {
+        return String(value[0] || fallback);
       }
 
-
-      if (
-        typeof value ===
-        "string"
-      ) {
-
+      if (typeof value === "string") {
         return value;
-
       }
-
     }
-
   }
-
 
   return fallback;
-
 }
 
+// ===========================================================
+// NORMALISATION DATE
+// ===========================================================
 
-/* ===========================================================
- * HOOK
- * =========================================================== */
+function getLocalDate(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+// ===========================================================
+// HOOK
+// ===========================================================
 
 export function useHomework() {
-
-
-  /* ===========================================================
-   * STATES
-   * =========================================================== */
-
-  const [
-    homeworks,
-    setHomeworks,
-  ] = useState<Homework[]>([]);
-
-
-  const [
-    classrooms,
-    setClassrooms,
-  ] = useState<Classroom[]>([]);
-
-
-  const [
-    subjects,
-    setSubjects,
-  ] = useState<Subject[]>([]);
-
-
-  /*
-   * Toujours un tableau.
-   *
-   * Évite :
-   *
-   * Cannot read properties of undefined
-   * (reading 'map')
-   */
-
-  const [
-    terms,
-    setTerms,
-  ] = useState<Term[]>([]);
-
-
-  const [
-    form,
-    setForm,
-  ] = useState<HomeworkFormData>(
-    INITIAL_FORM
-  );
-
-
-  const [
-    filters,
-    setFilters,
-  ] = useState<HomeworkFilters>(
-    INITIAL_FILTERS
-  );
-
-
-  const [
-    editingHomework,
-    setEditingHomework,
-  ] = useState<Homework | null>(
-    null
-  );
-
-
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
-
-
-  const [
-    submitting,
-    setSubmitting,
-  ] = useState(false);
-
-
-  const [
-    error,
-    setError,
-  ] = useState("");
-
-
-  /* ===========================================================
-   * CHARGEMENT DES DONNÉES
-   * =========================================================== */
-
-  const loadData =
-    useCallback(async () => {
-
-      try {
-
-        setLoading(true);
-
-        setError("");
-
-
-        const [
-
-          homeworkRes,
-
-          classroomRes,
-
-          subjectRes,
-
-          termRes,
-
-        ] = await Promise.all([
-
-          api.get(
-            "/homework/"
-          ),
-
-          api.get(
-            "/students/classrooms/"
-          ),
-
-          api.get(
-            "/academics/subjects/"
-          ),
-
-          api.get(
-            "/academics/terms/"
-          ),
-
-        ]);
-
-
-        /* -------------------------------------------------------
-         * HOMEWORKS
-         * ------------------------------------------------------- */
-
-        setHomeworks(
-
-          normalizeApiList<Homework>(
-            homeworkRes.data
-          )
-
-        );
-
-
-        /* -------------------------------------------------------
-         * CLASSES
-         * ------------------------------------------------------- */
-
-        setClassrooms(
-
-          normalizeApiList<Classroom>(
-            classroomRes.data
-          )
-
-        );
-
-
-        /* -------------------------------------------------------
-         * MATIÈRES
-         * ------------------------------------------------------- */
-
-        setSubjects(
-
-          normalizeApiList<Subject>(
-            subjectRes.data
-          )
-
-        );
-
-
-        /* -------------------------------------------------------
-         * PÉRIODES ACADÉMIQUES
-         * ------------------------------------------------------- */
-
-        console.log(
-          "TERM RESPONSE:",
-          termRes.data
-        );
-        
-        
-        const normalizedTerms =
-          normalizeApiList<Term>(
-            termRes.data
-          );
-        
-        
-        console.log(
-          "NORMALIZED TERMS:",
-          normalizedTerms
-        );
-        
-        
-        setTerms(
-          normalizedTerms
-        );
-      }
-
-      catch (
-        error: unknown
-      ) {
-
-        console.error(
-          "Erreur chargement homework:",
-          error
-        );
-
-
-        const message =
-          getErrorMessage(
-
-            error,
-
-            "Impossible de charger les exercices."
-
-          );
-
-
-        setError(
-          message
-        );
-
-
-        toast.error(
-          message
-        );
-
-
-        /*
-         * Sécurité :
-         * terms reste toujours un tableau.
-         */
-
-        setTerms([]);
-
-      }
-
-      finally {
-
-        setLoading(false);
-
-      }
-
-    }, []);
-
-
-  /* ===========================================================
-   * RESET FORMULAIRE
-   * =========================================================== */
-
-  function resetForm() {
-
-    setEditingHomework(
-      null
-    );
-
-
-    setForm(
-      INITIAL_FORM
-    );
-
-  }
-
-
-  /* ===========================================================
-   * ÉDITION
-   * =========================================================== */
-
-  function editHomework(
-    homework: Homework
-  ) {
-
-    setEditingHomework(
-      homework
-    );
-
-
-    setForm({
-
-      /* -------------------------------------------------------
-       * CLASSE
-       * ------------------------------------------------------- */
-
-      classroom:
-        homework.classroom,
-
-
-      /* -------------------------------------------------------
-       * GROUPE
-       * ------------------------------------------------------- */
-
-      classroom_group:
-        homework.classroom_group ?? "",
-
-
-      /* -------------------------------------------------------
-       * MATIÈRE
-       * ------------------------------------------------------- */
-
-      subject:
-        homework.subject,
-
-
-      /* -------------------------------------------------------
-       * PÉRIODE
-       *
-       * Convention frontend :
-       * term
-       * ------------------------------------------------------- */
-
-      term:
-        homework.term,
-
-
-      /* -------------------------------------------------------
-       * CONTENU
-       * ------------------------------------------------------- */
-
-      title:
-        homework.title,
-
-
-      description:
-        homework.description,
-
-
-      /* -------------------------------------------------------
-       * DATE
-       * ------------------------------------------------------- */
-
-      due_date:
-        homework.due_date,
-
-
-      /* -------------------------------------------------------
-       * PUBLICATION
-       * ------------------------------------------------------- */
-
-      is_published:
-        homework.is_published,
-
-    });
-
-  }
-
-
-  /* ===========================================================
-   * CRÉATION / MODIFICATION
-   * =========================================================== */
-
-  async function saveHomework() {
-
-    const isEditing =
-      Boolean(
-        editingHomework
-      );
-
-
+  // =========================================================
+  // STATES
+  // =========================================================
+
+  const [homeworks, setHomeworks] = useState<Homework[]>([]);
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [terms, setTerms] = useState<Term[]>([]);
+
+  const [form, setForm] = useState<HomeworkFormData>({
+    ...INITIAL_FORM,
+    assigned_date: getLocalDate(),
+  });
+
+  const [filters, setFilters] =
+    useState<HomeworkFilters>(INITIAL_FILTERS);
+
+  const [editingHomework, setEditingHomework] =
+    useState<Homework | null>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  // =========================================================
+  // CHARGEMENT DES DONNÉES
+  // =========================================================
+
+  const loadData = useCallback(async () => {
     try {
-
-      setSubmitting(
-        true
-      );
-
-
+      setLoading(true);
       setError("");
 
+      const [
+        homeworkRes,
+        classroomRes,
+        subjectRes,
+        termRes,
+      ] = await Promise.all([
+        api.get("/homework/"),
+        api.get("/students/classrooms/"),
+        api.get("/academics/subjects/"),
+        api.get("/academics/terms/"),
+      ]);
 
-      /* -------------------------------------------------------
-       * VALIDATION FRONTEND
-       * ------------------------------------------------------- */
+      setHomeworks(
+        normalizeApiList<Homework>(homeworkRes.data)
+      );
 
-      if (
-        !form.classroom
-      ) {
+      setClassrooms(
+        normalizeApiList<Classroom>(classroomRes.data)
+      );
 
-        throw new Error(
-          "Veuillez sélectionner une classe."
-        );
+      setSubjects(
+        normalizeApiList<Subject>(subjectRes.data)
+      );
 
+      setTerms(
+        normalizeApiList<Term>(termRes.data)
+      );
+    } catch (error: unknown) {
+      console.error("Erreur chargement homework:", error);
+
+      const message = getErrorMessage(
+        error,
+        "Impossible de charger les exercices."
+      );
+
+      setError(message);
+      toast.error(message);
+
+      setTerms([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // =========================================================
+  // RESET FORMULAIRE
+  // =========================================================
+
+  function resetForm() {
+    setEditingHomework(null);
+
+    setForm({
+      ...INITIAL_FORM,
+      assigned_date: getLocalDate(),
+    });
+
+    setError("");
+  }
+
+  // =========================================================
+  // ÉDITION
+  // =========================================================
+
+  function editHomework(homework: Homework) {
+    setEditingHomework(homework);
+
+    setForm({
+      classroom: homework.classroom,
+      classroom_group: homework.classroom_group ?? "",
+      subject: homework.subject,
+
+      term:
+        homework.academic_term ??
+        homework.term ??
+        "",
+
+      title: homework.title,
+      description: homework.description,
+
+      assigned_date:
+        homework.assigned_date || getLocalDate(),
+
+      due_date: homework.due_date,
+
+      max_score: String(homework.max_score ?? 20),
+
+      is_published: homework.is_published,
+    });
+
+    setError("");
+  }
+
+  // =========================================================
+  // CRÉATION / MODIFICATION
+  // =========================================================
+
+  async function saveHomework(): Promise<boolean> {
+    const isEditing = Boolean(editingHomework);
+
+    try {
+      setSubmitting(true);
+      setError("");
+
+      // VALIDATION CLASSE
+      if (!form.classroom) {
+        throw new Error("Veuillez sélectionner une classe.");
       }
 
-
-      if (
-        !form.subject
-      ) {
-
-        throw new Error(
-          "Veuillez sélectionner une matière."
-        );
-
+      // VALIDATION MATIÈRE
+      if (!form.subject) {
+        throw new Error("Veuillez sélectionner une matière.");
       }
 
-
-      if (
-        !form.term
-      ) {
-
+      // VALIDATION PÉRIODE
+      if (!form.term) {
         throw new Error(
           "Veuillez sélectionner une période académique."
         );
-
       }
 
-
-      if (
-        !form.title.trim()
-      ) {
-
+      // VALIDATION TITRE
+      if (!form.title.trim()) {
         throw new Error(
           "Veuillez renseigner le titre de l'exercice."
         );
-
       }
 
-
-      if (
-        !form.description.trim()
-      ) {
-
+      // VALIDATION DESCRIPTION
+      if (!form.description.trim()) {
         throw new Error(
           "Veuillez renseigner la description."
         );
-
       }
 
+      // VALIDATION DATE EXERCICE
+      if (!form.assigned_date) {
+        throw new Error(
+          "Veuillez renseigner la date de l'exercice."
+        );
+      }
 
-      if (
-        !form.due_date
-      ) {
-
+      // VALIDATION DATE LIMITE
+      if (!form.due_date) {
         throw new Error(
           "Veuillez renseigner la date limite."
         );
-
       }
 
+      if (form.due_date < form.assigned_date) {
+        throw new Error(
+          "La date limite ne peut pas être antérieure à la date de l'exercice."
+        );
+      }
 
-      /* -------------------------------------------------------
-       * PAYLOAD
-       *
-       * Le frontend utilise :
-       *
-       * form.term
-       *
-       * Le backend Django reçoit :
-       *
-       * academic_term_id
-       * ------------------------------------------------------- */
+      // VALIDATION NOTE MAXIMALE
+      const maxScore = Number(form.max_score);
 
+      if (!Number.isFinite(maxScore) || maxScore <= 0) {
+        throw new Error(
+          "La note maximale doit être supérieure à zéro."
+        );
+      }
+
+      // PAYLOAD
       const payload = {
+        classroom_id: form.classroom,
+        classroom_group_id: form.classroom_group || null,
+        subject_id: form.subject,
+        academic_term_id: form.term,
 
-        classroom_id:
-          form.classroom,
+        title: form.title.trim(),
+        description: form.description.trim(),
 
+        assigned_date: form.assigned_date,
+        max_score: maxScore,
 
-        classroom_group_id:
-
-          form.classroom_group ||
-
-          null,
-
-
-        subject_id:
-          form.subject,
-
-
-        academic_term_id:
-          form.term,
-
-
-        title:
-          form.title.trim(),
-
-
-        description:
-          form.description.trim(),
-
-
-        due_date:
-          form.due_date,
-
-
-        is_published:
-          form.is_published,
-
+        due_date: form.due_date,
+        is_published: form.is_published,
       };
 
-
-      /* -------------------------------------------------------
-       * MODIFICATION
-       * ------------------------------------------------------- */
-
-      if (
-        editingHomework
-      ) {
-
+      // MODIFICATION
+      if (editingHomework) {
         await api.patch(
-
           `/homework/${editingHomework.id}/`,
-
           payload
-
         );
-
+      } else {
+        // CRÉATION
+        await api.post("/homework/", payload);
       }
-
-
-      /* -------------------------------------------------------
-       * CRÉATION
-       * ------------------------------------------------------- */
-
-      else {
-
-        await api.post(
-
-          "/homework/",
-
-          payload
-
-        );
-
-      }
-
-
-      /* -------------------------------------------------------
-       * SUCCESS
-       * ------------------------------------------------------- */
 
       toast.success(
-
         isEditing
-
           ? "Exercice modifié avec succès."
-
           : "Exercice créé avec succès."
-
       );
-
-
-      /* -------------------------------------------------------
-       * RESET
-       * ------------------------------------------------------- */
 
       resetForm();
-
-
-      /* -------------------------------------------------------
-       * RECHARGEMENT
-       * ------------------------------------------------------- */
-
       await loadData();
 
-    }
+      return true;
+    } catch (error: unknown) {
+      console.error("Erreur sauvegarde homework:", error);
 
-    catch (
-      error: unknown
-    ) {
-
-      console.error(
-        "Erreur sauvegarde homework:",
-        error
-      );
-
-
-      /* -------------------------------------------------------
-       * ERREUR DE VALIDATION FRONTEND
-       * ------------------------------------------------------- */
-
-      if (
-        error instanceof Error &&
-        !(
-          error as any
-        )?.response
-      ) {
-
-        setError(
-          error.message
-        );
-
-
-        toast.error(
-          error.message
-        );
-
-
-        return;
-
-      }
-
-
-      const fallback =
-
-        isEditing
-
-          ? "Impossible de modifier l'exercice."
-
-          : "Impossible de créer l'exercice.";
-
+      const fallback = isEditing
+        ? "Impossible de modifier l'exercice."
+        : "Impossible de créer l'exercice.";
 
       const message =
-        getErrorMessage(
+        error instanceof Error &&
+        !(error as any)?.response
+          ? error.message
+          : getErrorMessage(error, fallback);
 
-          error,
+      setError(message);
+      toast.error(message);
 
-          fallback
-
-        );
-
-
-      setError(
-        message
-      );
-
-
-      toast.error(
-        message
-      );
-
+      return false;
+    } finally {
+      setSubmitting(false);
     }
-
-    finally {
-
-      setSubmitting(
-        false
-      );
-
-    }
-
   }
 
+  // =========================================================
+  // SUPPRESSION
+  // =========================================================
 
-  /* ===========================================================
-   * SUPPRESSION
-   * =========================================================== */
+  async function deleteHomework(id: string) {
+    const confirmed = confirm("Supprimer cet exercice ?");
 
-  async function deleteHomework(
-    id: string
-  ) {
-
-    const confirmed =
-      confirm(
-        "Supprimer cet exercice ?"
-      );
-
-
-    if (
-      !confirmed
-    ) {
-
+    if (!confirmed) {
       return;
-
     }
-
 
     try {
-
       setError("");
 
+      await api.delete(`/homework/${id}/`);
 
-      await api.delete(
-
-        `/homework/${id}/`
-
-      );
-
-
-      toast.success(
-        "Exercice supprimé avec succès."
-      );
-
+      toast.success("Exercice supprimé avec succès.");
 
       await loadData();
+    } catch (error: unknown) {
+      console.error("Erreur suppression homework:", error);
 
+      const message = getErrorMessage(
+        error,
+        "Impossible de supprimer l'exercice."
+      );
+
+      setError(message);
+      toast.error(message);
     }
-
-    catch (
-      error: unknown
-    ) {
-
-      console.error(
-        "Erreur suppression homework:",
-        error
-      );
-
-
-      const message =
-        getErrorMessage(
-
-          error,
-
-          "Impossible de supprimer l'exercice."
-
-        );
-
-
-      setError(
-        message
-      );
-
-
-      toast.error(
-        message
-      );
-
-    }
-
   }
 
-
-  /* ===========================================================
-   * FERMETURE ÉDITION
-   * =========================================================== */
+  // =========================================================
+  // FERMETURE ÉDITION
+  // =========================================================
 
   function closeEdition() {
-
     resetForm();
-
   }
 
+  // =========================================================
+  // FILTRES
+  // =========================================================
 
-  /* ===========================================================
-   * FILTRES
-   * =========================================================== */
+  const filteredHomeworks = useMemo(() => {
+    return homeworks.filter((hw) => {
+      const search = filters.search.toLowerCase().trim();
 
-  const filteredHomeworks =
-    useMemo(() => {
+      const matchesSearch =
+        !search ||
+        hw.title.toLowerCase().includes(search) ||
+        hw.description.toLowerCase().includes(search);
 
-      return homeworks.filter(
+      const matchesClassroom =
+        !filters.classroom ||
+        hw.classroom === filters.classroom;
 
-        (hw) => {
+      const matchesSubject =
+        !filters.subject ||
+        hw.subject === filters.subject;
 
-          const search =
+      const matchesTerm =
+        !filters.term ||
+        (hw.academic_term ?? hw.term) === filters.term;
 
-            filters.search
-              .toLowerCase()
-              .trim();
+      const matchesStatus =
+        !filters.status ||
+        hw.status === filters.status;
 
-
-          /* ---------------------------------------------------
-           * RECHERCHE
-           * --------------------------------------------------- */
-
-          const matchesSearch =
-
-            !search ||
-
-            hw.title
-              .toLowerCase()
-              .includes(search) ||
-
-            hw.description
-              .toLowerCase()
-              .includes(search);
-
-
-          /* ---------------------------------------------------
-           * CLASSE
-           * --------------------------------------------------- */
-
-          const matchesClassroom =
-
-            !filters.classroom ||
-
-            hw.classroom ===
-            filters.classroom;
-
-
-          /* ---------------------------------------------------
-           * MATIÈRE
-           * --------------------------------------------------- */
-
-          const matchesSubject =
-
-            !filters.subject ||
-
-            hw.subject ===
-            filters.subject;
-
-
-          /* ---------------------------------------------------
-           * PÉRIODE
-           * --------------------------------------------------- */
-
-          const matchesTerm =
-
-            !filters.term ||
-
-            hw.term ===
-            filters.term;
-
-
-          /* ---------------------------------------------------
-           * STATUT
-           * --------------------------------------------------- */
-
-          const matchesStatus =
-
-            !filters.status ||
-
-            hw.status ===
-            filters.status;
-
-
-          return (
-
-            matchesSearch &&
-
-            matchesClassroom &&
-
-            matchesSubject &&
-
-            matchesTerm &&
-
-            matchesStatus
-
-          );
-
-        }
-
+      return (
+        matchesSearch &&
+        matchesClassroom &&
+        matchesSubject &&
+        matchesTerm &&
+        matchesStatus
       );
+    });
+  }, [homeworks, filters]);
 
-    }, [
+  // =========================================================
+  // SUMMARY
+  // =========================================================
 
-      homeworks,
+  const summary = useMemo<HomeworkSummary>(() => ({
+    total: filteredHomeworks.length,
 
-      filters,
+    pending: filteredHomeworks.filter(
+      (homework) => homework.status === "pending"
+    ).length,
 
-    ]);
+    completed: filteredHomeworks.filter(
+      (homework) => homework.status === "completed"
+    ).length,
 
+    overdue: filteredHomeworks.filter(
+      (homework) => homework.status === "overdue"
+    ).length,
+  }), [filteredHomeworks]);
 
-  /* ===========================================================
-   * SUMMARY
-   * =========================================================== */
-
-  const summary =
-    useMemo<HomeworkSummary>(() => ({
-
-      total:
-        filteredHomeworks.length,
-
-
-      pending:
-
-        filteredHomeworks.filter(
-
-          (homework) =>
-
-            homework.status ===
-            "pending"
-
-        ).length,
-
-
-      completed:
-
-        filteredHomeworks.filter(
-
-          (homework) =>
-
-            homework.status ===
-            "completed"
-
-        ).length,
-
-
-      overdue:
-
-        filteredHomeworks.filter(
-
-          (homework) =>
-
-            homework.status ===
-            "overdue"
-
-        ).length,
-
-    }), [
-
-      filteredHomeworks,
-
-    ]);
-
-
-  /* ===========================================================
-   * CHARGEMENT INITIAL
-   * =========================================================== */
+  // =========================================================
+  // CHARGEMENT INITIAL
+  // =========================================================
 
   useEffect(() => {
-
     loadData();
+  }, [loadData]);
 
-  }, [
-
-    loadData,
-
-  ]);
-
-
-  /* ===========================================================
-   * RETURN
-   * =========================================================== */
+  // =========================================================
+  // RETURN
+  // =========================================================
 
   return {
-
-
-    /* ---------------------------------------------------------
-     * DONNÉES
-     * --------------------------------------------------------- */
-
-    homeworks:
-      filteredHomeworks,
-
-
+    homeworks: filteredHomeworks,
     classrooms,
-
-
     subjects,
-
-
     terms,
 
-
-    /* ---------------------------------------------------------
-     * FORMULAIRE
-     * --------------------------------------------------------- */
-
     form,
-
-
     setForm,
 
-
-    /* ---------------------------------------------------------
-     * FILTRES
-     * --------------------------------------------------------- */
-
     filters,
-
-
     setFilters,
-
-
-    /* ---------------------------------------------------------
-     * SUMMARY
-     * --------------------------------------------------------- */
 
     summary,
 
-
-    /* ---------------------------------------------------------
-     * ÉTATS
-     * --------------------------------------------------------- */
-
     loading,
-
-
     submitting,
-
-
     error,
-
-
     editingHomework,
 
-
-    /* ---------------------------------------------------------
-     * ACTIONS
-     * --------------------------------------------------------- */
-
     editHomework,
-
-
     saveHomework,
-
-
     deleteHomework,
-
-
     resetForm,
-
-
     closeEdition,
 
-
-    reload:
-      loadData,
-
+    reload: loadData,
   };
-
 }
