@@ -170,6 +170,10 @@ export default function GradesPage() {
     setHomeworkSaving,
   ] = useState(false);
 
+  const [
+    homeworkPublishing,
+    setHomeworkPublishing,
+  ] = useState(false);
 
   // ==========================================================
   // FILTRES ÉVALUATIONS
@@ -1599,6 +1603,54 @@ const filteredGrades = useMemo(() => {
 
     };
 
+  
+// ==========================================================
+// PUBLIER LES NOTES D'UN EXERCICE
+// ==========================================================
+
+const publishHomework = async () => {
+  if (!selectedHomework) {
+    toast.error("Veuillez sélectionner un exercice.");
+    return;
+  }
+
+  if (homeworkPendingPublication === 0) {
+    toast.error("Aucune nouvelle note à publier.");
+    return;
+  }
+
+  try {
+    setHomeworkPublishing(true);
+
+    const response = await api.post(
+      `/homework/${selectedHomework}/publish-grades/`
+    );
+
+    await loadHomeworkSubmissions(selectedHomework);
+
+    await loadHomeworks();
+
+    toast.success(
+      response.data?.message ||
+        "Les notes de l'exercice ont été publiées avec succès."
+    );
+
+  } catch (error: any) {
+    console.error(
+      "Erreur publication notes exercice :",
+      error
+    );
+
+    toast.error(
+      error?.response?.data?.detail ||
+        "Impossible de publier les notes de cet exercice."
+    );
+
+  } finally {
+    setHomeworkPublishing(false);
+  }
+};
+
 
   // ==========================================================
   // PUBLIER
@@ -1740,6 +1792,28 @@ const progress  = allGradesEntered
         )
 
       : 0;
+
+  // ==========================================================
+  // PUBLICATION DES NOTES EXERCICES
+  // ==========================================================
+
+  const homeworkPublishedStudents =
+  homeworkSubmissions.filter(
+    (item) =>
+      item.is_grade_published === true
+  ).length;
+
+  const homeworkPendingPublication =
+  homeworkSubmissions.filter(
+    (item) =>
+      item.has_unpublished_changes === true &&
+      item.score !== "" &&
+      item.score !== null &&
+      item.score !== undefined
+  ).length;
+
+  const canPublishHomework =
+  homeworkPendingPublication > 0;
 
 
   // ==========================================================
@@ -3943,36 +4017,73 @@ const progress  = allGradesEntered
                   </div>
 
 
-                  {/* ACTION */}
+                    
+                  {/* ACTIONS EXERCICES */}
 
-                  {homeworkSubmissions.length >
-                    0 && (
+                  {homeworkSubmissions.length > 0 && (
+                    <div className="flex flex-col gap-4">
 
-                    <div className="flex justify-end">
+                      {/* INFORMATIONS PUBLICATION */}
 
-                      <button
-                        type="button"
-                        onClick={
-                          saveHomework
-                        }
-                        disabled={
-                          homeworkSaving
-                        }
-                        className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#6214BE] px-6 py-3 font-medium text-white transition hover:bg-[#4e10a0] disabled:cursor-not-allowed disabled:bg-gray-400"
-                      >
+                      <div className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
 
-                        <Save
-                          size={20}
-                        />
+                        <div>
+                          <p className="font-semibold text-gray-900">
+                            Publication des notes
+                          </p>
 
-                        {homeworkSaving
-                          ? "Enregistrement..."
-                          : "Enregistrer les notes"}
+                          <p className="mt-1 text-sm text-gray-500">
+                            {homeworkPublishedStudents} élève(s) avec une note publiée
+                          </p>
+                        </div>
 
-                      </button>
+                        {homeworkPendingPublication > 0 ? (
+                          <span className="w-fit rounded-full bg-orange-100 px-3 py-1 text-sm font-medium text-orange-700">
+                            {homeworkPendingPublication} note(s) en attente de publication
+                          </span>
+                        ) : (
+                          <span className="w-fit rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+                            Toutes les notes saisies sont publiées
+                          </span>
+                        )}
+
+                      </div>
+
+                      {/* BOUTONS */}
+
+                      <div className="flex flex-col justify-end gap-3 sm:flex-row">
+
+                        <button
+                          type="button"
+                          onClick={saveHomework}
+                          disabled={homeworkSaving || homeworkPublishing}
+                          className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#6214BE] px-6 py-3 font-medium text-white transition hover:bg-[#4e10a0] disabled:cursor-not-allowed disabled:bg-gray-400"
+                        >
+                          <Save size={20} />
+
+                          {homeworkSaving
+                            ? "Enregistrement..."
+                            : "Enregistrer les notes"}
+                        </button>
+
+                        {canPublishHomework && (
+                          <button
+                            type="button"
+                            onClick={publishHomework}
+                            disabled={homeworkSaving || homeworkPublishing}
+                            className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-3 font-medium text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+                          >
+                            <Send size={20} />
+
+                            {homeworkPublishing
+                              ? "Publication..."
+                              : `Publier les notes (${homeworkPendingPublication})`}
+                          </button>
+                        )}
+
+                      </div>
 
                     </div>
-
                   )}
 
                 </>
