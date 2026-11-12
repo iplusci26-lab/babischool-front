@@ -56,31 +56,22 @@ export default function MessagingPage() {
 
   }, []);
 
-  const filteredConversations =
-    useMemo(() => {
-
-      return conversations.filter(
-        (conversation) => {
-
-          const keyword =
-            search.toLowerCase();
-
-          return (
-
-            conversation.student_name
-              ?.toLowerCase()
-              .includes(keyword)
-
-            ||
-
-            conversation.parent_name
-              ?.toLowerCase()
-              .includes(keyword)
-          );
-        }
-      );
-
-    }, [search, conversations]);
+  const filteredConversations = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+  
+    if (!keyword) return conversations;
+  
+    return conversations.filter((conversation) =>
+      [
+        conversation.contact?.name,
+        conversation.contact?.role,
+        conversation.student_name,
+        conversation.last_message,
+      ].some((value) =>
+        (value || "").toLowerCase().includes(keyword)
+      )
+    );
+  }, [search, conversations]);
 
   const totalUnread =
     conversations.reduce(

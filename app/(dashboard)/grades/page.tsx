@@ -1655,79 +1655,65 @@ const publishHomework = async () => {
   // ==========================================================
   // PUBLIER
   // ==========================================================
-
-  const publish =
-    async () => {
-
-      if (
-        !selected
-      ) {
-
-        toast.error(
-          "Veuillez sélectionner une évaluation."
-        );
-
-        return;
-
-      }
-
-      if (
-        assessment?.is_locked ||
-        assessment?.can_publish === false
-      ) {
-
-        toast.error(
-          "Cette évaluation ne peut plus être publiée."
-        );
-
-        return;
-
-      }
-
-      try {
-
-        setPublishing(
-          true
-        );
-
-        await api.post(
-          `/academics/assessments/${selected}/publish/`
-        );
-
-        await loadGrades(
-          selected
-        );
-
-        await loadAssessments();
-
+  const publish = async () => {
+    if (!selected) {
+      toast.error("Veuillez sélectionner une évaluation.");
+      return;
+    }
+  
+    // Une évaluation verrouillée peut être republiée
+    // lorsqu'une session de correction a été déverrouillée.
+    if (
+      (assessment?.is_locked && !correctionUnlocked) ||
+      assessment?.can_publish === false
+    ) {
+      toast.error("Aucune note en attente de publication.");
+      return;
+    }
+  
+    try {
+      setPublishing(true);
+  
+      const response = await api.post(
+        `/academics/assessments/${selected}/publish/`
+      );
+  
+      await loadGrades(selected);
+      await loadAssessments();
+      
+      const publishedCount =
+        response.data?.publication.published_count ?? 0;
+  
+      const remainingStudents =
+        response.data?.publication.remaining_students ?? 0;
+  
+      const canPublishMore =
+        response.data?.assessment?.can_publish ?? false;
+  
+      if (remainingStudents > 0) {
         toast.success(
-          "Évaluation publiée avec succès. Les notes sont maintenant verrouillées."
+          `${publishedCount} note(s) publiée(s). Vous pourrez publier les notes des autres élèves ultérieurement.`
         );
-
-      } catch (
-        error: any
-      ) {
-
-        console.error(
-          error
+      } else if (canPublishMore) {
+        toast.success(
+          `${publishedCount} note(s) publiée(s). D'autres modifications restent à publier.`
         );
-
-        toast.error(
-          error?.response?.data?.detail ||
-            "Impossible de publier cette évaluation."
+      } else {
+        toast.success(
+          `${publishedCount} note(s) publiée(s) avec succès.`
         );
-
-      } finally {
-
-        setPublishing(
-          false
-        );
-
       }
-
-    };
-
-
+    } catch (error: any) {
+      console.error(error);
+  
+      toast.error(
+        error?.response?.data?.detail ||
+          "Impossible de publier cette évaluation."
+      );
+    } finally {
+      setPublishing(false);
+    }
+  };
  // ==========================================================
 // STATISTIQUES ET PROGRESSION ÉVALUATION
 // ==========================================================
@@ -3126,7 +3112,7 @@ const progress  = allGradesEntered
 
 
                       {!assessment.is_locked &&
-                        allGradesEntered  && (
+                        assessment.can_publish === true  && (
 
                           <button
                             onClick={
